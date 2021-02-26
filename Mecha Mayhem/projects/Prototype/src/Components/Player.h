@@ -1,29 +1,19 @@
 #pragma once
-#include "Utilities/ControllerInput.h"
-#include "PhysBody.h"
+#include "Gun.h"
 #include "ObjMorphLoader.h"
-#include <AudioEngine.h>
-// Overloads: (name, ammo, damage, cooldown, isAuto)
-struct GunProperties 
-{
-	char* name;
-	int ammoCapacity;
-	float damage;
-	float cooldown;
-	bool isAuto = false;
-};
-class Player
+
+class Player : public Gun
 {
 public:
-	enum class WEAPON {
-		FIST,
-		PISTOL,
-		RIFLE,
-		CANNON,
-		MACHINEGUN,
-		SHOTGUN//,
-		//SWORD
-	};
+	//enum class WEAPON {
+	//	FIST,
+	//	PISTOL,
+	//	RIFLE,
+	//	CANNON,
+	//	MACHINEGUN,
+	//	SHOTGUN//,
+	//	//SWORD
+	//};
 	enum class OFFHAND {
 		EMPTY = 0,	//continues from WEAPON to allow for rand() choice
 		HEALPACK1 = 6,
@@ -52,7 +42,7 @@ public:
 	static void SetSkyPos(glm::vec3 pos) { m_skyPos = pos; }
 
 	//get the weapon Obj, returns pistol if empty
-	static ObjLoader GetWeaponModel(WEAPON choice);
+	static ObjLoader GetWeaponModel(Gun::WEAPON choice);
 	static ObjMorphLoader& GetOffhandModel(OFFHAND choice);
 
 	/*
@@ -92,8 +82,8 @@ public:
 			
 			//m_deathSound.play();
 
-			m_currWeapon = WEAPON::FIST;
-			m_secWeapon = WEAPON::FIST;
+			m_currWeapon = Gun::WEAPON::FIST;
+			m_secWeapon = Gun::WEAPON::FIST;
 			m_currWeaponAmmo = 0;
 			m_secWeaponAmmo = 0;
 			m_offhand = OFFHAND::EMPTY;
@@ -108,7 +98,7 @@ public:
 	bool IsPlayer() { return m_user != CONUSER::NONE; }
 
 	//returns true if successful
-	bool PickUpWeapon(WEAPON pickup);
+	//bool PickUpWeapon(Gun::WEAPON pickup);
 
 	//returns true if successful
 	bool PickUpOffhand(OFFHAND pickup);
@@ -119,10 +109,10 @@ public:
 private:
 
 	bool groundTest(float yVelo, PhysBody& bodyPos);
-	void UseWeapon(PhysBody& body, Transform& head, float offset);
-	void SwapWeapon(bool outOfAmmo = false);
+	//void UseWeapon(PhysBody& body, Transform& head, float offset);
+	//void SwapWeapon(bool outOfAmmo = false);
 	void UseHeal();
-	void ShootLazer(glm::quat offsetQuat, glm::quat rotation, glm::vec3 rayPos, glm::vec3 forwards, short damage);
+	//void ShootLazer(glm::quat offsetQuat, glm::quat rotation, glm::vec3 rayPos, glm::vec3 forwards, short damage);
 	btVector3 Melee(const glm::vec3& pos);
 
 	//digit 1 is first digit
@@ -185,8 +175,8 @@ private:
 
 	short m_currWeaponAmmo = 0;
 	short m_secWeaponAmmo = 0;
-	WEAPON m_currWeapon = WEAPON::FIST;
-	WEAPON m_secWeapon = WEAPON::FIST;
+	Gun::WEAPON m_currWeapon = Gun::WEAPON::FIST;
+	Gun::WEAPON m_secWeapon = Gun::WEAPON::FIST;
 
 	OFFHAND m_offhand = OFFHAND::EMPTY;
 
@@ -200,13 +190,6 @@ private:
 	float m_speed = 15.f;
 	float m_weaponCooldown = 0.f;
 
-	//Gun stuff
-	GunProperties pistol			{ "Pistol", 30, 5.f, 0.5f };
-	GunProperties cannon			{ "Proton Cannon", 3, 30.f, 2.f };
-	GunProperties rifle				{ "Proton Rifle", 20, 10.f, 0.8f };
-	GunProperties missileLauncher	{ "Missile Launcher", 1, 100.f, 3.f };
-	GunProperties shotgun			{ "Shotgun", 15, 25.f, 2.f };
-	GunProperties machineGun		{ "Machine Gun", 50, 5.f, 0.1f, true };
 
 
 
