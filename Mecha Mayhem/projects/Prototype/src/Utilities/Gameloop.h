@@ -4,6 +4,8 @@
 //holds all inits and unloads
 namespace Gameloop
 {
+	bool usingKeyboard;
+
 	//init everything and return the window from backend
 	GLFWwindow* Start(const std::string& name, int width, int height, bool usingImGui) {
 		srand(time(0));
@@ -82,7 +84,7 @@ namespace Gameloop
 	//update anything with global updates
 	void Update() {
 		//Keybored
-		Input::Update();
+		if (usingKeyboard) Input::Update();
 		//Controller Checks n stuff
 		ControllerInput::ControllerUpdate();
 		//this

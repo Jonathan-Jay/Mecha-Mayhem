@@ -584,6 +584,7 @@ void ObjMorphLoader::Init()
 	m_shader->LoadShaderPartFromFile("shaders/frag_none.glsl", GL_FRAGMENT_SHADER);
 	m_shader->Link();
 
+	//shadows
 	m_shadowShader = Shader::Create();
 	m_shadowShader->LoadShaderPartFromFile("shaders/vert_depth_morph.glsl", GL_VERTEX_SHADER);
 	m_shadowShader->LoadShaderPartFromFile("shaders/frag_depth.glsl", GL_FRAGMENT_SHADER);

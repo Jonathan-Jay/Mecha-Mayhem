@@ -9,6 +9,7 @@ int main() {
 	int width = 1280, height = 720;
 	const bool usingImGui = false;
 	Logger::outputLogger = false;
+	Gameloop::usingKeyboard = false;
 
 	GLFWwindow* window = Gameloop::Start("Mecha Mayhem", width, height, usingImGui);
 	if (!window)	return 1;
@@ -51,7 +52,7 @@ int main() {
 
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
-
+			std::cout << 1.f / Time::dt << "              \r";
 			if (Scene::GetExit()) {
 				break;
 			}
