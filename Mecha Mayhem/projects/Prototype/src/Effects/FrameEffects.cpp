@@ -17,6 +17,9 @@ void FrameEffects::Init()
 	PostEffect::Init("shaders/Post/greyscale_frag.glsl");
 	PostEffect::Init("shaders/Post/sepia_frag.glsl");
 	PostEffect::Init("shaders/Post/toon_frag.glsl");
+
+	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
+	PostEffect::Init("shaders/Post/gBuffer_ambient_frag.glsl");
 }
 
 void FrameEffects::Unload()
@@ -29,6 +32,7 @@ void FrameEffects::Init(unsigned width, unsigned height)
 	RemoveAllEffects();
 
 	baseEffect.Init(width, height);
+	illumBuffer.Init(width, height);
 }
 
 void FrameEffects::Resize(unsigned width, unsigned height)
@@ -38,6 +42,7 @@ void FrameEffects::Resize(unsigned width, unsigned height)
 	}
 
 	baseEffect.Reshape(width, height);
+	illumBuffer.Reshape(width, height);
 }
 
 void FrameEffects::AddEffect(PostEffect* effect)
@@ -61,6 +66,7 @@ void FrameEffects::RemoveEffect(int slot)
 void FrameEffects::Clear()
 {
 	baseEffect.Clear();
+	illumBuffer.Clear();
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Clear();
 	}
@@ -69,17 +75,24 @@ void FrameEffects::Clear()
 
 void FrameEffects::Bind()
 {
-	baseEffect.BindBuffer(0);
+	baseEffect.Bind();
 }
 
 void FrameEffects::UnBind()
 {
-	baseEffect.UnbindBuffer();
+	baseEffect.Unbind();
 }
 
 void FrameEffects::Draw(/*bool paused*/)
 {
-	PostEffect* prev = &baseEffect;
+	if (true) {
+		baseEffect.DrawBuffersToScreen();
+		return;
+	}
+
+	illumBuffer.ApplyEffect(&baseEffect);
+
+	PostEffect* prev = &illumBuffer;
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->ApplyEffect(prev);
 		prev = layersOfEffects[i];

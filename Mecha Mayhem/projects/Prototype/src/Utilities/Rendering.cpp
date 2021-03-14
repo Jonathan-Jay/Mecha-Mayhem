@@ -9,7 +9,7 @@ namespace Rendering {
 		orthoVP.SetOrthoHeight(10.f).SetNear(-100.f).Setfar(100.f)
 			.SetIsOrtho(true).ResizeWindow(width, height).SetPosition(BLM::GLMzero);
 	}
-
+	
 	void Update(entt::registry* reg, int numOfCams, bool paused)
 	{
 		frameEffects->Clear();
@@ -80,6 +80,8 @@ namespace Rendering {
 			camCam.SetPosition(camTrans.GetGlobalPosition()).
 				SetForward(camTrans.GetForwards());
 
+			frameEffects->SetCamPos(camTrans.GetGlobalPosition(), count);
+
 			ObjLoader::BeginTempDraw();
 			ObjMorphLoader::BeginTempDraw();
 			Sprite::BeginDraw(spriteView.size());
@@ -125,6 +127,8 @@ namespace Rendering {
 		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
 
 		frameEffects->UnBind();
+
+		frameEffects->SetCamCount(numOfCams);
 	}
 
 	void RenderForShading(entt::registry* reg, const glm::mat4& lightVPMatrix)

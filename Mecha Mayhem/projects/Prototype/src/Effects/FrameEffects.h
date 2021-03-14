@@ -1,5 +1,5 @@
 #pragma once
-#include "Post/PostEffect.h"
+#include "IlluminationBuffer.h"
 
 //aka the PP wrapper
 class FrameEffects
@@ -47,8 +47,17 @@ public:
 		return layersOfEffects[index];
 	}
 
+	void SetCamPos(glm::vec3 pos, int camNum) {
+		illumBuffer.SetCamPos(pos, camNum);
+	}
+
+	void SetCamCount(int camNum) {
+		illumBuffer.SetCamCount(camNum);
+	}
+
 private:
-	PostEffect baseEffect;
+	GBuffer baseEffect;
+	IlluminationBuffer illumBuffer;
 	//BufferCombiner pauseEffect;
 	std::vector<PostEffect*> layersOfEffects = {};
 };

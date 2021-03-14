@@ -31,18 +31,23 @@ namespace Gameloop
 		if (usingImGui)	BackEnd::InitImGui();
 
 		//all static inits
+
+		//shaders
 		ObjLoader::Init();
 		ObjMorphLoader::Init();
 		Sprite::Init();
+		FrameEffects::Init();
 
+		//rendering stuff
+		Rendering::Init(width, height);
+		Framebuffer::InitFullscreenQuad();
+
+		//others
 		Input::Init(window);
 		HitboxGen::Init();
 		Effects::Init();
 		Player::Init(width, height);
 
-		Rendering::Init(width, height);
-		Framebuffer::InitFullscreenQuad();
-		FrameEffects::Init();
 
 		return window;
 	}
