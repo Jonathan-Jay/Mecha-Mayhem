@@ -10,10 +10,10 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 		_buffers[index]->AddDepthTarget();
 		_buffers[index]->Init(width, height);
 
-		//illum buffer
+		//light accum buffer (stored in a RGBA16F for floating point numbers)
 		index = int(_buffers.size());
 		_buffers.push_back(new Framebuffer());
-		_buffers[index]->AddColorTarget(GL_RGBA8);
+		_buffers[index]->AddColorTarget(GL_RGBA16F);
 		_buffers[index]->AddDepthTarget();
 		_buffers[index]->Init(width, height);
 
@@ -44,10 +44,7 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 		//bind directional light shader
 		_shaders[Lights::DIRECTIONAL]->Bind();
 		//_shaders[Lights::DIRECTIONAL]->SetUniformMatrix("u_LightSpaceMatrix", _lightSpaceViewProj);
-		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos[0]", _camPos[0]);
-		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos[1]", _camPos[1]);
-		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos[2]", _camPos[2]);
-		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos[3]", _camPos[3]);
+		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos", *_camPos.data(), 4);
 		_shaders[Lights::DIRECTIONAL]->SetUniform("camCount", _camCount);
 
 		_sunBuffer.Bind(0);

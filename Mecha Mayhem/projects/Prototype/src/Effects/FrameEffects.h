@@ -55,6 +55,8 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
+	bool _drawGBuffer = false;
+
 private:
 	GBuffer baseEffect;
 	IlluminationBuffer illumBuffer;

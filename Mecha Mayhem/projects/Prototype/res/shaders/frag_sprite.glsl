@@ -12,10 +12,13 @@ layout(location = 3) out vec3 outPositions;
 
 void main() {
 	vec4 result = texture(s_texture, inUV);
+	
+	if (result.a < 0.5)
+		discard;
 
 	outColours = result;
 
-	outNormals = vec3(0, 1, 0);
+	outNormals = vec3(0);
 	outSpecs = vec3(0);
 	outPositions = vec3(0);
 }

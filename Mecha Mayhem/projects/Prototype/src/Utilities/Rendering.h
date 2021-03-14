@@ -17,7 +17,7 @@ namespace Rendering
 	//doesn't bind the buffer
 	void RenderForShading(entt::registry* reg, const glm::mat4& lightVPMatrix);
 
-	extern glm::vec4 BackColour;
+	extern glm::vec3 BackColour;
 	extern std::array<glm::vec3, MAX_LIGHTS> LightsPos;
 	extern std::array<glm::vec3, MAX_LIGHTS> LightsColour;
 	extern size_t LightCount;

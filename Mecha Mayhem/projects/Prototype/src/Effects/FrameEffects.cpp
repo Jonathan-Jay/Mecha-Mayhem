@@ -85,7 +85,7 @@ void FrameEffects::UnBind()
 
 void FrameEffects::Draw(/*bool paused*/)
 {
-	if (true) {
+	if (_drawGBuffer) {
 		baseEffect.DrawBuffersToScreen();
 		return;
 	}

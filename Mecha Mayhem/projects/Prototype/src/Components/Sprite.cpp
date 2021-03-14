@@ -185,7 +185,33 @@ void Sprite::Init()
 
 	m_shader->SetUniform("s_texture", 0);
 
-	std::vector<float> interleaved = {
+	std::vector<float> pos = {
+		-0.5f, -0.5f, 0.f,
+		-0.5f, 0.5f, 0.f,
+		0.5f, -0.5f, 0.f,
+		-0.5f, 0.5f, 0.f,
+		0.5f, 0.5f, 0.f,
+		0.5f, -0.5f, 0.f
+	};
+	std::vector<float> UV = {
+		1, 0, 0,
+		1, 1, 0,
+		0, 0, 0,
+		1, 1, 0,
+		0, 1, 0,
+		0, 0, 0
+	};
+
+	VertexBuffer::sptr posVBO = VertexBuffer::Create();
+	posVBO->LoadData(pos.data(), pos.size());
+	VertexBuffer::sptr UVVBO = VertexBuffer::Create();
+	UVVBO->LoadData(UV.data(), UV.size());
+
+	m_square = VertexArrayObject::Create();
+	m_square->AddVertexBuffer(posVBO, { BufferAttribute(0, 3, GL_FLOAT, NULL, NULL, 0) }, true);
+	m_square->AddVertexBuffer(UVVBO, { BufferAttribute(1, 3, GL_FLOAT, NULL, NULL, 0) }, true);
+
+	/*std::vector<float> interleaved = {
 		-0.5f, -0.5f, 0.f, 1, 0,
 		-0.5f, 0.5f, 0.f, 1, 1,
 		0.5f, -0.5f, 0.f, 0, 0,
@@ -200,7 +226,7 @@ void Sprite::Init()
 	m_square->AddVertexBuffer(buff, {
 		BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 5, 0),
 		BufferAttribute(1, 2, GL_FLOAT, false, sizeof(float) * 5, sizeof(float) * 3)
-		});
+		});*/
 }
 
 void Sprite::Unload()

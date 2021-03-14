@@ -14,7 +14,8 @@ namespace Rendering {
 	{
 		frameEffects->Clear();
 
-		glClearColor(BackColour.x, BackColour.y, BackColour.z, BackColour.w);
+		//glDisable(GL_BLEND);
+		glClearColor(BackColour.x, BackColour.y, BackColour.z, 0.3f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		frameEffects->Bind();
@@ -128,6 +129,7 @@ namespace Rendering {
 
 		frameEffects->UnBind();
 
+		//glEnable(GL_BLEND);
 		frameEffects->SetCamCount(numOfCams);
 	}
 
@@ -192,7 +194,6 @@ namespace Rendering {
 		));
 	}*/
 
-	glm::vec4 BackColour = { 0.2f, 0.2f, 0.2f, 1.f };
 	std::array<glm::vec3, MAX_LIGHTS> LightsColour = {
 	   glm::vec3(200.f),
 	   glm::vec3(15.f, 15.f, 0.f),
@@ -205,6 +206,7 @@ namespace Rendering {
 		glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f)
 	};
 	size_t LightCount = 0;
+	glm::vec3 BackColour = { 0.2f, 0.2f, 0.2f };
 	glm::vec3 DefaultColour = glm::vec3(1.f);
 	glm::vec3 AmbientColour = glm::vec3(1.f);
 	glm::float32 AmbientStrength = 1.f;

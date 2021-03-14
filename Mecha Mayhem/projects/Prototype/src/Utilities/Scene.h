@@ -37,8 +37,11 @@ public:
 
 	//put ImGui stuff here
 	virtual void ImGuiFunc() {
-		ImGui::SetWindowSize(ImVec2(150, 50));
-		ImGui::Text("Empty");
+		/*ImGui::SetWindowSize(ImVec2(150, 50));
+		ImGui::Text("Empty");*/
+		if (ImGui::Button("Toggle Draw GBuffer")) {
+			m_frameEffects._drawGBuffer = !m_frameEffects._drawGBuffer;
+		}
 	};
 
 	//can't override

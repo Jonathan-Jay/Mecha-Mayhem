@@ -35,7 +35,7 @@ layout(binding = 2) uniform sampler2D s_specularTex;
 layout(binding = 3) uniform sampler2D s_positionTex;
 
 //uniform mat4 u_LightSpaceMatrix;
-uniform vec3 u_CamPos[4];
+uniform vec3 u_camPos[4];
 uniform int camCount;
 
 out vec4 frag_color;
@@ -63,21 +63,28 @@ out vec4 frag_color;
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
+	//Normals
+	vec3 inNormal = texture(s_normalsTex, inUV).xyz;
+
+	if (length(inNormal) < 0.25) {
+		frag_color = vec4(1.0, 1.0, 1.0, 1.0);
+		return;
+	}
+
+	inNormal = (normalize(inNormal) * 2.0) - 1.0;
+
 	//Albedo
 	vec4 textureColor = texture(s_albedoTex, inUV);
-	//Normals
-	vec3 inNormal = (normalize(texture(s_normalsTex, inUV).rgb) * 2.0) - 1.0;
 	//Specular
 	vec2 texSpec = texture(s_specularTex, inUV).rg;
 	//Positions
 	vec3 fragPos = texture(s_positionTex, inUV).rgb;
 
-
 	// Diffuse
 	vec3 N = inNormal;
 	vec3 lightDir = normalize(-sun._lightDirection.xyz);
 	float dif = max(dot(N, lightDir), 0.0);
-	vec3 diffuse = dif * sun._lightCol.xyz;// add diffuse intensity
+	vec3 diffuse = dif * sun._lightCol.rgb;// add diffuse intensity
 
 	int camNum = 0;
 	if (camCount > 2) {
@@ -88,13 +95,13 @@ void main() {
 	}
 
 	// Specular
-	vec3 viewDir  = normalize(u_CamPos[camNum] - fragPos);
+	vec3 viewDir  = normalize(u_camPos[camNum] - fragPos);
 	vec3 h        = normalize(lightDir + viewDir);
 
 
-	// Get the specular power from the specular map
+	// Get the specular from the specular map
 	float spec = pow(max(dot(N, h), 0.0), texSpec.y); // Shininess coefficient (can be a uniform)
-	vec3 specular = sun._lightSpecularPow * texSpec.x * spec * sun._lightCol.xyz; // Can also use a specular color
+	vec3 specular = sun._lightSpecularPow * texSpec.x * spec * sun._lightCol.rgb; // Can also use a specular color
 
 	// Get the albedo from the diffuse / albedo map	
 
@@ -105,7 +112,7 @@ void main() {
 	// float shadow = ShadowCalculation(inFragPosLightSpace, sun._shadowBias);
 
 	vec3 result = (
-		(sun._ambientPow * sun._ambientCol.xyz) + // global ambient light
+		(sun._ambientPow * sun._ambientCol.rgb) + // global ambient light
 		//(1.0 - shadow) * //Shadow value
 		(diffuse + specular) // light factors from our single light
 		); // Object color, no

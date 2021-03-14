@@ -40,7 +40,7 @@ public:
 
 private:
 	glm::mat4 _lightSpaceViewProj;
-	glm::vec3 _camPos[4] = {
+	std::array<glm::vec3, 4> _camPos = {
 		glm::vec3(0), glm::vec3(0), glm::vec3(0), glm::vec3(0)
 	};
 
