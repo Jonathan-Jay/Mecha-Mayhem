@@ -55,6 +55,13 @@ void FrameEffects::AddEffect(PostEffect* effect)
 	layersOfEffects.push_back(effect);
 }
 
+void FrameEffects::InsertEffect(PostEffect* effect, int index)
+{
+	if (index <= size()) {
+		layersOfEffects.insert(layersOfEffects.begin() + index, effect);
+	}
+}
+
 void FrameEffects::RemoveEffect(int slot)
 {
 	if (layersOfEffects.size() <= slot || slot < 0)	return;

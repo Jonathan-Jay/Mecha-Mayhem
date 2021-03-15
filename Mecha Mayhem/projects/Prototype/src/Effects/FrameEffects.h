@@ -25,6 +25,7 @@ public:
 
 	//in order of added
 	void AddEffect(PostEffect* effect);
+	void InsertEffect(PostEffect* effect, int index);
 	void RemoveEffect(int slot);
 
 	//binds everything needed

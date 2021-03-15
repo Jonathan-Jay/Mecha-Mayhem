@@ -66,15 +66,16 @@ void MainMenu::Init(int width, int height)
 	ECS::AttachComponent<Sprite>(digit2);
 	ECS::GetComponent<Transform>(digit2).SetPosition(glm::vec3(-0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 
+	FixDigits(LeaderBoard::scoreGoal);
+
 	backGround = ECS::CreateEntity();
-	//ECS::AttachComponent<Sprite>(backGround).Init(glm::vec4(0.5f, 0.5f, 1.f, 1.f), -19, 10);
 	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10);
 	ECS::GetComponent<Transform>(backGround).SetPosition(glm::vec3(0, 100 - 100.f, -10)).ChildTo(charSelectParent);
 
 
 
 	ECS::GetComponent<Transform>(charSelectParent).ChildTo(camera).SetPosition(glm::vec3(0, 0, 0))
-		.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
+		.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup)).SetScale(0.05f);
 
 
 
@@ -105,26 +106,6 @@ void MainMenu::Init(int width, int height)
 
 void MainMenu::Update()
 {
-	if (Input::GetKey(KEY::LEFT)) {
-		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
-		trans.SetRotation(trans.GetLocalRotation() * glm::angleAxis(Time::dt, BLM::GLMup));
-	}
-	if (Input::GetKey(KEY::RIGHT)) {
-		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
-		trans.SetRotation(trans.GetLocalRotation() * glm::angleAxis(-Time::dt, BLM::GLMup));
-	}
-
-	if (Input::GetKey(KEY::DOWN)) {
-		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
-		trans.SetScale(trans.GetScale().x - Time::dt);
-		std::cout << "scale: " << trans.GetScale().x << "           \r";
-	}
-	if (Input::GetKey(KEY::UP)) {
-		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
-		trans.SetScale(trans.GetScale().x + Time::dt);
-		std::cout << "scale: " << trans.GetScale().x << "           \r";
-	}
-
 	if (m_scenePos == 0) {
 		float lx = 0, ly = 0, rx = 0, ry = 0;
 		for (int i(0); i < 4; ++i) {
@@ -162,18 +143,29 @@ void MainMenu::Update()
 			if (ECS::GetComponent<ObjMorphLoader>(title).IsDone()) {
 				ECS::GetComponent<ObjMorphLoader>(title).ToggleDirection();
 				ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(100.f);
-				ECS::GetComponent<Transform>(camera).SetPosition(glm::vec3(0, 100, 0)).SetRotation(BLM::GLMQuat);
+				//ECS::GetComponent<Transform>(camera).SetPosition(glm::vec3(0, 100, 0)).SetRotation(BLM::GLMQuat);
 				ECS::GetComponent<Transform>(text).SetScale(1.f);
+
+
+
+
+
+				ECS::GetComponent<Transform>(charSelectParent).SetRotation(BLM::GLMQuat);
+
+
+
+
+
 
 				ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).UnChild(false);
 				ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).UnChild(false);
-
-				FixDigits(LeaderBoard::scoreGoal);
 
 				cameraPath.SetSpeed(1);
 				m_exit = false;
 				zoomTime = 1;
 				m_scenePos = 1;
+				m_exitHoldTimer = 1.f;
+				m_confirmTimer = 1.f;
 				Rendering::BackColour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
 				Rendering::LightsPos[0] = glm::vec3(0, 100, -5);
 				Rendering::LightsPos[2] = BLM::GLMzero;
@@ -197,6 +189,9 @@ void MainMenu::Update()
 
 			//exit
 			for (int x(0); x < 4; ++x) {
+				if (ControllerInput::GetButtonUp(BUTTON::SELECT, CONUSER(x))) {
+					playerSwapped[x] = false;
+				}
 				if (ControllerInput::GetButton(BUTTON::B, CONUSER(x))) {
 					if (!playerSwapped[x]) {
 						if (ControllerInput::GetButtonDown(BUTTON::B, CONUSER(x))) {
@@ -352,6 +347,13 @@ void MainMenu::Update()
 
 						ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
 
+
+
+						ECS::GetComponent<Transform>(charSelectParent)
+							.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
+
+
+
 						ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).ChildTo(camera);
 						ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).ChildTo(camera);
 					}
@@ -369,6 +371,7 @@ void MainMenu::Update()
 		//if (allHolding && playerCount > 0) {
 		if (allHolding == playerCount && playerCount > 0) {
 			m_confirmTimer -= Time::dt;
+			((BloomEffect*)m_frameEffects[1])->SetThreshold(0.25f + 0.75f * m_confirmTimer);
 			if (m_confirmTimer <= 0) {
 				//1 is tutorial
 				//if (playerCount == 1)	QueueSceneChange(1);
@@ -407,6 +410,7 @@ void MainMenu::Update()
 		else {
 			m_confirmTimer = 1.f;
 			ECS::GetComponent<Sprite>(backGround).SetHeight(10);
+			((BloomEffect*)m_frameEffects[1])->SetThreshold(1.f);
 		}
 	}
 }

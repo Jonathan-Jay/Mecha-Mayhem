@@ -49,7 +49,7 @@ private:
 	static const int maxSelect = 4;
 
 	float zoomTime = 1;
-	float m_exitHoldTimer = 0;
+	float m_exitHoldTimer = 1.f;
 	float m_confirmTimer = 1.f;
 
 	CatmullFollower cameraPath{ 1, {

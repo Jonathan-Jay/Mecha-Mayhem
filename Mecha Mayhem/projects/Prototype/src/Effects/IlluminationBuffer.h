@@ -46,9 +46,9 @@ private:
 
 	int _camCount = 1;
 
-	UniformBuffer _sunBuffer;
-
 	bool _sunEnabled = true;
+
+	UniformBuffer _sunBuffer;
 	
 	DirectionalLight _sun;
 };

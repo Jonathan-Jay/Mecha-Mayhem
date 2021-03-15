@@ -63,11 +63,9 @@ void DemoScene::Update()
 				else {
 					m_paused = true;
 					//add effects or smt
-					if (m_frameEffects[0] == nullptr) {
-						m_frameEffects.AddEffect(new PixelEffect());
-						m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
-						((PixelEffect*)(m_frameEffects[0]))->SetPixelCount(128);
-					}
+					m_frameEffects.InsertEffect(new PixelEffect(), 0);
+					m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					((PixelEffect*)(m_frameEffects[0]))->SetPixelCount(128);
 				}
 			}
 		}
@@ -77,11 +75,9 @@ void DemoScene::Update()
 				std::cout << "-Controller " << i + 1 << " disconnected\n";
 				m_paused = true;
 				//add effects or smt
-				if (m_frameEffects[0] == nullptr) {
-					m_frameEffects.AddEffect(new PixelEffect());
-					m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
-					((PixelEffect*)(m_frameEffects[0]))->SetPixelCount(128);
-				}
+				m_frameEffects.InsertEffect(new PixelEffect(), 0);
+				m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+				((PixelEffect*)(m_frameEffects[0]))->SetPixelCount(128);
 			}
 		}
 	}
