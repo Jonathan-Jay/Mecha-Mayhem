@@ -91,7 +91,12 @@ void FrameEffects::UnBind()
 void FrameEffects::Draw(/*bool paused*/)
 {
 	if (_drawGBuffer) {
-		baseEffect.DrawBuffersToScreen(gBufferSelection);
+		if (gBufferSelection == 5) {
+			illumBuffer.ApplyEffect(&baseEffect);
+			illumBuffer.DrawIllumBuffer();
+		}
+		else
+			baseEffect.DrawBuffersToScreen(gBufferSelection);
 		return;
 	}
 

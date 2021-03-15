@@ -48,9 +48,10 @@ public:
 		case 2:		ImGui::Text("4: Specular Buffer");		break;
 		case 3:		ImGui::Text("5: Position Buffer");		break;
 		case 4:		ImGui::Text("6: All Buffers");			break;
+		case 5:		ImGui::Text("7: Light Accumulation Buffer");			break;
 		}
 		int temp = FrameEffects::gBufferSelection + 2;
-		if (ImGui::SliderInt("GBuffer Drawing Selection", &temp, 1, 6)) {
+		if (ImGui::SliderInt("GBuffer Drawing Selection", &temp, 1, 7)) {
 			FrameEffects::gBufferSelection = temp - 2;
 			if (FrameEffects::gBufferSelection < 0) {
 				m_frameEffects._drawGBuffer = false;
