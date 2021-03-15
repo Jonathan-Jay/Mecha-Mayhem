@@ -192,7 +192,6 @@ private:
 		return num - (num / 10) * 10;
 	}*/
 
-	static const glm::mat4 m_modelOffset;
 	static const glm::mat4 m_gunOffsetMat;
 	static const glm::mat4 m_swordOffsetMat;
 	static constexpr float pi = glm::half_pi<float>() - 0.01f;

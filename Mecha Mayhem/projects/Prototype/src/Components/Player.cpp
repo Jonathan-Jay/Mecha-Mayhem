@@ -22,12 +22,6 @@ const glm::mat4 Player::m_swordOffsetMat = glm::mat4(
 	-0.2f, 0.4f, 0.4f, 1
 );
 
-const glm::mat4 Player::m_modelOffset = glm::mat4(
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0,
-	0, -1, 0, 0
-);
 //Gun stuff												
 														//type,				ammo,	damage, cooldown,	movementSpeed,  maxRange (default 2000)
 const Player::GunProperties Player::pistol			{ WEAPON::PISTOL,		30,		25,		0.4f,		 10.f,				50.f };
@@ -335,9 +329,10 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 	if (!m_punched && m_currWeapon != WEAPON::FIST) {
 		GetWeaponModel(m_currWeapon).DrawTemp(model * m_gunOffsetMat);
 	}
-	m_charModel.DrawTemp(tempModel + m_modelOffset, m_colour - glm::vec3(sinf(m_damageCounter * 21.f)));
+	m_charModel.DrawTemp(tempModel, m_colour - glm::vec3(sinf(m_damageCounter * 21.f)));
 	if (m_respawnTimer > 0) {
-		m_heliDrone.DrawTemp(model - m_modelOffset);
+		tempModel[3].y += 1;
+		m_heliDrone.DrawTemp(tempModel);
 	}
 
 }

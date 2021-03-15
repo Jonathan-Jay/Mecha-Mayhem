@@ -17,44 +17,66 @@ void MainMenu::Init(int width, int height)
 	ECS::AttachComponent<Sprite>(text).Init("Start Text.png", -4.f, 1.f).SetScale(0.075f);
 	ECS::GetComponent<Transform>(text).SetPosition(glm::vec3(0.f, -0.1f, -0.35f)).ChildTo(camera);
 
-	charSelect = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(charSelect).Init("CharSelect.png", -12.326f, 1.5f);
-	ECS::GetComponent<Transform>(charSelect).SetPosition(glm::vec3(0, 103, -8));
-
 	{
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<ObjLoader>(entity).LoadMesh("models/cringe.obj");
 		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0, -5, 0));
 	}
 
+
+
+
+	charSelectParent = ECS::CreateEntity();
+	ECS::GetComponent<Transform>(charSelectParent).SetPosition(glm::vec3(0, 100, 0));
+
+
+
+	charSelect = ECS::CreateEntity();
+	ECS::AttachComponent<Sprite>(charSelect).Init("CharSelect.png", -12.326f, 1.5f);
+	ECS::GetComponent<Transform>(charSelect).SetPosition(glm::vec3(0, 103.f - 100.f, -8)).ChildTo(charSelectParent);
+
+
 	for (int x(0); x < 4; ++x) {
 		{
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<Sprite>(entity).Init("ArrowL.png", -0.75f, 0.75f);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, 99, -8));
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, 99.f - 100.f, -8)).ChildTo(charSelectParent);
 		}
 		{
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<Sprite>(entity).Init("ArrowR.png", -0.75f, 0.75f);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 5, 99, -8));
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 5, 99.f - 100.f, -8)).ChildTo(charSelectParent);
 		}
 		models[x] = ECS::CreateEntity();
 		ECS::AttachComponent<Player>(models[x]).Init(CONUSER::NONE, LeaderBoard::players[x].model);
 		ECS::AttachComponent<PhysBody>(models[x]);
-		ECS::GetComponent<Transform>(models[x]).SetPosition(glm::vec3(x * 4 - 6, 99, -8)).SetRotation(glm::angleAxis(BLM::pi, BLM::GLMup)).SetScale(1.5f);
+		ECS::GetComponent<Transform>(models[x]).SetPosition(glm::vec3(x * 4 - 6, 99.f - 100.f
+			
+			- 1 //remove once players are replaced with aligned models
+			
+			
+			, -8))
+			.SetRotation(glm::angleAxis(BLM::pi, BLM::GLMup)).SetScale(1.5f).ChildTo(charSelectParent);
 	}
 
 	digit1 = ECS::CreateEntity();
 	ECS::AttachComponent<Sprite>(digit1);
-	ECS::GetComponent<Transform>(digit1).SetPosition(glm::vec3(0.4f, 96.75f, -8));
+	ECS::GetComponent<Transform>(digit1).SetPosition(glm::vec3(0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 	digit2 = ECS::CreateEntity();
 	ECS::AttachComponent<Sprite>(digit2);
-	ECS::GetComponent<Transform>(digit2).SetPosition(glm::vec3(-0.4f, 96.75f, -8));
+	ECS::GetComponent<Transform>(digit2).SetPosition(glm::vec3(-0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 
 	backGround = ECS::CreateEntity();
 	//ECS::AttachComponent<Sprite>(backGround).Init(glm::vec4(0.5f, 0.5f, 1.f, 1.f), -19, 10);
 	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10);
-	ECS::GetComponent<Transform>(backGround).SetPosition(glm::vec3(0, 100, -10));
+	ECS::GetComponent<Transform>(backGround).SetPosition(glm::vec3(0, 100 - 100.f, -10)).ChildTo(charSelectParent);
+
+
+
+	ECS::GetComponent<Transform>(charSelectParent).ChildTo(camera).SetPosition(glm::vec3(0, 0, 0))
+		.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
+
+
 
 	Rendering::frameEffects = &m_frameEffects;
 	Rendering::DefaultColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
@@ -83,6 +105,25 @@ void MainMenu::Init(int width, int height)
 
 void MainMenu::Update()
 {
+	if (Input::GetKey(KEY::LEFT)) {
+		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
+		trans.SetRotation(trans.GetLocalRotation() * glm::angleAxis(Time::dt, BLM::GLMup));
+	}
+	if (Input::GetKey(KEY::RIGHT)) {
+		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
+		trans.SetRotation(trans.GetLocalRotation() * glm::angleAxis(-Time::dt, BLM::GLMup));
+	}
+
+	if (Input::GetKey(KEY::DOWN)) {
+		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
+		trans.SetScale(trans.GetScale().x - Time::dt);
+		std::cout << "scale: " << trans.GetScale().x << "           \r";
+	}
+	if (Input::GetKey(KEY::UP)) {
+		auto& trans = ECS::GetComponent<Transform>(charSelectParent);
+		trans.SetScale(trans.GetScale().x + Time::dt);
+		std::cout << "scale: " << trans.GetScale().x << "           \r";
+	}
 
 	if (m_scenePos == 0) {
 		float lx = 0, ly = 0, rx = 0, ry = 0;

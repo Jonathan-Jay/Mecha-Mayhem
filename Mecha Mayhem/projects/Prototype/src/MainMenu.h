@@ -59,6 +59,8 @@ private:
 		glm::vec3(-2.5f, 0.f, -2.5f)
 	}, 8 };
 
+	entt::entity charSelectParent = entt::null;
+
 	entt::entity camera = entt::null;
 	entt::entity title = entt::null;
 	entt::entity text = entt::null;
