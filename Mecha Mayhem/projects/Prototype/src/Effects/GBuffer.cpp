@@ -55,10 +55,17 @@ void GBuffer::UnbindLighting()
 	_gBuffer.UnbindTexture(3);
 }
 
-void GBuffer::DrawBuffersToScreen()
+void GBuffer::DrawBuffersToScreen(int test)
 {
 	_passThrough->Bind();
+	if (test >= 0 && test < 4) {
+		_gBuffer.BindColorAsTexture(test, 0);
+		_gBuffer.DrawFullscreenQuad();
+		_gBuffer.UnbindTexture(0);
 
+		_passThrough->UnBind();
+		return;
+	}
 	//set viewport to top left
 	glViewport(0, _windowHeight * 0.5f, _windowWidth * 0.5f, _windowHeight * 0.5f);
 	_gBuffer.BindColorAsTexture(Target::ALBEDO, 0);

@@ -33,10 +33,14 @@ public:
 	void UnbindLighting();
 
 	//Draws out the buffers to the screen
-	void DrawBuffersToScreen();
+	void DrawBuffersToScreen(int test);
 
 	//Reshape the framebuffer
 	void Reshape(unsigned width, unsigned height);
+
+	Framebuffer& GetGBuffer() {
+		return _gBuffer;
+	}
 private:
 	Framebuffer _gBuffer;
 	Shader::sptr _passThrough;

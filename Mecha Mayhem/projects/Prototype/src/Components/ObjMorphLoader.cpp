@@ -884,20 +884,21 @@ void ObjMorphLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
 		m_defaultTempQueue.push_back({ m_t, m_vao, model, colour });
 }
 
-void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour,
+/*void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour,
 	const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount, float specularStrength, float shininess,
-	float ambientLightStrength, const glm::vec3& ambientColour, float ambientStrength)
+	float ambientLightStrength, const glm::vec3& ambientColour, float ambientStrength)*/
+void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float specularStrength, float shininess)
 {
 	glm::mat4 VP = camera.GetProjection() * view;
 
 	if (m_defaultQueue.size() || m_defaultTempQueue.size()) {
 		//global stuff
 		m_shader->Bind();
-		m_shader->SetUniform("camPos", camera.GetPosition());
-
 		m_shader->SetUniform("colour", colour);
 		m_shader->SetUniform("specularStrength", specularStrength);
 		m_shader->SetUniform("shininess", shininess);
+
+		/*m_shader->SetUniform("camPos", camera.GetPosition());
 
 		m_shader->SetUniform("lightsPos", *lightPos.data(), MAX_LIGHTS);
 		m_shader->SetUniform("lightsColour", *lightColour.data(), MAX_LIGHTS);
@@ -905,7 +906,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 
 		m_shader->SetUniform("ambientLightStrength", ambientLightStrength);
 		m_shader->SetUniform("ambientColour", ambientColour);
-		m_shader->SetUniform("ambientStrength", ambientStrength);
+		m_shader->SetUniform("ambientStrength", ambientStrength);*/
 
 		for (int i(0); i < m_defaultTempQueue.size(); ++i) {
 			m_shader->SetUniformMatrix("MVP", VP * m_defaultTempQueue[i].model);
@@ -931,7 +932,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 	if (m_texQueue.size() || m_texTempQueue.size()) {
 		//global stuff
 		m_texShader->Bind();
-		m_texShader->SetUniform("camPos", camera.GetPosition());
+		/*m_texShader->SetUniform("camPos", camera.GetPosition());
 
 		m_texShader->SetUniform("lightsPos", *lightPos.data(), MAX_LIGHTS);
 		m_texShader->SetUniform("lightsColour", *lightColour.data(), MAX_LIGHTS);
@@ -939,7 +940,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 
 		m_texShader->SetUniform("ambientLightStrength", ambientLightStrength);
 		m_texShader->SetUniform("ambientColour", ambientColour);
-		m_texShader->SetUniform("ambientStrength", ambientStrength);
+		m_texShader->SetUniform("ambientStrength", ambientStrength);*/
 
 		for (int i(0); i < m_texTempQueue.size(); ++i) {
 			m_texShader->SetUniformMatrix("MVP", VP * m_texTempQueue[i].model);
@@ -969,7 +970,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 	if (m_matQueue.size() || m_matTempQueue.size()) {
 		//global stuff
 		m_matShader->Bind();
-		m_matShader->SetUniform("camPos", camera.GetPosition());
+		/*m_matShader->SetUniform("camPos", camera.GetPosition());
 
 		m_matShader->SetUniform("lightsPos", *lightPos.data(), MAX_LIGHTS);
 		m_matShader->SetUniform("lightsColour", *lightColour.data(), MAX_LIGHTS);
@@ -977,7 +978,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 
 		m_matShader->SetUniform("ambientLightStrength", ambientLightStrength);
 		m_matShader->SetUniform("ambientColour", ambientColour);
-		m_matShader->SetUniform("ambientStrength", ambientStrength);
+		m_matShader->SetUniform("ambientStrength", ambientStrength);*/
 
 		for (int i(0); i < m_matTempQueue.size(); ++i) {
 			m_matShader->SetUniformMatrix("MVP", VP * m_matTempQueue[i].model);

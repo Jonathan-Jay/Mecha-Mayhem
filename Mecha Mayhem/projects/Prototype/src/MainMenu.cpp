@@ -1,6 +1,5 @@
 #include "MainMenu.h"
 #include "LeaderBoard.h"
-#include "Effects/Post/BloomEffect.h"
 
 void MainMenu::Init(int width, int height)
 {
@@ -67,12 +66,18 @@ void MainMenu::Init(int width, int height)
 	Rendering::LightsPos[5] = BLM::GLMzero;
 
 	m_frameEffects.Init(width, height);
-	{
-		m_frameEffects.AddEffect(new BloomEffect());
+	if (m_frameEffects[0] == nullptr) {
+		m_frameEffects.AddEffect(new DepthOfFieldEffect());
 		m_frameEffects[0]->Init(width, height);
-		((BloomEffect*)m_frameEffects[0])->SetBlurCount(10);
-		((BloomEffect*)m_frameEffects[0])->SetRadius(2.5f);
-		((BloomEffect*)m_frameEffects[0])->SetThreshold(0.9f);
+		((DepthOfFieldEffect*)m_frameEffects[0])->SetBlurPasses(2);
+		((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+		((DepthOfFieldEffect*)m_frameEffects[0])->SetDrawBuffer(m_frameEffects.GetDrawBuffer());
+
+		m_frameEffects.AddEffect(new BloomEffect());
+		m_frameEffects[1]->Init(width, height);
+		((BloomEffect*)m_frameEffects[1])->SetBlurCount(10);
+		((BloomEffect*)m_frameEffects[1])->SetRadius(2.5f);
+		((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 	}
 }
 
@@ -135,7 +140,8 @@ void MainMenu::Update()
 				Rendering::LightsPos[4] = BLM::GLMzero;
 				Rendering::LightsPos[5] = BLM::GLMzero;
 				Rendering::AmbientStrength = 1.5f;
-				((BloomEffect*)m_frameEffects[0])->SetThreshold(1.f);
+				((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(1.1f);
+				((BloomEffect*)m_frameEffects[1])->SetThreshold(1.f);
 			}
 		}
 		else if (ECS::GetComponent<ObjMorphLoader>(title).IsDone()) {
@@ -300,7 +306,8 @@ void MainMenu::Update()
 						Rendering::LightsPos[4] = BLM::GLMzero;
 						Rendering::LightsPos[5] = BLM::GLMzero;
 						Rendering::AmbientStrength = 1.f;
-						((BloomEffect*)m_frameEffects[0])->SetThreshold(0.9f);
+						((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+						((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 						ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
 
@@ -323,9 +330,12 @@ void MainMenu::Update()
 			m_confirmTimer -= Time::dt;
 			if (m_confirmTimer <= 0) {
 				//1 is tutorial
-				if (playerCount == 1)	QueueSceneChange(1);
+				//if (playerCount == 1)	QueueSceneChange(1);
 				//2+ is DemoScene
-				else					QueueSceneChange(2);
+				//else					QueueSceneChange(2);
+
+				QueueSceneChange(Scene::nextScene);
+
 				m_scenePos = 0;
 				m_exitHoldTimer = 1.f;
 				m_confirmTimer = 1.f;
@@ -373,7 +383,8 @@ Scene* MainMenu::Reattach()
 	Rendering::LightsPos[4] = BLM::GLMzero;
 	Rendering::LightsPos[5] = BLM::GLMzero;
 	Rendering::AmbientStrength = 1.f;
-	((BloomEffect*)m_frameEffects[0])->SetThreshold(0.9f);
+	((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+	((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 	return Scene::Reattach();
 }

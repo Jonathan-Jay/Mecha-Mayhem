@@ -17,9 +17,14 @@ void FrameEffects::Init()
 	PostEffect::Init("shaders/Post/greyscale_frag.glsl");
 	PostEffect::Init("shaders/Post/sepia_frag.glsl");
 	PostEffect::Init("shaders/Post/toon_frag.glsl");
+	PostEffect::Init("shaders/Post/dof_extract.glsl");
+	PostEffect::Init("shaders/Post/dof_combine.glsl");
+	PostEffect::Init("shaders/Post/dof_deletion.glsl");
 
+	//gbuffer
 	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
 	PostEffect::Init("shaders/Post/gBuffer_ambient_frag.glsl");
+
 }
 
 void FrameEffects::Unload()
@@ -86,7 +91,7 @@ void FrameEffects::UnBind()
 void FrameEffects::Draw(/*bool paused*/)
 {
 	if (_drawGBuffer) {
-		baseEffect.DrawBuffersToScreen();
+		baseEffect.DrawBuffersToScreen(gBufferSelection);
 		return;
 	}
 

@@ -10,6 +10,7 @@
 #include "Effects/Post/PixelEffect.h"
 #include "Effects/Post/SepiaEffect.h"
 #include "Effects/Post/GreyscaleEffect.h"
+#include "Effects/Post/DepthOfField.h"
 
 class Scene
 {
@@ -39,9 +40,159 @@ public:
 	virtual void ImGuiFunc() {
 		/*ImGui::SetWindowSize(ImVec2(150, 50));
 		ImGui::Text("Empty");*/
-		if (ImGui::Button("Toggle Draw GBuffer")) {
-			m_frameEffects._drawGBuffer = !m_frameEffects._drawGBuffer;
+		switch (FrameEffects::gBufferSelection)
+		{
+		default:	ImGui::Text("1: Normal");				break;
+		case 0:		ImGui::Text("2: Albedo/Colour Buffer");	break;
+		case 1:		ImGui::Text("3: Normal Buffer");		break;
+		case 2:		ImGui::Text("4: Specular Buffer");		break;
+		case 3:		ImGui::Text("5: Position Buffer");		break;
+		case 4:		ImGui::Text("6: All Buffers");			break;
 		}
+		int temp = FrameEffects::gBufferSelection + 2;
+		if (ImGui::SliderInt("GBuffer Drawing Selection", &temp, 1, 6)) {
+			FrameEffects::gBufferSelection = temp - 2;
+			if (FrameEffects::gBufferSelection < 0) {
+				m_frameEffects._drawGBuffer = false;
+			}
+			else {
+				m_frameEffects._drawGBuffer = true;
+			}
+		}
+		ImGui::Text("Toggle scene: ");
+		ImGui::SameLine();
+		if (ImGui::Button(nextScene == 1 ? "tutorial" : "custom scene")) {
+			if (nextScene == 1)
+				nextScene = 2;
+			else
+				nextScene = 1;
+		}
+		if (ImGui::CollapsingHeader("Post Processing Effects"))
+		{
+			ImGui::Text(("Number of effects: " + std::to_string(m_frameEffects.size())).c_str());
+			ImGui::SliderInt("max amt of effects", &maxEffectCount, 0, 5);
+			for (int i(0); i < m_frameEffects.size(); ++i) {
+				std::string name = m_frameEffects[i]->Info();
+				if (ImGui::TreeNode((std::to_string(i + 1) + ": " + name).c_str())) {
+					if (name == "Bloom") {
+						BloomEffect* effect = (BloomEffect*)(m_frameEffects[i]);
+						float threshold = effect->GetTreshold();
+						if (ImGui::SliderFloat("Treshold", &threshold, 0.f, 1.f)) {
+							effect->SetThreshold(threshold);
+						}
+						float radius = effect->GetRadius();
+						if (ImGui::SliderFloat("Radius", &radius, 0.f, 15.f)) {
+							effect->SetRadius(radius);
+						}
+						int blur = effect->GetBlurCount();
+						if (ImGui::SliderInt("Blur Passes", &blur, 1, 15)) {
+							effect->SetBlurCount(blur);
+						}
+					}
+					else if (name == "Greyscale") {
+						GreyscaleEffect* effect = (GreyscaleEffect*)(m_frameEffects[i]);
+						float intensity = effect->GetIntensity();
+						if (ImGui::SliderFloat("Intensity", &intensity, 0.f, 1.f)) {
+							effect->SetIntensity(intensity);
+						}
+					}
+					else if (name == "Sepia") {
+						SepiaEffect* effect = (SepiaEffect*)(m_frameEffects[i]);
+						float intensity = effect->GetIntensity();
+						if (ImGui::SliderFloat("Intensity", &intensity, 0.f, 1.f)) {
+							effect->SetIntensity(intensity);
+						}
+					}
+					else if (name == "Toon") {
+						ImGui::Text("Toon bands based on average of rgb");
+						ToonEffect* effect = (ToonEffect*)(m_frameEffects[i]);
+						int bands = effect->GetBands();
+						if (ImGui::SliderInt("Bands", &bands, 3, 15)) {
+							effect->SetBands(bands);
+						}
+					}
+					else if (name == "Pixel") {
+						ImGui::Text("Pixels done by drawing to a smaller buffer, which means no new shader!");
+						PixelEffect* effect = (PixelEffect*)(m_frameEffects[i]);
+						int pixels = effect->GetPixelCount();
+						if (ImGui::SliderInt("PixelCount", &pixels, 4, BackEnd::GetHeight())) {
+							effect->SetPixelCount(pixels);
+						}
+					}
+					else if (name == "DepthOfField") {
+						ImGui::Text("We got the depth buffer somehow");
+						DepthOfFieldEffect* effect = (DepthOfFieldEffect*)(m_frameEffects[i]);
+						float depthLimit = effect->GetDepthLimit();
+						if (ImGui::SliderFloat("Depth Limit", &depthLimit, 0.f, 1.f)) {
+							effect->SetDepthLimit(depthLimit);
+						}
+						int blur = effect->GetBlurPasses();
+						if (ImGui::SliderInt("Blur Passes", &blur, 1, 15)) {
+							effect->SetBlurPasses(blur);
+						}
+					}
+					if (name != "N/A")
+					if (ImGui::Button("Remove")) {
+						m_frameEffects.RemoveEffect(i);
+						//ImGui::SetNextItemOpen(false);
+					}
+					ImGui::TreePop();
+				}
+			}
+			if (m_frameEffects.size() < maxEffectCount) {
+				if (ImGui::Button("Greyscale")) {
+					GreyscaleEffect* effect = new GreyscaleEffect();
+					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					effect->SetInfo("Greyscale");
+					m_frameEffects.AddEffect(effect);
+					effect = nullptr;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Sepia")) {
+					SepiaEffect* effect = new SepiaEffect();
+					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					effect->SetInfo("Sepia");
+					m_frameEffects.AddEffect(effect);
+					effect = nullptr;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("\"Toon Shading\"")) {
+					ToonEffect* effect = new ToonEffect();
+					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					effect->SetInfo("Toon");
+					m_frameEffects.AddEffect(effect);
+					effect = nullptr;
+				}
+				if (ImGui::Button("Bloom")) {
+					BloomEffect* effect = new BloomEffect();
+					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					effect->SetInfo("Bloom");
+					m_frameEffects.AddEffect(effect);
+					effect = nullptr;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Pixelataion")) {
+					PixelEffect* effect = new PixelEffect();
+					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					effect->SetInfo("Pixel");
+					m_frameEffects.AddEffect(effect);
+					effect = nullptr;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Depth Of Field")) {
+					DepthOfFieldEffect* effect = new DepthOfFieldEffect();
+					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+					effect->SetInfo("DepthOfField");
+					m_frameEffects.AddEffect(effect);
+					effect->SetDrawBuffer(m_frameEffects.GetDrawBuffer());
+					effect = nullptr;
+				}
+			}
+			else {
+				ImGui::Text("Max effects added");
+			}
+		}
+
 	};
 
 	//can't override
@@ -64,6 +215,18 @@ protected:
 	int maxEffectCount = 1;
 	bool m_paused = false;
 
+
+
+
+
+
+	static size_t nextScene;
+
+
+
+
+
+
 	static size_t m_nextScene;
 	static bool m_doSceneChange;
 	static bool m_exitGame;
@@ -81,3 +244,4 @@ protected:
 	btSequentialImpulseConstraintSolver* _solver = nullptr;
 };
 
+inline size_t Scene::nextScene = 1;

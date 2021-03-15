@@ -370,15 +370,15 @@ MultiTextObj& MultiTextObj::LoadMesh(const std::string& fileName)
 	return *this;
 }
 
-void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera,
+/*void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera,
 	const glm::vec3& colour, const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount,
-	float specularStrength, float shininess,
-	float ambientLightStrength, const glm::vec3& ambientColour, float ambientStrength)
+	float ambientLightStrength, const glm::vec3& ambientColour, float ambientStrength)*/
+void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera, const glm::vec3& colour)
 {
 	glm::mat4 VP = camera.GetProjection() * view;
 
 	ObjLoader::m_texShader->Bind();
-	ObjLoader::m_texShader->SetUniform("camPos", camera.GetPosition());
+	/*ObjLoader::m_texShader->SetUniform("camPos", camera.GetPosition());
 
 	ObjLoader::m_texShader->SetUniform("lightsPos", *lightPos.data(), MAX_LIGHTS);
 	ObjLoader::m_texShader->SetUniform("lightsColour", *lightColour.data(), MAX_LIGHTS);
@@ -386,9 +386,9 @@ void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Cam
 
 	ObjLoader::m_texShader->SetUniform("ambientLightStrength", ambientLightStrength);
 	ObjLoader::m_texShader->SetUniform("ambientColour", ambientColour);
-	ObjLoader::m_texShader->SetUniform("ambientStrength", ambientStrength);
+	ObjLoader::m_texShader->SetUniform("ambientStrength", ambientStrength);*/
 
-	ObjLoader::m_texShader->SetUniform("addColour", glm::vec3(0.f));
+	ObjLoader::m_texShader->SetUniform("addColour", colour);
 
 	for (int i(0); i < m_models[m_index].vao.size(); ++i) {
 		ObjLoader::m_texShader->SetUniformMatrix("MVP", VP * model);

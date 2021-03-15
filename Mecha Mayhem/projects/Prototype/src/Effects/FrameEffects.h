@@ -47,6 +47,10 @@ public:
 		return layersOfEffects[index];
 	}
 
+	Framebuffer* GetDrawBuffer() {
+		return &baseEffect.GetGBuffer();
+	}
+
 	void SetCamPos(glm::vec3 pos, int camNum) {
 		illumBuffer.SetCamPos(pos, camNum);
 	}
@@ -55,7 +59,13 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
+
+
 	bool _drawGBuffer = false;
+
+	static int gBufferSelection;
+
+
 
 private:
 	GBuffer baseEffect;
@@ -63,3 +73,5 @@ private:
 	//BufferCombiner pauseEffect;
 	std::vector<PostEffect*> layersOfEffects = {};
 };
+
+inline int FrameEffects::gBufferSelection = -1;

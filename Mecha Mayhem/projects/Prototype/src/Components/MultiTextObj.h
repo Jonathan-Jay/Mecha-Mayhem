@@ -13,10 +13,10 @@ public:
 
 	MultiTextObj& LoadMesh(const std::string& fileName);
 
-	void Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera, const glm::vec3& colour, const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount,
-		float specularStrength = 1.f, float shininess = 4,
+	/*void Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera, const glm::vec3& colour, const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount,
 		float ambientLightStrength = 0.05f, const glm::vec3& ambientColour = glm::vec3(0.f), float ambientStrength = 0.f
-	);
+	);*/
+	void Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera, const glm::vec3& colour);
 	void DrawShadow(const glm::mat4& model);
 
 	void Enable() { m_enabled = true; }

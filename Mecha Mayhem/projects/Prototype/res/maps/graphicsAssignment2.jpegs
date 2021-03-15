@@ -1,0 +1,10 @@
+floor 0
+box pos 60 10 0 scl 50 20 20
+box pos -60 10 0 scl 50 20 20
+box pos 0 10 -60 scl 20 20 50
+box pos 0 10 60 scl 20 20 50
+
+cyl pos 24 5 12 scl 4.3 4.3 5.98
+
+spawner pos 0 0 0 bounds 0 6 delay 30
+spawn pos 23.32 2 2.77

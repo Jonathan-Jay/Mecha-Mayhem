@@ -105,19 +105,13 @@ namespace Rendering {
 			//map drawn first for transparency
 			textObjView.each(
 				[&](MultiTextObj& obj, Transform& trans) {
-					obj.Draw(trans.GetModel(), view, camCam,
-						DefaultColour, LightsPos, LightsColour, LightCount,
-						1, 4, 0.0f, AmbientColour, AmbientStrength);
+					obj.Draw(trans.GetModel(), view, camCam, glm::vec3(0));
 				}
 			);
 
 			//do all the draws
-			ObjLoader::PerformDraw(view, camCam,
-				DefaultColour, LightsPos, LightsColour, LightCount,
-				1, 4, 0.0f, AmbientColour, AmbientStrength);
-			ObjMorphLoader::PerformDraw(view, camCam,
-				DefaultColour, LightsPos, LightsColour, LightCount,
-				1, 4, 0.0f, AmbientColour, AmbientStrength);
+			ObjLoader::PerformDraw(view, camCam, DefaultColour, 1, 4);
+			ObjMorphLoader::PerformDraw(view, camCam, DefaultColour, 1, 4);
 			Sprite::PerformDraw();
 
 
