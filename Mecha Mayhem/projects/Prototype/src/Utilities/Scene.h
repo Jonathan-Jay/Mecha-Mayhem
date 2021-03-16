@@ -40,34 +40,6 @@ public:
 	virtual void ImGuiFunc() {
 		/*ImGui::SetWindowSize(ImVec2(150, 50));
 		ImGui::Text("Empty");*/
-		switch (FrameEffects::gBufferSelection)
-		{
-		default:	ImGui::Text("1: Normal");				break;
-		case 0:		ImGui::Text("2: Albedo/Colour Buffer");	break;
-		case 1:		ImGui::Text("3: Normal Buffer");		break;
-		case 2:		ImGui::Text("4: Specular Buffer");		break;
-		case 3:		ImGui::Text("5: Position Buffer");		break;
-		case 4:		ImGui::Text("6: All Buffers");			break;
-		case 5:		ImGui::Text("7: Light Accumulation Buffer");			break;
-		}
-		int temp = FrameEffects::gBufferSelection + 2;
-		if (ImGui::SliderInt("GBuffer Drawing Selection", &temp, 1, 7)) {
-			FrameEffects::gBufferSelection = temp - 2;
-			if (FrameEffects::gBufferSelection < 0) {
-				m_frameEffects._drawGBuffer = false;
-			}
-			else {
-				m_frameEffects._drawGBuffer = true;
-			}
-		}
-		ImGui::Text("Toggle scene: ");
-		ImGui::SameLine();
-		if (ImGui::Button(nextScene == 1 ? "tutorial" : "custom scene")) {
-			if (nextScene == 1)
-				nextScene = 2;
-			else
-				nextScene = 1;
-		}
 		if (ImGui::CollapsingHeader("Post Processing Effects"))
 		{
 			ImGui::Text(("Number of effects: " + std::to_string(m_frameEffects.size())).c_str());
@@ -135,7 +107,6 @@ public:
 					if (name != "N/A")
 					if (ImGui::Button("Remove")) {
 						m_frameEffects.RemoveEffect(i);
-						//ImGui::SetNextItemOpen(false);
 					}
 					ImGui::TreePop();
 				}
@@ -216,18 +187,6 @@ protected:
 	int maxEffectCount = 1;
 	bool m_paused = false;
 
-
-
-
-
-
-	static size_t nextScene;
-
-
-
-
-
-
 	static size_t m_nextScene;
 	static bool m_doSceneChange;
 	static bool m_exitGame;
@@ -244,5 +203,3 @@ protected:
 	btCollisionDispatcher* _dispatcher = nullptr;
 	btSequentialImpulseConstraintSolver* _solver = nullptr;
 };
-
-inline size_t Scene::nextScene = 1;

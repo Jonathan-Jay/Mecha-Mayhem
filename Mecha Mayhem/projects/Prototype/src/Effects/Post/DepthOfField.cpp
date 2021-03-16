@@ -26,11 +26,14 @@ void DepthOfFieldEffect::Init(unsigned width, unsigned height)
 	if (index == 0) {
 		_shaders.push_back(GetShader("shaders/Post/passthrough_frag.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/dof_extract.glsl"));
-		_shaders.push_back(GetShader("shaders/Post/dof_combine.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/dof_deletion.glsl"));
-		_shaders.push_back(GetShader("shaders/Post/bloom_horizontal_blur.glsl"));
-		_shaders.push_back(GetShader("shaders/Post/bloom_vertical_blur.glsl"));
+		_shaders.push_back(GetShader("shaders/Post/dof_horizontal_blur.glsl"));
+		_shaders.push_back(GetShader("shaders/Post/dof_vertical_blur.glsl"));
+		_shaders.push_back(GetShader("shaders/Post/dof_combine.glsl"));
 	}
+
+	_shaders[3]->SetUniform("u_TexelSize", 2.f / width);
+	_shaders[4]->SetUniform("u_TexelSize", 2.f / height);
 }
 
 void DepthOfFieldEffect::ApplyEffect(PostEffect* buffer)
@@ -65,7 +68,7 @@ void DepthOfFieldEffect::ApplyEffect(PostEffect* buffer)
 	UnbindShader();
 
 	//draw to smaller buffer while deleting the near
-	BindShader(3);
+	BindShader(2);
 
 	buffer->BindColorAsTexture(0, 0, 0);
 	_buffers[0]->BindColorAsTexture(0, 1);
@@ -77,13 +80,10 @@ void DepthOfFieldEffect::ApplyEffect(PostEffect* buffer)
 
 	UnbindShader();
 
-	_shaders[3]->SetUniform("u_Spread", 5);
-	_shaders[4]->SetUniform("u_Spread", 5);
-
 	//blur
 	for (int i(0); i < _blurPasses; ++i) {
 		//hori
-		BindShader(4);
+		BindShader(3);
 
 		_buffers[1]->BindColorAsTexture(0, 0);
 
@@ -94,7 +94,7 @@ void DepthOfFieldEffect::ApplyEffect(PostEffect* buffer)
 		UnbindShader();
 
 		//verti
-		BindShader(5);
+		BindShader(4);
 
 		_buffers[2]->BindColorAsTexture(0, 0);
 
@@ -106,7 +106,7 @@ void DepthOfFieldEffect::ApplyEffect(PostEffect* buffer)
 	}
 
 	//combine
-	BindShader(2);
+	BindShader(5);
 
 	_buffers[0]->BindColorAsTexture(0, 0);
 	_buffers[1]->BindColorAsTexture(0, 1);
@@ -124,6 +124,9 @@ void DepthOfFieldEffect::Reshape(unsigned width, unsigned height)
 	_buffers[0]->Reshape(width, height);
 	_buffers[1]->Reshape(width * 0.5f, height * 0.5f);
 	_buffers[2]->Reshape(width * 0.5f, height * 0.5f);
+
+	_shaders[3]->SetUniform("u_TexelSize", 2.f / width);
+	_shaders[4]->SetUniform("u_TexelSize", 2.f / height);
 }
 
 void DepthOfFieldEffect::SetDepthLimit(float depth)

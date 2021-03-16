@@ -50,12 +50,7 @@ void MainMenu::Init(int width, int height)
 		models[x] = ECS::CreateEntity();
 		ECS::AttachComponent<Player>(models[x]).Init(CONUSER::NONE, LeaderBoard::players[x].model);
 		ECS::AttachComponent<PhysBody>(models[x]);
-		ECS::GetComponent<Transform>(models[x]).SetPosition(glm::vec3(x * 4 - 6, 99.f - 100.f
-			
-			- 1 //remove once players are replaced with aligned models
-			
-			
-			, -8))
+		ECS::GetComponent<Transform>(models[x]).SetPosition(glm::vec3(x * 4 - 6, 99.f - 100.f, -8))
 			.SetRotation(glm::angleAxis(BLM::pi, BLM::GLMup)).SetScale(1.5f).ChildTo(charSelectParent);
 	}
 
@@ -173,7 +168,7 @@ void MainMenu::Update()
 				Rendering::LightsPos[4] = BLM::GLMzero;
 				Rendering::LightsPos[5] = BLM::GLMzero;
 				Rendering::AmbientStrength = 1.5f;
-				((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(1.1f);
+				//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(1.1f);
 				((BloomEffect*)m_frameEffects[1])->SetThreshold(1.f);
 			}
 		}
@@ -342,7 +337,7 @@ void MainMenu::Update()
 						Rendering::LightsPos[4] = BLM::GLMzero;
 						Rendering::LightsPos[5] = BLM::GLMzero;
 						Rendering::AmbientStrength = 1.f;
-						((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+						//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
 						((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 						ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
@@ -371,20 +366,28 @@ void MainMenu::Update()
 		//if (allHolding && playerCount > 0) {
 		if (allHolding == playerCount && playerCount > 0) {
 			m_confirmTimer -= Time::dt;
-			((BloomEffect*)m_frameEffects[1])->SetThreshold(0.25f + 0.75f * m_confirmTimer);
+			((BloomEffect*)m_frameEffects[1])->SetThreshold(0.6f + 0.4f * m_confirmTimer);
 			if (m_confirmTimer <= 0) {
 				//1 is tutorial
-				//if (playerCount == 1)	QueueSceneChange(1);
+				if (playerCount == 1)	QueueSceneChange(1);
 				//2+ is DemoScene
-				//else					QueueSceneChange(2);
-
-				QueueSceneChange(Scene::nextScene);
+				else					QueueSceneChange(2);
 
 				m_scenePos = 0;
 				m_exitHoldTimer = 1.f;
 				m_confirmTimer = 1.f;
 
 				ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
+
+
+
+
+				ECS::GetComponent<Transform>(charSelectParent)
+					.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
+
+
+
+
 
 				ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).ChildTo(camera);
 				ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).ChildTo(camera);

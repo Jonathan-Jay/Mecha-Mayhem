@@ -6,22 +6,24 @@ void GBuffer::Init(unsigned width, unsigned height)
 	_windowWidth = width;
 	_windowHeight = height;
 
-	//Add Colour targets to GBuffer
-	_gBuffer.AddColorTarget(GL_RGBA8);	//Albedo buffer, needs all channels
-	_gBuffer.AddColorTarget(GL_RGB8);	//Normals buffer, doesn't need alpha
-	_gBuffer.AddColorTarget(GL_RGB8);	//Specular buffer, really only needs one
+	if (_passThrough == nullptr) {
+		//Add Colour targets to GBuffer
+		_gBuffer.AddColorTarget(GL_RGBA8);	//Albedo buffer, needs all channels
+		_gBuffer.AddColorTarget(GL_RGB8);	//Normals buffer, doesn't need alpha
+		_gBuffer.AddColorTarget(GL_RGB8);	//Specular buffer, really only needs one
 
-	//Important note: you can get position data from depth buffer, but we're gonna use a position buffer
-	_gBuffer.AddColorTarget(GL_RGB32F);	//Position buffer, big boy
+		//Important note: you can get position data from depth buffer, but we're gonna use a position buffer
+		_gBuffer.AddColorTarget(GL_RGB32F);	//Position buffer, big boy
 
-	//Add a depth buffer
-	_gBuffer.AddDepthTarget();
+		//Add a depth buffer
+		_gBuffer.AddDepthTarget();
 
-	//Init the buffer
-	_gBuffer.Init(width, height);
+		//Init the buffer
+		_gBuffer.Init(width, height);
 
-	//Initialize passthrough shader
-	_passThrough = PostEffect::GetShader("shaders/Post/passthrough_frag.glsl");
+		//Initialize passthrough shader
+		_passThrough = PostEffect::GetShader("shaders/Post/passthrough_frag.glsl");
+	}
 }
 
 void GBuffer::Bind()

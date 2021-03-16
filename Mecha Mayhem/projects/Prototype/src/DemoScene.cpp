@@ -6,8 +6,7 @@ void DemoScene::Init(int width, int height)
 	ECS::AttachRegistry(&m_reg);
 	PhysBody::Init(m_world);
 	ECS::AttachWorld(m_world);
-	//std::string input = "playtestmap";
-	std::string input = "graphicsAssignment2";
+	std::string input = "playtestmap";
 	m_colliders.Init(m_world, input, false, false);
 	/*std::cout << "filename: " + input + "\n";
 	if (!m_colliders.Init(m_world, input, false, false))
@@ -18,9 +17,8 @@ void DemoScene::Init(int width, int height)
 	//map
 	{
 		auto entity = ECS::CreateEntity();
-		//ECS::AttachComponent<MultiTextObj>(entity).LoadMesh("maps/MapUntextured.obj");
-		//ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0, -30.f, 0)).SetScale(4.f);
-		ECS::AttachComponent<ObjLoader>(entity).LoadMesh("maps/CGMap.obj", true);
+		ECS::AttachComponent<MultiTextObj>(entity).LoadMesh("maps/MapUntextured.obj");
+		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0, -30.f, 0)).SetScale(4.f);
 	}
 
 	m_colliders.GenerateSpawners();

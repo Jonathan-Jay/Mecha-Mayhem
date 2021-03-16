@@ -43,7 +43,7 @@ public:
 	}
 private:
 	Framebuffer _gBuffer;
-	Shader::sptr _passThrough;
+	Shader::sptr _passThrough = nullptr;
 
 	int _windowWidth;
 	int _windowHeight;

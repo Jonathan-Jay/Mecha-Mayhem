@@ -17,9 +17,12 @@ void FrameEffects::Init()
 	PostEffect::Init("shaders/Post/greyscale_frag.glsl");
 	PostEffect::Init("shaders/Post/sepia_frag.glsl");
 	PostEffect::Init("shaders/Post/toon_frag.glsl");
+
 	PostEffect::Init("shaders/Post/dof_extract.glsl");
-	PostEffect::Init("shaders/Post/dof_combine.glsl");
 	PostEffect::Init("shaders/Post/dof_deletion.glsl");
+	PostEffect::Init("shaders/Post/dof_horizontal_blur.glsl");
+	PostEffect::Init("shaders/Post/dof_vertical_blur.glsl");
+	PostEffect::Init("shaders/Post/dof_combine.glsl");
 
 	//gbuffer
 	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
@@ -38,6 +41,7 @@ void FrameEffects::Init(unsigned width, unsigned height)
 
 	baseEffect.Init(width, height);
 	illumBuffer.Init(width, height);
+	//transparencyLayer.Init(width, height);
 }
 
 void FrameEffects::Resize(unsigned width, unsigned height)
@@ -48,6 +52,7 @@ void FrameEffects::Resize(unsigned width, unsigned height)
 
 	baseEffect.Reshape(width, height);
 	illumBuffer.Reshape(width, height);
+	//transparencyLayer.Reshape(width, height);
 }
 
 void FrameEffects::AddEffect(PostEffect* effect)
@@ -79,6 +84,7 @@ void FrameEffects::Clear()
 {
 	baseEffect.Clear();
 	illumBuffer.Clear();
+	//transparencyLayer.Clear();
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Clear();
 	}
@@ -95,29 +101,34 @@ void FrameEffects::UnBind()
 	baseEffect.Unbind();
 }
 
+void FrameEffects::BindTransparency()
+{
+	//transparencyLayer.BindBuffer(0);
+	//usedTransparency = true;
+}
+
+void FrameEffects::UnBindTransparency()
+{
+	//transparencyLayer.UnbindBuffer();
+}
+
 void FrameEffects::Draw(/*bool paused*/)
 {
-	if (_drawGBuffer) {
-		if (gBufferSelection == 5) {
-			illumBuffer.ApplyEffect(&baseEffect);
-			illumBuffer.DrawIllumBuffer();
-		}
-		else
-			baseEffect.DrawBuffersToScreen(gBufferSelection);
-		return;
-	}
-
 	illumBuffer.ApplyEffect(&baseEffect);
 
 	PostEffect* prev = &illumBuffer;
+
+	/*if (usedTransparency) {
+		usedTransparency = false;
+
+		transparencyLayer.ApplyEffect(prev, &baseEffect);
+		prev = &transparencyLayer;
+	}*/
+
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->ApplyEffect(prev);
 		prev = layersOfEffects[i];
 	}
-	/*if (paused) {
-		pauseEffect->ApplyEffect(prev);
-		prev = &pauseEffect;
-	}*/
 	prev->DrawToScreen();
 }
 

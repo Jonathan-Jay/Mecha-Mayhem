@@ -28,9 +28,13 @@ public:
 	void InsertEffect(PostEffect* effect, int index);
 	void RemoveEffect(int slot);
 
-	//binds everything needed
+	//binds gBuffer
 	void Bind();
 	void UnBind();
+
+	//binds transparency buffer
+	void BindTransparency();
+	void UnBindTransparency();
 
 	//for drawing purposes
 	void Clear();
@@ -60,19 +64,12 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
-
-
-	bool _drawGBuffer = false;
-
-	static int gBufferSelection;
-
-
-
 private:
 	GBuffer baseEffect;
 	IlluminationBuffer illumBuffer;
+	//TransparencyLayer transparencyLayer;
+	//bool usedTransparency = false;
+
 	//BufferCombiner pauseEffect;
 	std::vector<PostEffect*> layersOfEffects = {};
 };
-
-inline int FrameEffects::gBufferSelection = -1;

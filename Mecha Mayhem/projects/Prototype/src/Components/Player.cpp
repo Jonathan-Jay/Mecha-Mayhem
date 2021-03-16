@@ -329,9 +329,13 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 	if (!m_punched && m_currWeapon != WEAPON::FIST) {
 		GetWeaponModel(m_currWeapon).DrawTemp(model * m_gunOffsetMat);
 	}
+
+	//temporary Fix for misaligned players
+	tempModel = glm::translate(tempModel, glm::vec3(0, -1, 0));
+
 	m_charModel.DrawTemp(tempModel, m_colour - glm::vec3(sinf(m_damageCounter * 21.f)));
 	if (m_respawnTimer > 0) {
-		tempModel[3].y += 1;
+		tempModel = glm::translate(tempModel, glm::vec3(0, 1, 0));
 		m_heliDrone.DrawTemp(tempModel);
 	}
 
