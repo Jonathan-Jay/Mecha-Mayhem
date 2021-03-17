@@ -5,6 +5,7 @@ layout(location = 2) in vec3 inColour;
 layout(location = 3) in vec3 inSpec;
 
 uniform vec3 addColour;
+uniform int receiveShadows;
 
 //multi render target
 //we can render colour to all of these
@@ -22,7 +23,8 @@ void main() {
 
 	//other classes store in material
 	outSpecs = inSpec;
-		
+	outSpecs.z = receiveShadows;
+
 	//positions 
 	outPositions = inPos;
 }

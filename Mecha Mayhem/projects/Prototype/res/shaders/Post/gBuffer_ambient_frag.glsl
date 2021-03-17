@@ -18,7 +18,8 @@ struct DirectionalLight
 	float _lightAmbientPow;
 	float _lightSpecularPow;
 	
-	float _shadowBias;
+	float _shadowBiasMax;
+	float _shadowBiasMin;
 };
 
 layout (std140, binding = 0) uniform u_Lights

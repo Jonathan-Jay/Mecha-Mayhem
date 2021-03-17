@@ -18,7 +18,8 @@ struct DirectionalLight
 	float _lightAmbientPow;
 	float _lightSpecularPow;
 	
-	float _shadowBias;
+	float _shadowBiasMax;
+	float _shadowBiasMin;
 };
 
 layout (std140, binding = 0) uniform u_Lights
@@ -27,39 +28,40 @@ layout (std140, binding = 0) uniform u_Lights
 };
 
 
-//layout(binding = 30) uniform sampler2D s_ShadowMap;
+layout(binding = 30) uniform sampler2D s_ShadowMap;
 
 layout(binding = 0) uniform sampler2D s_albedoTex;
 layout(binding = 1) uniform sampler2D s_normalsTex;
 layout(binding = 2) uniform sampler2D s_specularTex;
 layout(binding = 3) uniform sampler2D s_positionTex;
 
-//uniform mat4 u_LightSpaceMatrix;
+uniform mat4 u_LightSpaceMatrix;
 uniform vec3 u_camPos[4];
 uniform int camCount;
 
 out vec4 frag_color;
 
-// float ShadowCalculation(vec4 fragPosLightSpace, float bias)
-// {
-// 	//Perspective division
-// 	vec3 projectionCoordinates = fragPosLightSpace.xyz / fragPosLightSpace.w;
-	
-// 	//Transform into a [0,1] range
-// 	projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
-	
-// 	//Get the closest depth value from light's perspective (using our 0-1 range)
-// 	float closestDepth = texture(s_ShadowMap, projectionCoordinates.xy).r;
+float ShadowCalculation(vec4 fragPosLightSpace, float bias)
+{
+	//Perspective division
+	vec3 projectionCoordinates = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
-// 	//Get the current depth according to the light
-// 	float currentDepth = projectionCoordinates.z;
+	//Transform into a [0,1] range
+	projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
 
-// 	//Check whether there's a shadow
-// 	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	//Get the closest depth value from light's perspective (using our 0-1 range)
+	float closestDepth = texture(s_ShadowMap, projectionCoordinates.xy).r;
 
-// 	//Return the value
-// 	return shadow;
-// }
+	//Get the current depth according to the light
+	//float currentDepth = projectionCoordinates.z;
+
+	//Check whether there's a shadow
+	//float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+	//Return the value
+	return float(projectionCoordinates.z - bias > closestDepth);
+	//return shadow;
+}
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
@@ -76,23 +78,16 @@ void main() {
 	//Albedo
 	vec4 textureColor = texture(s_albedoTex, inUV);
 	//Specular
-	vec2 texSpec = texture(s_specularTex, inUV).rg;
+	vec3 texSpec = texture(s_specularTex, inUV).rgb;
 	//Positions
 	vec3 fragPos = texture(s_positionTex, inUV).rgb;
 
 	// Diffuse
-	vec3 N = inNormal;
 	vec3 lightDir = normalize(-sun._lightDirection.xyz);
-	float dif = max(dot(N, lightDir), 0.0);
+	float dif = max(dot(inNormal, lightDir), 0.0);
 	vec3 diffuse = dif * sun._lightCol.rgb;// add diffuse intensity
 
-	int camNum = 0;
-	if (camCount > 2) {
-		camNum = int(inUV.x > 0.5) + int(inUV.y < 0.5) * 2;
-	}
-	else if (camCount > 1) {
-		camNum = int(inUV.x > 0.5);
-	}
+	int camNum = int(camCount > 1) * int(inUV.x > 0.5) + int(camCount > 2) * int(inUV.y < 0.5) * 2;
 
 	// Specular
 	vec3 viewDir  = normalize(u_camPos[camNum] - fragPos);
@@ -100,20 +95,22 @@ void main() {
 
 
 	// Get the specular from the specular map
-	float spec = pow(max(dot(N, h), 0.0), texSpec.y); // Shininess coefficient (can be a uniform)
+	float spec = pow(max(dot(inNormal, h), 0.0), texSpec.y); // Shininess coefficient (can be a uniform)
 	vec3 specular = sun._lightSpecularPow * texSpec.x * spec * sun._lightCol.rgb; // Can also use a specular color
 
 	// Get the albedo from the diffuse / albedo map	
 
 	//Lighting
-	// vec4 inFragPosLightSpace = u_LightSpaceMatrix * vec4(fragPos, 1.0);
+	vec4 inFragPosLightSpace = u_LightSpaceMatrix * vec4(fragPos, 1.0);
 
-
-	// float shadow = ShadowCalculation(inFragPosLightSpace, sun._shadowBias);
+	//float lightNorm = dot(inNormal, lightDir);
+	//float bias = lightNorm > 0 ? 0 : max(sun._shadowBiasMax * (1.0 - lightNorm), sun._shadowBiasMin); 
+	float bias = max(sun._shadowBiasMax * (1.0 - dot(inNormal, lightDir)), sun._shadowBiasMin); 
+	float shadow = texSpec.z * ShadowCalculation(inFragPosLightSpace, bias);
 
 	vec3 result = (
 		(sun._ambientPow * sun._ambientCol.rgb) + // global ambient light
-		//(1.0 - shadow) * //Shadow value
+		(1.0 - shadow) * //Shadow value
 		(diffuse + specular) // light factors from our single light
 		); // Object color, no
 

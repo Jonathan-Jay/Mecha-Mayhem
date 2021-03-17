@@ -43,7 +43,10 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 	if (_sunEnabled) {
 		//bind directional light shader
 		_shaders[Lights::DIRECTIONAL]->Bind();
-		//_shaders[Lights::DIRECTIONAL]->SetUniformMatrix("u_LightSpaceMatrix", _lightSpaceViewProj);
+
+		//the shadow texture is sent elsewhere
+		_shaders[Lights::DIRECTIONAL]->SetUniformMatrix("u_LightSpaceMatrix", _lightSpaceViewProj);
+
 		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos", *_camPos.data(), 4);
 		_shaders[Lights::DIRECTIONAL]->SetUniform("camCount", _camCount);
 
@@ -97,7 +100,7 @@ void IlluminationBuffer::SetLightSpaceViewProj(glm::mat4 lightSpaceViewProj)
 
 void IlluminationBuffer::SetCamPos(glm::vec3 camPos, int camNum)
 {
-	if (camNum >= 4 && camNum < 0)	return;
+	if (camNum > 3 || camNum < 0)	return;
 
 	_camPos[camNum] = camPos;
 }

@@ -7,6 +7,7 @@ uniform vec3 addColour;
 
 uniform float specularStrength;
 uniform float shininess;
+uniform int receiveShadows;
 
 //multi render target
 //we can render colour to all of these
@@ -23,7 +24,7 @@ void main() {
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
 
 	//other classes store in material
-	outSpecs = vec3(specularStrength, shininess, 1.0);
+	outSpecs = vec3(specularStrength, shininess, receiveShadows);
 
 	//positions 
 	outPositions = inPos;

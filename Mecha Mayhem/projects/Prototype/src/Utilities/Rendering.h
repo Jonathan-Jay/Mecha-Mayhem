@@ -15,7 +15,7 @@ namespace Rendering
 	//void DrawPauseScreen(Sprite image);
 
 	//doesn't bind the buffer
-	void RenderForShading(entt::registry* reg, const glm::mat4& lightVPMatrix);
+	void RenderForShading(entt::registry* reg);
 
 	extern glm::vec3 BackColour;
 	extern std::array<glm::vec3, MAX_LIGHTS> LightsPos;

@@ -20,6 +20,7 @@ public:
 	};*/
 
 private:
+	void SetDigits(int index, int number);
 
 	CatmullFollower dronePath = { 3, {
 		glm::vec3(0, 7, 0),
@@ -60,6 +61,19 @@ private:
 
 	float camDistance = 2.5f;
 	float m_timer = 0.f;
+
+	struct DummyData {
+		entt::entity dummy = entt::null;
+		entt::entity digit1 = entt::null;
+		entt::entity digit2 = entt::null;
+
+		short lastHealth = 100;
+		short currHealth = 0;
+
+		float timer = 0;
+	};
+
+	DummyData dummies[6] = {};
 
 	entt::entity bodyEnt[4] = { entt::null, entt::null, entt::null, entt::null };
 	entt::entity Head[4] = { entt::null, entt::null, entt::null, entt::null };

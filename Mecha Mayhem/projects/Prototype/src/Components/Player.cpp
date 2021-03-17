@@ -549,8 +549,9 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 				//ground anims
 				if (vel.x != 0 || vel.z != 0) {
 					m_charModel.SetSpeed(std::max(fabsf(vel.x), fabsf(vel.z))).
-						BlendTo(m_charModelIndex + "/walk");
-					if (m_charModel.Getp0() == 0 || m_charModel.Getp0() == 4) {
+						BlendTo(m_charModelIndex + "/walk", 0.1f, m_walkFrame);
+					m_walkFrame = m_charModel.Getp0();
+					if (m_walkFrame == 0 || m_walkFrame == 4) {
 						if (!m_stepped) {
 
 							//m_walk[rand() % 5].play();
@@ -768,7 +769,7 @@ void Player::LaserGun(float offset, Transform& head, short damage, float distanc
 	RayResult p = PhysBody::GetRaycastResult(BLM::GLMtoBT(rayPos),
 		BLM::GLMtoBT(glm::rotate(offsetQuat, -head.GetForwards()) * distance * 100.f));
 
-	if (p.hasHit()) if (p.m_closestHitFraction <= 0.01f)
+	if (p.hasHit() && p.m_closestHitFraction <= 0.01f)
 	{
 		if (type == WEAPON::PISTOL)
 		{

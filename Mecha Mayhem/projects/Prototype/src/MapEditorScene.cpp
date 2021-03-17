@@ -121,9 +121,6 @@ void MapEditor::Exit()
 Scene* MapEditor::Reattach()
 {
 	Rendering::DefaultColour = glm::vec4(1.f, 0.5f, 0.5f, 0.5f);
-	Rendering::hitboxes = &m_colliders;
-	Rendering::effects = &m_effects;
-	Rendering::frameEffects = &m_frameEffects;
 	Rendering::LightCount = 2;
 	Rendering::LightsPos[0] = BLM::GLMzero;
 	Rendering::LightsColour[0] = glm::vec3(20.f);

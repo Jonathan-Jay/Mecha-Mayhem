@@ -183,9 +183,9 @@ public:
 
 protected:
 	std::string m_name;
+	bool m_paused = false;
 	short m_camCount = 1;
 	int maxEffectCount = 1;
-	bool m_paused = false;
 
 	static size_t m_nextScene;
 	static bool m_doSceneChange;

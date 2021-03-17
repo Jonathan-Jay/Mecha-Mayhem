@@ -1,5 +1,7 @@
 #pragma once
 #include "IlluminationBuffer.h"
+#include <GLM/gtc/matrix_transform.hpp>
+#include "Utilities/BLM.h"
 
 //aka the PP wrapper
 class FrameEffects
@@ -31,6 +33,10 @@ public:
 	//binds gBuffer
 	void Bind();
 	void UnBind();
+
+	//binds shadow buffer
+	void BindShadowMap(bool front);
+	void UnBindShadowMap();
 
 	//binds transparency buffer
 	void BindTransparency();
@@ -64,12 +70,40 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
+	void SetShadowVP(const glm::mat4& VP) {
+		m_shadowVP = VP;
+		illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+	}
+
+	void SetShadowVP(float left, float right, float nearZ, float farZ, const glm::vec3& position) {
+					//Projection
+		m_shadowVP = glm::ortho(left, right, left, right, nearZ, farZ) *
+					//view rotation
+					glm::lookAt(position + glm::vec3(illumBuffer.GetSunRef()._lightDirection), position, BLM::GLMup);
+		illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+	}
+
+	FrameEffects& Reattach() {
+		illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+		return *this;
+	}
+
+	glm::mat4 GetShadowVP() const { return m_shadowVP; }
+
+	static const unsigned shadowWidth	= 8192;//4096;
+	static const unsigned shadowHeight	= 8192;//4096;
 private:
 	GBuffer baseEffect;
 	IlluminationBuffer illumBuffer;
 	//TransparencyLayer transparencyLayer;
-	//bool usedTransparency = false;
 
-	//BufferCombiner pauseEffect;
+	Framebuffer shadowMap;
+
 	std::vector<PostEffect*> layersOfEffects = {};
+
+	glm::mat4 m_shadowVP =
+		//Projection
+		glm::ortho(-10.f, 10.f, -10.f, 10.f, 10.f, -10.f) *
+		//View
+		glm::lookAt(glm::vec3(illumBuffer.GetSunRef()._lightDirection), BLM::GLMzero, BLM::GLMup);
 };

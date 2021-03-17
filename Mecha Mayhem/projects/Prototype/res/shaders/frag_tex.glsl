@@ -6,6 +6,7 @@ layout(location = 3) in vec3 inSpec;
 layout(location = 4) in vec2 inUV;
 
 uniform vec3 addColour;
+uniform int receiveShadows;
 
 uniform sampler2D s_texture;
 
@@ -26,6 +27,7 @@ void main() {
 
 	//other classes store in material
 	outSpecs = inSpec;
+	outSpecs.z = receiveShadows;
 
 	//positions 
 	outPositions = inPos;

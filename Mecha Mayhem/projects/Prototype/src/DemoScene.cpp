@@ -35,6 +35,7 @@ void DemoScene::Init(int width, int height)
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init(width, height);
+	m_frameEffects.SetShadowVP(-70, 70, 20, -130, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
 
 	Player::SetUIAspect(width, height);
 	Player::SetCamDistance(camDistance);
@@ -48,11 +49,11 @@ void DemoScene::Update()
 {
 	for (int i(0); i < 4; ++i) {
 		if (ControllerInput::GetButtonDown(BUTTON::START, CONUSER(i))) {
-			if (m_paused && ControllerInput::GetButton(BUTTON::RB, CONUSER(i))) {
+			if ((m_timer > 0 || m_paused) && ControllerInput::GetButton(BUTTON::RB, CONUSER(i))) {
 				if (BackEnd::GetFullscreen())	BackEnd::SetTabbed();
 				else							BackEnd::SetFullscreen();
 			}
-			else {
+			else if (m_timer == 0) {
 				if (m_paused) {
 					m_paused = false;
 					//remove effects or smt
@@ -68,7 +69,7 @@ void DemoScene::Update()
 			}
 		}
 
-		if (LeaderBoard::players[i].user != CONUSER::NONE) {
+		if (m_timer == 0) if (LeaderBoard::players[i].user != CONUSER::NONE) {
 			if (ControllerInput::ControllerDisconnected(CONUSER(i))) {
 				std::cout << "-Controller " << i + 1 << " disconnected\n";
 				m_paused = true;
@@ -195,17 +196,8 @@ void DemoScene::LateUpdate()
 
 Scene* DemoScene::Reattach()
 {
-	ECS::AttachRegistry(&m_reg);
-	if (m_world) {
-		PhysBody::Init(m_world);
-		ECS::AttachWorld(m_world);
-		Rendering::hitboxes = &m_colliders;
-	}
+	Scene::Reattach();
 
-	m_frameEffects.Resize(BackEnd::GetWidth(), BackEnd::GetHeight());
-
-	Rendering::effects = &m_effects;
-	Rendering::frameEffects = &m_frameEffects;
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
 	Rendering::LightsColour[0] = glm::vec3(200.f);
 	Rendering::LightCount = 2 + LeaderBoard::playerCount;
@@ -217,7 +209,13 @@ Scene* DemoScene::Reattach()
 
 	killGoal = LeaderBoard::scoreGoal;
 
-	std::vector<glm::vec3> spawntests = {};
+	std::vector<float> spawntests = {};
+	std::vector<glm::vec3> spawnPos = {
+			glm::vec3(60, -20, 20),
+			glm::vec3(-30, -20, 30),
+			glm::vec3(20, -20, -40),
+			glm::vec3(20, -20, 80)
+	};
 	//prob wanna improve on this
 	{
 		int offset = 0;
@@ -226,13 +224,7 @@ Scene* DemoScene::Reattach()
 			offset = (rand() % 2) * 2;
 		}
 		for (int i(0); i < LeaderBoard::playerCount;) {
-			glm::vec3 tempPos;
-			switch (offset + rand() % LeaderBoard::playerCount) {
-			case 0:	tempPos = glm::vec3(60, -20, 20);	break;
-			case 1:	tempPos = glm::vec3(-30, -20, 30);	break;
-			case 2:	tempPos = glm::vec3(20, -20, -40);	break;
-			case 3:	tempPos = glm::vec3(20, -20, 80);	break;
-			}
+			int tempPos = offset + rand() % LeaderBoard::playerCount;
 
 			bool valid = true;
 			for (int x(0); x < spawntests.size(); ++x) {
@@ -256,16 +248,16 @@ Scene* DemoScene::Reattach()
 		--i;
 		cameraEnt[i] = ECS::CreateEntity();
 		if (m_camCount == 2)
-			ECS::AttachComponent<Camera>(cameraEnt[i]).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
 		else
-			ECS::AttachComponent<Camera>(cameraEnt[i]).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
 
 		bodyEnt[i] = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(bodyEnt[i]).CreatePlayer(bodyEnt[i], BLM::GLMQuat,
 			m_colliders.SetSpawnNear(
 				ECS::AttachComponent<Player>(bodyEnt[i]).Init(
 					LeaderBoard::players[temp].user, LeaderBoard::players[temp].model, LeaderBoard::players[temp].colour, i
-				).SetRotation(glm::radians(180.f), 0), spawntests[i], 15.f
+				).SetRotation(glm::radians(180.f), 0), spawnPos[spawntests[i]], 25.f
 			)
 		);
 

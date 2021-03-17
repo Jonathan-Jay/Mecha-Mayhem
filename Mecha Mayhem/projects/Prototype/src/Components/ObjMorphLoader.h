@@ -61,6 +61,9 @@ public:
 	ObjMorphLoader& SetSpeed(float speed) { m_speed = speed; return *this; }
 	float GetSpeed() { return m_speed; }
 
+	ObjMorphLoader& SetReceiveShadows(bool choice) { m_receiveShadows = choice; return *this; }
+	bool GetReceiveShadows() { return m_receiveShadows; }
+
 	void Update(float dt);
 
 	static void BeginDraw(unsigned amt = 0);
@@ -115,6 +118,7 @@ private:
 		VertexArrayObject::sptr vao;
 		glm::mat4 model;
 		glm::vec3 colour;
+		int shaded;
 		size_t texture = 0;
 	};
 
@@ -153,6 +157,7 @@ private:
 	size_t m_indexHold = INT_MAX;
 	size_t m_p0Hold = 0;
 
+	bool m_receiveShadows = true;
 	bool m_reversing = false;
 	bool m_bounce = false;
 	bool m_loop = false;

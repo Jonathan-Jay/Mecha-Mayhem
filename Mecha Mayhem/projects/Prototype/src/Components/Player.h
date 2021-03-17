@@ -119,6 +119,9 @@ public:
 
 	//void GivePoints(int amt) { m_killCount += amt; }
 
+	//returns health
+	short GetHealth() { return m_health; }
+
 	//returns true if kill shot
 	bool TakeDamage(short dmg) {
 		if (m_health <= 0 || m_invincible)	return false;
@@ -164,7 +167,10 @@ public:
 		return false;
 	}
 
+	//returns true if score matches scoreGoal
 	bool HasWon(size_t scoreGoal) { return m_killCount >= scoreGoal; }
+
+	//return score
 	short GetScore() { return m_killCount; }
 
 private:
@@ -255,6 +261,7 @@ private:
 	static const short m_punchDmg = 8;
 	static const short m_swordDmg = 16;
 
+	short m_walkFrame = 0;
 	short m_meleeDmg = m_punchDmg;
 
 	short m_camPos = -1;

@@ -10,7 +10,7 @@ void MainMenu::Init(int width, int height)
 		.ResizeWindow(width, height).SetNear(0.3f);
 
 	title = ECS::CreateEntity();
-	ECS::AttachComponent<ObjMorphLoader>(title).LoadMeshs("title", true);
+	ECS::AttachComponent<ObjMorphLoader>(title).LoadMeshs("title", true).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(title).SetPosition(glm::vec3(0.f, 0.15f, -0.9f)).SetScale(0.25f).ChildTo(camera);
 
 	text = ECS::CreateEntity();
@@ -84,6 +84,8 @@ void MainMenu::Init(int width, int height)
 	Rendering::LightsPos[5] = BLM::GLMzero;
 
 	m_frameEffects.Init(width, height);
+	m_frameEffects.SetShadowVP(-20, 20, 20, -10, glm::vec3(4.125f - 1.5f, 0, 4.45f + 1.5f));
+
 	if (m_frameEffects[0] == nullptr) {
 		m_frameEffects.AddEffect(new DepthOfFieldEffect());
 		m_frameEffects[0]->Init(width, height);
@@ -363,8 +365,8 @@ void MainMenu::Update()
 			}
 		}
 
-		//if (allHolding && playerCount > 0) {
-		if (allHolding == playerCount && playerCount > 0) {
+		if (allHolding && playerCount > 0) {
+		//if (allHolding == playerCount && playerCount > 0) {
 			m_confirmTimer -= Time::dt;
 			((BloomEffect*)m_frameEffects[1])->SetThreshold(0.6f + 0.4f * m_confirmTimer);
 			if (m_confirmTimer <= 0) {

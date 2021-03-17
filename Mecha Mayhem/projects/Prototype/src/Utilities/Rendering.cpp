@@ -127,8 +127,12 @@ namespace Rendering {
 		frameEffects->SetCamCount(numOfCams);
 	}
 
-	void RenderForShading(entt::registry* reg, const glm::mat4& lightVPMatrix)
+	void RenderForShading(entt::registry* reg)
 	{
+		glViewport(0, 0, FrameEffects::shadowWidth, FrameEffects::shadowHeight);
+
+		glm::mat4 lightVPMatrix = frameEffects->GetShadowVP();
+
 		auto objView = reg->view<ObjLoader, Transform>();
 		auto textObjView = reg->view<MultiTextObj, Transform>();
 		auto morphView = reg->view<ObjMorphLoader, Transform>();
@@ -136,46 +140,52 @@ namespace Rendering {
 		auto playerView = reg->view<Player, Transform>();
 		auto spawnerView = reg->view<Spawner, Transform>();
 
-		//reserve some queue size
-		ObjLoader::BeginDraw(objView.size());
-		ObjMorphLoader::BeginDraw(morphView.size() + spawnerView.size() + playerView.size());
-		Sprite::BeginDraw(spriteView.size());
+		for (int i(0); i < 2; ++i) {
+			frameEffects->BindShadowMap(i);
 
-		objView.each([](ObjLoader& obj, Transform& trans) {
-			obj.Draw(trans.GetModel());
-		});
+			//reserve some queue size
+			ObjLoader::BeginDraw(objView.size());
+			ObjMorphLoader::BeginDraw(morphView.size() + spawnerView.size() + playerView.size());
+			Sprite::BeginDraw(spriteView.size());
 
-		morphView.each([](ObjMorphLoader& obj, Transform& trans) {
-			obj.Draw(trans.GetModel());
-		});
+			objView.each([](ObjLoader& obj, Transform& trans) {
+				obj.Draw(trans.GetModel());
+				});
 
-		spriteView.each([](Sprite& spr, Transform& trans) {
-			spr.Draw(BLM::GLMMat, trans.GetModel());
-		});
+			morphView.each([](ObjMorphLoader& obj, Transform& trans) {
+				obj.Draw(trans.GetModel());
+				});
 
-		spawnerView.each([](Spawner& spawn, Transform& trans) {
-			spawn.Render(trans.GetModel());
-		});
+			spriteView.each([](Sprite& spr, Transform& trans) {
+				spr.Draw(BLM::GLMMat, trans.GetModel());
+				});
 
-		//draw all players, cams are limited from 0-3, so this ignores all cams
-		playerView.each([](Player& p, Transform& trans) {
-			p.Draw(trans.GetModel(), 4, 0, false);
-		});
+			spawnerView.each([](Spawner& spawn, Transform& trans) {
+				spawn.Render(trans.GetModel());
+				});
 
-		//draw scene specific stuff (might want to remove this, if you don't want lasers to cast shadows)
-		if (effects != nullptr) effects->Render();
+			//draw all players, cams are limited from 0-3, so this ignores all cams
+			playerView.each([](Player& p, Transform& trans) {
+				p.Draw(trans.GetModel(), 4, 0, false);
+				});
 
-		//do all the draws
-		ObjLoader::PerformDrawShadow(lightVPMatrix);
-		ObjMorphLoader::PerformDrawShadow(lightVPMatrix);
+			//draw scene specific stuff (might want to remove this, if you don't want lasers to cast shadows)
+			if (effects != nullptr) effects->Render();
 
-		//make sure this runs after ObjDraw
-		Sprite::PerformDrawShadow(/*lightVPMatrix*/);
+			//do all the draws
+			ObjLoader::PerformDrawShadow(lightVPMatrix);
+			ObjMorphLoader::PerformDrawShadow(lightVPMatrix);
 
-		//map drawn last becuase shader reuse lol
-		textObjView.each([](MultiTextObj& obj, Transform& trans) {
+			//make sure this runs after ObjDraw
+			Sprite::PerformDrawShadow(/*lightVPMatrix*/);
+
+			//map drawn last becuase shader reuse lol
+			textObjView.each([](MultiTextObj& obj, Transform& trans) {
 				obj.DrawShadow(trans.GetModel());
-			});
+				});
+		}
+
+		frameEffects->UnBindShadowMap();
 	}
 
 	/*void DrawPauseScreen(Sprite image)

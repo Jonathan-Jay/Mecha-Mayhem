@@ -35,6 +35,8 @@ public:
 	void Disable() { m_enabled = false; }
 	bool GetEnabled() { return m_enabled; }
 
+	ObjLoader& SetReceiveShadows(bool choice) { m_receiveShadows = choice; return *this; }
+	bool GetReceiveShadows() { return m_receiveShadows; }
 private:
 
 	struct Models
@@ -51,6 +53,7 @@ private:
 		size_t modelIndex;
 		glm::mat4 model;
 		glm::vec3 colour;
+		int shaded;
 	};
 
 	static std::vector<DrawData> m_matQueue;
@@ -71,6 +74,7 @@ private:
 	static const std::vector<BufferAttribute> m_specAttrib;
 	static const std::vector<BufferAttribute> m_uvAttrib;
 
+	bool m_receiveShadows = true;
 	bool m_enabled = false;
 	size_t m_index = INT_MAX;
 };

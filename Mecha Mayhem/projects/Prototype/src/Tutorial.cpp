@@ -22,14 +22,14 @@ void Tutorial::Init(int width, int height)
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(0, 1, -12))
 			.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69)
+		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
 			.SetSpawn(glm::vec3(4, 1, -59)).SetRotation(glm::radians(180.f), 0).TakeDamage(76);
 	}
 	{
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(0, 2.5f, -20))
 			.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69)
+		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
 			.SetSpawn(glm::vec3(-4, 1, -59)).SetRotation(glm::radians(180.f), 0);
 	}
 
@@ -46,26 +46,49 @@ void Tutorial::Init(int width, int height)
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(-7.5f, 1, i * 7.5f - 55))
 				.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetSpawn(glm::vec3(-7.5f, 1, i * 7.5f - 55))
-				.SetRotation(glm::radians(90.f), 0);
+			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+				.SetSpawn(glm::vec3(-7.5f, 1, i * 7.5f - 55)).SetRotation(glm::radians(90.f), 0);
+			dummies[i].dummy = entity;
 		}
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(-9.f, 2.5f, i * 7.5f - 55.40f))
+				.SetRotation(glm::angleAxis(glm::radians(90.f), BLM::GLMup));
+			dummies[i].digit2 = entity;
+		}
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(-9.f, 2.5f, i * 7.5f - 54.60f))
+				.SetRotation(glm::angleAxis(glm::radians(90.f), BLM::GLMup));
+			dummies[i].digit1 = entity;
+		}
+		SetDigits(i, 0);
+
 		{
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(7.5f, 1, i * 7.5f - 55))
 				.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetSpawn(glm::vec3(7.5f, 1, i * 7.5f - 55))
-				.SetRotation(glm::radians(270.f), 0);
-		}
-		/*{
-			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Spawner>(entity).Init(0.3f, 5.f);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(5.f, 0, i * 7.5f - 55));
+			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+				.SetSpawn(glm::vec3(7.5f, 1, i * 7.5f - 55)).SetRotation(glm::radians(270.f), 0);
+			dummies[i + 3].dummy = entity;
 		}
 		{
 			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Spawner>(entity).Init(0.3f, 5.f);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(-5.f, 0, i * 7.5f - 55));
-		}*/
+			ECS::AttachComponent<Sprite>(entity);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(9.f, 2.5f, i * 7.5f - 54.60f))
+				.SetRotation(glm::angleAxis(glm::radians(270.f), BLM::GLMup));
+			dummies[i + 3].digit2 = entity;
+		}
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(9.f, 2.5f, i * 7.5f - 55.40f))
+				.SetRotation(glm::angleAxis(glm::radians(270.f), BLM::GLMup));
+			dummies[i + 3].digit1 = entity;
+		}
+		SetDigits(i + 3, 0);
 	}
 
 	//map
@@ -109,6 +132,7 @@ void Tutorial::Init(int width, int height)
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init(width, height);
+	m_frameEffects.SetShadowVP(-35, 35, 40, -60, glm::vec3(0, 0, -30));
 
 	Player::SetCamDistance(camDistance);
 
@@ -117,9 +141,24 @@ void Tutorial::Init(int width, int height)
 	m_pauseSprite = Sprite("Pause.png", 8.952f, 3);
 }
 
+void Tutorial::SetDigits(int index, int number)
+{
+	if (index < 0 || index > 5)	return;
+	if (number > 99) {
+		ECS::GetComponent<Sprite>(dummies[index].digit2).Init("num/9.png", -0.75f, 1.f);
+		ECS::GetComponent<Sprite>(dummies[index].digit1).Init("num/9.png", -0.75f, 1.f);
+		return;
+	}
+
+	int val = number / 10;
+	ECS::GetComponent<Sprite>(dummies[index].digit2).Init(
+		"num/" + std::to_string(number - val * 10) + ".png", -0.75f, 1.f);
+	ECS::GetComponent<Sprite>(dummies[index].digit1).Init("num/" + std::to_string(val) + ".png", -0.75f, 1.f);
+}
+
 void Tutorial::Update()
 {
-	if (Input::GetKeyDown(KEY::F)) {
+	/*if (Input::GetKeyDown(KEY::F)) {
 		if (++m_camCount > 4)	m_camCount = 1;
 		if (m_camCount == 2) {
 			ECS::GetComponent<Camera>(cameraEnt[0]).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
@@ -137,15 +176,16 @@ void Tutorial::Update()
 			}
 			Player::SetUIAspect(BackEnd::GetWidth(), BackEnd::GetHeight());
 		}
-	}
+	}*/
 
-	for (size_t i(0); i < 4; ++i) {
+	bool winner = false;
+	for (int i(0); i < 4; ++i) {
 		if (ControllerInput::GetButtonDown(BUTTON::START, CONUSER(i))) {
-			if (m_paused && ControllerInput::GetButton(BUTTON::RB, CONUSER(i))) {
+			if ((m_timer > 0 || m_paused) && ControllerInput::GetButton(BUTTON::RB, CONUSER(i))) {
 				if (BackEnd::GetFullscreen())	BackEnd::SetTabbed();
 				else							BackEnd::SetFullscreen();
 			}
-			else {
+			else if (m_timer == 0) {
 				if (m_paused) {
 					m_paused = false;
 					//remove effects or smt
@@ -154,12 +194,20 @@ void Tutorial::Update()
 				else {
 					m_paused = true;
 					//add effects or smt
-					m_paused = true;
-					//add effects or smt
 					m_frameEffects.InsertEffect(new PixelEffect(), 0);
 					m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
 					((PixelEffect*)(m_frameEffects[0]))->SetPixelCount(128);
 				}
+			}
+		}
+
+
+		if (ControllerInput::GetButtonDown(BUTTON::SELECT, CONUSER(i))) {
+			winner = true;
+			if (m_paused) {
+				m_paused = false;
+				//remove effects or smt
+				m_frameEffects.RemoveEffect(0);
 			}
 		}
 	}
@@ -196,7 +244,31 @@ void Tutorial::Update()
 		ECS::GetComponent<Transform>(cameraEnt4)
 	);*/
 
-	bool winner = false;
+	for (int i(0); i < 6; ++i) {
+		auto& p = ECS::GetComponent<Player>(dummies[i].dummy);
+
+		short lastTemp = dummies[i].lastHealth - dummies[i].currHealth;
+		dummies[i].currHealth = p.GetHealth();
+		short temp = dummies[i].lastHealth - dummies[i].currHealth;
+
+		if (temp != lastTemp) {
+			SetDigits(i, temp);
+			dummies[i].timer = 2.5f;
+		}
+
+		if (dummies[i].timer > 0) {
+			dummies[i].timer -= Time::dt;
+			if (dummies[i].timer <= 0) {
+				dummies[i].timer = 0;
+				SetDigits(i, 0);
+
+				p.GainHealth(100);
+				dummies[i].lastHealth = 100;
+				dummies[i].currHealth = 100;
+			}
+		}
+	}
+
 	for (int i(0); i < LeaderBoard::playerCount; ++i) {
 		auto& p = ECS::GetComponent<Player>(bodyEnt[i]);
 		p.GetInput(
@@ -269,18 +341,10 @@ void Tutorial::Update()
 	ECS::GetComponent<Transform>(speakerDrone).SetPosition(dronePath3.Update(Time::dt).GetPosition()).SetRotation(dronePath3.GetLookingForwards(0.5f));
 }
 
-Scene* Tutorial::Reattach() {
-	ECS::AttachRegistry(&m_reg);
-	if (m_world) {
-		PhysBody::Init(m_world);
-		ECS::AttachWorld(m_world);
-		Rendering::hitboxes = &m_colliders;
-	}
+Scene* Tutorial::Reattach()
+{
+	Scene::Reattach();
 
-	m_frameEffects.Resize(BackEnd::GetWidth(), BackEnd::GetHeight());
-
-	Rendering::effects = &m_effects;
-	Rendering::frameEffects = &m_frameEffects;
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
 	Rendering::LightsColour[0] = glm::vec3(200.f);
 	Rendering::LightCount = 2;
@@ -297,9 +361,9 @@ Scene* Tutorial::Reattach() {
 		--i;
 		cameraEnt[i] = ECS::CreateEntity();
 		if (m_camCount == 2)
-			ECS::AttachComponent<Camera>(cameraEnt[i]).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
 		else
-			ECS::AttachComponent<Camera>(cameraEnt[i]).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
 
 		bodyEnt[i] = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(bodyEnt[i]).CreatePlayer(bodyEnt[i], BLM::GLMQuat, glm::vec3(0, 1.5f, 0));

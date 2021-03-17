@@ -77,7 +77,7 @@ Scene* Scene::Reattach()
 	m_frameEffects.Resize(BackEnd::GetWidth(), BackEnd::GetHeight());
 
 	Rendering::effects = &m_effects;
-	Rendering::frameEffects = &m_frameEffects;
+	Rendering::frameEffects = &m_frameEffects.Reattach();
 
 	return this;
 }
@@ -136,6 +136,8 @@ void Scene::BackEndUpdate()
 	Sprite::BeginUIDraw(10, m_camCount);
 
 	Rendering::Update(&m_reg, m_camCount, m_paused);
+
+	Rendering::RenderForShading(&m_reg);
 
 	//once pause buffer works, we can move this or smt
 	m_frameEffects.Draw();

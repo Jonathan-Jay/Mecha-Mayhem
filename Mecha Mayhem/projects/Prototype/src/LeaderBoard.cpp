@@ -46,7 +46,7 @@ void LeaderBoard::Init(int windowWidth, int windowHeight)
 	//title
 	{
 		auto entity = ECS::CreateEntity();
-		ECS::AttachComponent<Sprite>(entity).Init("leaderboard.png", -3.27f, 0.5f);
+		ECS::AttachComponent<Sprite>(entity).Init("leaderboard.png", -3.60f, 0.5f);
 		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0.f, 1.2f, -3.f));
 	}
 

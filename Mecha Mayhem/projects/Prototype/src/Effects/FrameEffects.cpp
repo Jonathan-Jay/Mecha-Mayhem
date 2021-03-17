@@ -42,16 +42,21 @@ void FrameEffects::Init(unsigned width, unsigned height)
 	baseEffect.Init(width, height);
 	illumBuffer.Init(width, height);
 	//transparencyLayer.Init(width, height);
+
+	shadowMap.AddDepthTarget();
+	shadowMap.SetWrapMode(WrapMode::ClampToBorder);
+	shadowMap.Init(shadowWidth, shadowHeight);
+	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
 }
 
 void FrameEffects::Resize(unsigned width, unsigned height)
 {
+	baseEffect.Reshape(width, height);
+	illumBuffer.Reshape(width, height);
+
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Reshape(width, height);
 	}
-
-	baseEffect.Reshape(width, height);
-	illumBuffer.Reshape(width, height);
 	//transparencyLayer.Reshape(width, height);
 }
 
@@ -84,6 +89,7 @@ void FrameEffects::Clear()
 {
 	baseEffect.Clear();
 	illumBuffer.Clear();
+	shadowMap.Clear();
 	//transparencyLayer.Clear();
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Clear();
@@ -101,6 +107,23 @@ void FrameEffects::UnBind()
 	baseEffect.Unbind();
 }
 
+void FrameEffects::BindShadowMap(bool front)
+{
+	if (front) {
+		shadowMap.Bind();
+		glCullFace(GL_FRONT);
+	}
+	else {
+		shadowMap.Bind();
+		glCullFace(GL_BACK);
+	}
+}
+
+void FrameEffects::UnBindShadowMap()
+{
+	shadowMap.Unbind();
+}
+
 void FrameEffects::BindTransparency()
 {
 	//transparencyLayer.BindBuffer(0);
@@ -114,7 +137,12 @@ void FrameEffects::UnBindTransparency()
 
 void FrameEffects::Draw(/*bool paused*/)
 {
+	shadowMap.BindDepthAsTexture(30);
+
 	illumBuffer.ApplyEffect(&baseEffect);
+
+	shadowMap.UnbindTexture(30);
+
 
 	PostEffect* prev = &illumBuffer;
 
