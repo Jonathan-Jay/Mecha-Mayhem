@@ -52,7 +52,17 @@ public:
 	void SetWidth(float width) { m_width = width; }
 	void SetHeight(float height) { m_height = height; }
 
-	bool IsValid() { return (m_width > 0) && (m_height > 0); }
+	bool IsValid() { return (m_width != 0) && (m_height != 0) && (m_scale != 0); }
+
+	//if ever you just want the texture
+	void Bind(int slot) {
+		m_textures[m_index].texture->Bind(slot);
+	}
+
+	//basically just Texture2D::Unbind();
+	void UnBind(int slot) {
+		Texture2D::Unbind(slot);
+	}
 
 	struct Texture
 	{

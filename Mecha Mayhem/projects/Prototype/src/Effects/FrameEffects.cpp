@@ -1,4 +1,5 @@
 #include "FrameEffects.h"
+#include "Components/Sprite.h"
 
 FrameEffects::FrameEffects() { }
 
@@ -88,13 +89,16 @@ void FrameEffects::RemoveEffect(int slot)
 void FrameEffects::Clear()
 {
 	baseEffect.Clear();
-	illumBuffer.Clear();
 	shadowMap.Clear();
 	//transparencyLayer.Clear();
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Clear();
 	}
 	//pauseEffect.Clear();
+	
+	//clear the illum buffer with white instead of clear colour
+	glClearColor(1.f, 1.f, 1.f, 0.3f);
+	illumBuffer.Clear();
 }
 
 void FrameEffects::Bind()
@@ -137,11 +141,12 @@ void FrameEffects::UnBindTransparency()
 
 void FrameEffects::Draw(/*bool paused*/)
 {
-	shadowMap.BindDepthAsTexture(30);
-
+	if (m_usingShadows)		shadowMap.BindDepthAsTexture(30);
+	else		Sprite::m_textures[0].texture->Bind(30);
+	
 	illumBuffer.ApplyEffect(&baseEffect);
 
-	shadowMap.UnbindTexture(30);
+	Texture2D::Unbind(30);
 
 
 	PostEffect* prev = &illumBuffer;
@@ -164,5 +169,28 @@ void FrameEffects::RemoveAllEffects()
 {
 	while (layersOfEffects.size()) {
 		RemoveEffect(0);
+		//RemoveEffect(layersOfEffects.size() - 1);
 	}
+}
+
+void FrameEffects::SetShadowVP(const glm::mat4& VP)
+{
+	m_shadowVP = VP;
+	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+}
+
+void FrameEffects::SetShadowVP(float left, float right, float nearZ, float farZ, const glm::vec3& position)
+{
+	//Projection
+	m_shadowVP = glm::ortho(left, right, left, right, nearZ, farZ) *
+		//view rotation
+		glm::lookAt(position + glm::vec3(illumBuffer.GetSunRef()._lightDirection), position, BLM::GLMup);
+	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+}
+
+FrameEffects& FrameEffects::Reattach()
+{
+	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+
+	return *this;
 }

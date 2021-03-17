@@ -7,7 +7,7 @@ struct PointLight
 	//***SAME TYPES SHOULD BE GROUPED TOGETHER***\\
 	//VEC4s 
 	//SHOULD ALWAYS USE VEC4s (Vec3s get upscaled to Vec4s anyways, using anything less is a waste of memory)
-	glm::vec4 _lightPos = glm::vec4();
+	glm::vec4 _lightPos = glm::vec4(0.f, 0.f, 0.f, 0.f);
 	glm::vec4 _lightCol = glm::vec4(1.0f, 1.0f, 1.0f, 0.f);
 	glm::vec4 _ambientCol = glm::vec4(1.0f, 1.0f, 1.0f, 0.f);
 

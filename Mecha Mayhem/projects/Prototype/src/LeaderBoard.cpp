@@ -73,6 +73,7 @@ void LeaderBoard::Init(int windowWidth, int windowHeight)
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init(windowWidth, windowHeight);
+	m_frameEffects.UsingShadows(false);
 }
 
 //lol is to avoid overwriting existing function lol

@@ -1,6 +1,6 @@
 #pragma once
-#include "IlluminationBuffer.h"
 #include <GLM/gtc/matrix_transform.hpp>
+#include "IlluminationBuffer.h"
 #include "Utilities/BLM.h"
 
 //aka the PP wrapper
@@ -8,7 +8,15 @@ class FrameEffects
 {
 public:
 	FrameEffects();
-	~FrameEffects() { RemoveAllEffects(); }
+	~FrameEffects() { UnloadAllBuffers(); }
+
+	//unload all buffers and stuff
+	void UnloadAllBuffers() {
+		baseEffect.Unload();
+		illumBuffer.Unload();
+		shadowMap.Unload();
+		RemoveAllEffects();
+	}
 
 	//ensure you can't copy it, because of Framebuffer
 	FrameEffects(const FrameEffects& other) = delete;
@@ -70,29 +78,23 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
-	void SetShadowVP(const glm::mat4& VP) {
-		m_shadowVP = VP;
-		illumBuffer.SetLightSpaceViewProj(m_shadowVP);
-	}
-
-	void SetShadowVP(float left, float right, float nearZ, float farZ, const glm::vec3& position) {
-					//Projection
-		m_shadowVP = glm::ortho(left, right, left, right, nearZ, farZ) *
-					//view rotation
-					glm::lookAt(position + glm::vec3(illumBuffer.GetSunRef()._lightDirection), position, BLM::GLMup);
-		illumBuffer.SetLightSpaceViewProj(m_shadowVP);
-	}
-
-	FrameEffects& Reattach() {
-		illumBuffer.SetLightSpaceViewProj(m_shadowVP);
-		return *this;
-	}
+	void SetShadowVP(const glm::mat4& VP);
+	void SetShadowVP(float left, float right, float nearZ, float farZ, const glm::vec3& position);
 
 	glm::mat4 GetShadowVP() const { return m_shadowVP; }
+
+	DirectionalLight& GetSun() { return illumBuffer.GetSunRef(); }
+
+	FrameEffects& Reattach();
+
+	void UsingShadows(bool choice) { m_usingShadows = choice; }
+	bool GetUsingShadows() { return m_usingShadows; }
 
 	static const unsigned shadowWidth	= 8192;//4096;
 	static const unsigned shadowHeight	= 8192;//4096;
 private:
+	bool m_usingShadows = true;
+
 	GBuffer baseEffect;
 	IlluminationBuffer illumBuffer;
 	//TransparencyLayer transparencyLayer;

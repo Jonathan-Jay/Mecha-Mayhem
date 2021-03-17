@@ -227,6 +227,21 @@ void Sprite::Init()
 		BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 5, 0),
 		BufferAttribute(1, 2, GL_FLOAT, false, sizeof(float) * 5, sizeof(float) * 3)
 		});*/
+
+	{	//add a white texture at index 0
+		std::string tempName = std::to_string(1.f) + " " + std::to_string(1.f)
+			+ " " + std::to_string(1.f) + " " + std::to_string(1.f);
+
+		Texture2DDescription desc = Texture2DDescription();
+		desc.Width = 1;
+		desc.Height = 1;
+		desc.GenerateMipMaps = false;
+		desc.MinificationFilter = MinFilter::Nearest;
+		desc.MagnificationFilter = MagFilter::Nearest;
+		desc.Format = InternalFormat::RGBA8;
+		Texture2D::sptr texture = Texture2D::Create(desc);
+		texture->Clear(glm::vec4(1.f));
+		m_textures.push_back({ tempName, texture }); }
 }
 
 void Sprite::Unload()

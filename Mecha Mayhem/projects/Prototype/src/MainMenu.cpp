@@ -103,6 +103,11 @@ void MainMenu::Init(int width, int height)
 
 void MainMenu::Update()
 {
+	if (Input::GetKeyDown(KEY::F)) {
+		if (BackEnd::GetFullscreen())	BackEnd::SetTabbed();
+		else							BackEnd::SetFullscreen();
+	}
+
 	if (m_scenePos == 0) {
 		float lx = 0, ly = 0, rx = 0, ry = 0;
 		for (int i(0); i < 4; ++i) {

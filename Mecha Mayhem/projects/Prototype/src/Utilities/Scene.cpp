@@ -24,6 +24,7 @@ Scene::Scene(const std::string& name, const glm::vec3& gravity, bool physics)
 
 Scene::~Scene()
 {
+	//destructors will take care of the rest
 	Rendering::hitboxes = nullptr;
 	Rendering::effects = nullptr;
 	Rendering::frameEffects = nullptr;
@@ -137,7 +138,8 @@ void Scene::BackEndUpdate()
 
 	Rendering::Update(&m_reg, m_camCount, m_paused);
 
-	Rendering::RenderForShading(&m_reg);
+	if (m_frameEffects.GetUsingShadows())
+		Rendering::RenderForShading(&m_reg);
 
 	//once pause buffer works, we can move this or smt
 	m_frameEffects.Draw();
@@ -180,8 +182,11 @@ void Scene::doSceneChange(GLFWwindow* window) {
 void Scene::UnloadScenes()
 {
 	m_activeScene = nullptr;
-	while (m_scenes.size()) {
-		delete m_scenes[0];
-		m_scenes.erase(m_scenes.begin());
+	for (int i(0); m_scenes.size(); ++i) {
+		if (m_scenes[i] != nullptr) {
+			delete m_scenes[i];
+			m_scenes[i] = nullptr;
+		}
 	}
+	m_scenes.clear();
 }

@@ -7,9 +7,9 @@
 
 int main() {
 	int width = 1280, height = 720;
+	bool showImGui = true;
 	const bool usingImGui = true;
 	Logger::outputLogger = false;
-	Gameloop::usingKeyboard = false;
 
 	GLFWwindow* window = Gameloop::Start("Mecha Mayhem", width, height, usingImGui);
 	if (!window)	return 1;
@@ -76,12 +76,16 @@ int main() {
 
 			ControllerInput::ControllerRefresh();
 
+			//delete this?
+			if (Input::GetKeyDown(KEY::F1))		showImGui = !showImGui;
+			//delete this?
+
 			Scene::m_activeScene->Update();
 			Scene::doSceneChange(window);
 
 			//do not touch plz
 			Scene::m_activeScene->BackEndUpdate();
-			if (usingImGui)
+			if (usingImGui && showImGui)
 				Gameloop::ImGuiWindow(window, Scene::m_activeScene);
 			Gameloop::Update();
 

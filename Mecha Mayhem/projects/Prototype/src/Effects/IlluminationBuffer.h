@@ -8,6 +8,7 @@
 enum Lights
 {
 	DIRECTIONAL = 1,
+	//POINT,
 	AMBIENT
 };
 
@@ -24,7 +25,8 @@ public:
 	//Can only apply effect using GBuffer object
 	void ApplyEffect(GBuffer* gBuffer);
 
-	void DrawIllumBuffer();
+	//basically useless in our version
+	//void DrawIllumBuffer();
 
 	void SetLightSpaceViewProj(glm::mat4 lightSpaceViewProj);
 	void SetCamPos(glm::vec3 camPos, int camNum);
@@ -37,6 +39,7 @@ public:
 	void SetSun(glm::vec4 lightDir, glm::vec4 lightCol);
 
 	void EnableSun(bool enabled);
+	bool GetSunEnabled() const;
 
 private:
 	glm::mat4 _lightSpaceViewProj;

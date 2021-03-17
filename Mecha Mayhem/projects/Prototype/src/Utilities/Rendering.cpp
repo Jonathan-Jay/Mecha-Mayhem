@@ -12,10 +12,10 @@ namespace Rendering {
 	
 	void Update(entt::registry* reg, int numOfCams, bool paused)
 	{
+		//sending clear colour first because of illum buffer
+		glClearColor(BackColour.x, BackColour.y, BackColour.z, 0.3f);
 		frameEffects->Clear();
 
-		//glDisable(GL_BLEND);
-		glClearColor(BackColour.x, BackColour.y, BackColour.z, 0.3f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		frameEffects->Bind();
@@ -119,11 +119,9 @@ namespace Rendering {
 			if (++count >= numOfCams)
 				break;
 		}
-		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
 
 		frameEffects->UnBind();
 
-		//glEnable(GL_BLEND);
 		frameEffects->SetCamCount(numOfCams);
 	}
 

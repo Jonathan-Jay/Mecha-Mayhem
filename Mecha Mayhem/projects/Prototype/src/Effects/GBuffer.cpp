@@ -1,5 +1,20 @@
 #include "GBuffer.h"
 
+GBuffer::GBuffer()
+{
+}
+
+GBuffer::~GBuffer()
+{
+	Unload();
+}
+
+void GBuffer::Unload()
+{
+	_gBuffer.Unload();
+	_passThrough = nullptr;
+}
+
 void GBuffer::Init(unsigned width, unsigned height)
 {
 	//stores width and height

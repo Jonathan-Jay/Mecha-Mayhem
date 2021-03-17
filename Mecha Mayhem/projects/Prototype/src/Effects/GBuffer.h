@@ -14,6 +14,11 @@ enum Target
 class GBuffer
 {
 public:
+	GBuffer();
+	~GBuffer();
+
+	void Unload();
+
 	//Initialize this effects (will be overriden in each derived class)
 	void Init(unsigned width, unsigned height);
 

@@ -13,10 +13,11 @@ public:
 	virtual void Exit() override;
 
 	virtual Scene* Reattach() override;
+	/*
 	virtual void ImGuiFunc() override {
 		//insert functions here
-
 	}
+	*/
 
 	struct PlayerChoice {
 		CONUSER user = CONUSER::NONE;

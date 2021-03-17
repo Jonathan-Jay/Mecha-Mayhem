@@ -40,6 +40,10 @@ public:
 	virtual void ImGuiFunc() {
 		/*ImGui::SetWindowSize(ImVec2(150, 50));
 		ImGui::Text("Empty");*/
+		if (ImGui::SliderFloat("SpecularPower", &m_frameEffects.GetSun()._lightSpecularPow, 0.f, 100.f)) {
+			//blank lol
+		}
+
 		if (ImGui::CollapsingHeader("Post Processing Effects"))
 		{
 			ImGui::Text(("Number of effects: " + std::to_string(m_frameEffects.size())).c_str());

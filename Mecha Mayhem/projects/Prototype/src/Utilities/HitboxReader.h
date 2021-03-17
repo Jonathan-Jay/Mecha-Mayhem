@@ -7,7 +7,7 @@ class HitboxGen
 {
 public:
 	HitboxGen() {}
-	~HitboxGen() { m_world = nullptr; }
+	~HitboxGen() { Clear(); }
 
 	bool ToggleDraw() {
 		return m_draw = !m_draw;
@@ -113,6 +113,7 @@ public:
 		p.SetRotation(m_spawnLocations[index].roty, m_spawnLocations[index].rotx);
 	}
 
+	//reset everything
 	void Clear() {
 		m_draw = false;
 		m_current = 0;
