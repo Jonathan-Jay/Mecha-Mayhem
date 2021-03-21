@@ -7,10 +7,10 @@
 
 int main() {
 	int width = 1280, height = 720;
-	bool showImGui = true;
+	bool showImGui = false;
 	const bool usingImGui = true;
 	Logger::outputLogger = false;
-
+	
 	GLFWwindow* window = Gameloop::Start("Mecha Mayhem", width, height, usingImGui);
 	if (!window)	return 1;
 
@@ -28,12 +28,12 @@ int main() {
 		Scene::m_scenes[2]->Init(width, height);
 		Scene::m_scenes[3]->Init(width, height);
 
-		/*							//controller	model	score	colour
-		LeaderBoard::players[0] = { CONUSER::ONE,	1,		0,		glm::vec3(0,0,0) };
-		LeaderBoard::players[1] = { CONUSER::TWO,	1,		0,		glm::vec3(0,0,0) };
-		LeaderBoard::players[2] = { CONUSER::THREE,	1,		0,		glm::vec3(0,0,0) };
-		LeaderBoard::players[3] = { CONUSER::FOUR,	1,		0,		glm::vec3(0,0,0) };
-		LeaderBoard::playerCount = 4;*/
+									//controller	model	score	colour
+		LeaderBoard::players[0] = { CONUSER::NONE,	1,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::players[1] = { CONUSER::NONE,	2,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::players[2] = { CONUSER::NONE,	3,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::players[3] = { CONUSER::NONE,	4,		0,		glm::vec3(0,0,0) };
+		//LeaderBoard::playerCount = 4;
 
 		Scene::m_activeScene = Scene::m_scenes[0]->Reattach();
 		/*Scene::m_scenes.push_back(new MapEditor("uh, not for playing"));
@@ -77,12 +77,16 @@ int main() {
 			ControllerInput::ControllerRefresh();
 
 			//delete this?
+			if (Input::GetKeyDown(KEY::F)) {
+				if (BackEnd::GetFullscreen())	BackEnd::SetTabbed();
+				else							BackEnd::SetFullscreen();
+			}
 			if (Input::GetKeyDown(KEY::F1))		showImGui = !showImGui;
 			//delete this?
 
 			Scene::m_activeScene->Update();
 			Scene::doSceneChange(window);
-
+			
 			//do not touch plz
 			Scene::m_activeScene->BackEndUpdate();
 			if (usingImGui && showImGui)

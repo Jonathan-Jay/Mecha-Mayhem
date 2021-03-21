@@ -41,7 +41,7 @@ void MapEditor::Init(int windowWidth, int windowHeight)
 	Rendering::LightsPos[0] = BLM::GLMzero;
 	Rendering::LightsColour[0] = glm::vec3(20.f);
 
-	m_frameEffects.Init(width, height);
+	m_frameEffects.Init();
 }
 
 void MapEditor::Update()

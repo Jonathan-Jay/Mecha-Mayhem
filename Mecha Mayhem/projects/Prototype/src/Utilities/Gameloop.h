@@ -34,7 +34,7 @@ namespace Gameloop
 		ObjLoader::Init();
 		ObjMorphLoader::Init();
 		Sprite::Init();
-		FrameEffects::Init();
+		FrameEffects::Init(width, height);
 
 		//rendering stuff
 		Rendering::Init(width, height);

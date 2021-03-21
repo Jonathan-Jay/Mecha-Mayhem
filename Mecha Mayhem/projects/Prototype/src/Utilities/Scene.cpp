@@ -53,7 +53,7 @@ void Scene::Init(int windowWidth, int windowHeight)
 		if (!m_colliders.Init(m_world, "maps/map1"))
 			std::cout << "map1 failed to load, no collision boxes loaded\n";
 	}
-	m_frameEffects.Init(windowWidth, windowHeight);
+	m_frameEffects.Init();
 
 	// for multi cam setup, change the m_camCount variable, and also spawn in reverse order (aka player 1 last)
 	auto cameraEnt = ECS::CreateEntity();
@@ -138,7 +138,8 @@ void Scene::BackEndUpdate()
 
 	Rendering::Update(&m_reg, m_camCount, m_paused);
 
-	if (m_frameEffects.GetUsingShadows())
+	//dont update shadows if paused
+	if (m_frameEffects.GetUsingShadows() && !m_paused)
 		Rendering::RenderForShading(&m_reg);
 
 	//once pause buffer works, we can move this or smt
@@ -182,7 +183,7 @@ void Scene::doSceneChange(GLFWwindow* window) {
 void Scene::UnloadScenes()
 {
 	m_activeScene = nullptr;
-	for (int i(0); m_scenes.size(); ++i) {
+	for (int i(0); i < m_scenes.size(); ++i) {
 		if (m_scenes[i] != nullptr) {
 			delete m_scenes[i];
 			m_scenes[i] = nullptr;

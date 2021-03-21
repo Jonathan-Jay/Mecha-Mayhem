@@ -372,7 +372,6 @@ void Player::Update(PhysBody& body)
 			//put somewhere inaccessible
 			body.SetPosition(btVector3(0, 1000, 0));
 
-			ClearWeapons();
 			//m_deathSound.play();
 		}
 

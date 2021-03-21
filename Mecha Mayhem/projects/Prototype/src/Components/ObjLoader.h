@@ -1,5 +1,6 @@
 #pragma once
 #include "Sprite.h"
+#include "Utilities/BLM.h"
 
 class ObjLoader
 {
@@ -20,8 +21,8 @@ public:
 
 	static void BeginTempDraw();
 
-	void Draw(const glm::mat4& model, const glm::vec3& colour = glm::vec3(0.f));
-	void DrawTemp(const glm::mat4& model, const glm::vec3& colour = glm::vec3(0.f));
+	void Draw(const glm::mat4& model, const glm::vec3& colour = BLM::GLMzero);
+	void DrawTemp(const glm::mat4& model, const glm::vec3& colour = BLM::GLMzero);
 
 	/*static void PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount,
 		float specularStrength = 1.f, float shininess = 4,
@@ -35,8 +36,13 @@ public:
 	void Disable() { m_enabled = false; }
 	bool GetEnabled() { return m_enabled; }
 
+	glm::vec3 GetAdditiveColour() { return m_colour; }
+	void SetAdditiveColour(const glm::vec3& colour) { m_colour = colour; }
+
 	ObjLoader& SetReceiveShadows(bool choice) { m_receiveShadows = choice; return *this; }
 	bool GetReceiveShadows() { return m_receiveShadows; }
+	ObjLoader& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
+	bool GetCastShadows() { return m_castShadows; }
 private:
 
 	struct Models
@@ -50,7 +56,7 @@ private:
 
 	struct DrawData
 	{
-		size_t modelIndex;
+		int modelIndex;
 		glm::mat4 model;
 		glm::vec3 colour;
 		int shaded;
@@ -74,7 +80,9 @@ private:
 	static const std::vector<BufferAttribute> m_specAttrib;
 	static const std::vector<BufferAttribute> m_uvAttrib;
 
+	bool m_castShadows = true;
 	bool m_receiveShadows = true;
 	bool m_enabled = false;
-	size_t m_index = INT_MAX;
+	int m_index = -1;
+	glm::vec3 m_colour = BLM::GLMzero;
 };

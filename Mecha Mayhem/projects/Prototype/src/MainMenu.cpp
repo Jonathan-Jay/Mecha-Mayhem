@@ -14,13 +14,15 @@ void MainMenu::Init(int width, int height)
 	ECS::GetComponent<Transform>(title).SetPosition(glm::vec3(0.f, 0.15f, -0.9f)).SetScale(0.25f).ChildTo(camera);
 
 	text = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(text).Init("Start Text.png", -4.f, 1.f).SetScale(0.075f);
+	ECS::AttachComponent<Sprite>(text).Init("Start Text.png", -5.51f, 1.f).SetReceiveShadows(false).SetScale(0.075f);
 	ECS::GetComponent<Transform>(text).SetPosition(glm::vec3(0.f, -0.1f, -0.35f)).ChildTo(camera);
 
 	{
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<ObjLoader>(entity).LoadMesh("models/cringe.obj");
 		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0, -5, 0));
+
+		//arena = entity;
 	}
 
 
@@ -32,7 +34,7 @@ void MainMenu::Init(int width, int height)
 
 
 	charSelect = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(charSelect).Init("CharSelect.png", -12.326f, 1.5f);
+	ECS::AttachComponent<Sprite>(charSelect).Init("CharSelect.png", -12.326f, 1.5f).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(charSelect).SetPosition(glm::vec3(0, 103.f - 100.f, -8)).ChildTo(charSelectParent);
 
 
@@ -55,16 +57,17 @@ void MainMenu::Init(int width, int height)
 	}
 
 	digit1 = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(digit1);
+	ECS::AttachComponent<Sprite>(digit1).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(digit1).SetPosition(glm::vec3(0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 	digit2 = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(digit2);
+	ECS::AttachComponent<Sprite>(digit2).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(digit2).SetPosition(glm::vec3(-0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 
 	FixDigits(LeaderBoard::scoreGoal);
 
 	backGround = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10);
+	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10)
+		.SetCastShadows(false).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(backGround).SetPosition(glm::vec3(0, 100 - 100.f, -10)).ChildTo(charSelectParent);
 
 
@@ -83,30 +86,53 @@ void MainMenu::Init(int width, int height)
 	Rendering::LightsPos[4] = BLM::GLMzero;
 	Rendering::LightsPos[5] = BLM::GLMzero;
 
-	m_frameEffects.Init(width, height);
+	m_frameEffects.Init();
 	m_frameEffects.SetShadowVP(-20, 20, 20, -10, glm::vec3(4.125f - 1.5f, 0, 4.45f + 1.5f));
 
 	if (m_frameEffects[0] == nullptr) {
 		m_frameEffects.AddEffect(new DepthOfFieldEffect());
 		m_frameEffects[0]->Init(width, height);
-		((DepthOfFieldEffect*)m_frameEffects[0])->SetBlurPasses(2);
-		((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+		((DepthOfFieldEffect*)m_frameEffects[0])->SetBlurPasses(4);
+		((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 		((DepthOfFieldEffect*)m_frameEffects[0])->SetDrawBuffer(m_frameEffects.GetDrawBuffer());
+		m_frameEffects[0]->SetInfo("DepthOfField");
 
 		m_frameEffects.AddEffect(new BloomEffect());
 		m_frameEffects[1]->Init(width, height);
 		((BloomEffect*)m_frameEffects[1])->SetBlurCount(10);
 		((BloomEffect*)m_frameEffects[1])->SetRadius(2.5f);
 		((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
+		m_frameEffects[1]->SetInfo("Bloom");
 	}
 }
 
+/*
+	glm::vec3 ttargett = BLM::GLMzero;
+	glm::vec3 nextttargett = BLM::GLMzero;
+	glm::vec3 colureeoiruuuuuut = BLM::GLMzero;
+	float dumbtimerr = 0;
+	
+	void taregtlerp() {
+		dumbtimerr += Time::dt;
+		if (dumbtimerr > 1) {
+			ttargett = nextttargett;
+			nextttargett = glm::vec3(
+				(rand() % 100) / 300.f,
+				(rand() % 100) / 300.f,
+				(rand() % 100) / 300.f
+			);
+			dumbtimerr = 0;
+		}
+		colureeoiruuuuuut = (1.f - dumbtimerr) * ttargett + dumbtimerr * nextttargett;
+	}
+*/
+
 void MainMenu::Update()
 {
-	if (Input::GetKeyDown(KEY::F)) {
-		if (BackEnd::GetFullscreen())	BackEnd::SetTabbed();
-		else							BackEnd::SetFullscreen();
-	}
+	/*
+	taregtlerp();
+	ECS::GetComponent<ObjLoader>(arena).SetAdditiveColour(colureeoiruuuuuut);
+	*/
 
 	if (m_scenePos == 0) {
 		float lx = 0, ly = 0, rx = 0, ry = 0;
@@ -204,12 +230,12 @@ void MainMenu::Update()
 							m_exitGame = true;
 							break;
 						}
-						ECS::GetComponent<Sprite>(text).SetWidth(-4.f * m_exitHoldTimer);
+						ECS::GetComponent<Sprite>(text).SetWidth(-5.51f * m_exitHoldTimer);
 					}
 				}
 				else if (ControllerInput::GetButtonUp(BUTTON::B, CONUSER(x))) {
 					playerSwapped[x] = false;
-					ECS::GetComponent<Sprite>(text).SetWidth(-4.f);
+					ECS::GetComponent<Sprite>(text).SetWidth(-5.51f);
 				}
 			}
 		}
@@ -344,7 +370,7 @@ void MainMenu::Update()
 						Rendering::LightsPos[4] = BLM::GLMzero;
 						Rendering::LightsPos[5] = BLM::GLMzero;
 						Rendering::AmbientStrength = 1.f;
-						//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+						//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 						((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 						ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
@@ -438,7 +464,7 @@ Scene* MainMenu::Reattach()
 	Rendering::LightsPos[4] = BLM::GLMzero;
 	Rendering::LightsPos[5] = BLM::GLMzero;
 	Rendering::AmbientStrength = 1.f;
-	((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.69f);
+	//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 	((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 	return Scene::Reattach();

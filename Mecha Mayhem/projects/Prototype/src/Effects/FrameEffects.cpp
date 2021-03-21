@@ -1,9 +1,14 @@
 #include "FrameEffects.h"
 #include "Components/Sprite.h"
 
+GBuffer* FrameEffects::baseEffect = nullptr;
+IlluminationBuffer FrameEffects::illumBuffer;
+TransparencyLayer FrameEffects::transparencyLayer;
+Framebuffer* FrameEffects::shadowMap = nullptr;
+
 FrameEffects::FrameEffects() { }
 
-void FrameEffects::Init()
+void FrameEffects::Init(unsigned width, unsigned height)
 {
 	PostEffect::Init("shaders/Post/passthrough_frag.glsl");
 
@@ -29,36 +34,51 @@ void FrameEffects::Init()
 	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
 	PostEffect::Init("shaders/Post/gBuffer_ambient_frag.glsl");
 
+	//transparency
+	PostEffect::Init("shaders/Post/transparency_frag.glsl");
+
+	shadowMap = new Framebuffer();
+	baseEffect = new GBuffer();
+
+	//shadowMap->Unload();
+	shadowMap->AddDepthTarget();
+	shadowMap->SetWrapMode(WrapMode::ClampToBorder);
+	shadowMap->Init(shadowWidth, shadowHeight);
+
+	baseEffect->Init(width, height);
+	illumBuffer.Init(width, height);
+	transparencyLayer.Init(width, height);
 }
 
 void FrameEffects::Unload()
 {
+	baseEffect->Unload();
+	illumBuffer.Unload();
+	transparencyLayer.Unload();
+	shadowMap->Unload();
+
+	delete baseEffect;
+	delete shadowMap;
 	PostEffect::UnloadShaders();
 }
 
-void FrameEffects::Init(unsigned width, unsigned height)
+void FrameEffects::Init()
 {
 	RemoveAllEffects();
 
-	baseEffect.Init(width, height);
-	illumBuffer.Init(width, height);
-	//transparencyLayer.Init(width, height);
-
-	shadowMap.AddDepthTarget();
-	shadowMap.SetWrapMode(WrapMode::ClampToBorder);
-	shadowMap.Init(shadowWidth, shadowHeight);
 	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+	illumBuffer.SetSun(m_sun);
 }
 
 void FrameEffects::Resize(unsigned width, unsigned height)
 {
-	baseEffect.Reshape(width, height);
+	baseEffect->Reshape(width, height);
 	illumBuffer.Reshape(width, height);
+	transparencyLayer.Reshape(width, height);
 
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Reshape(width, height);
 	}
-	//transparencyLayer.Reshape(width, height);
 }
 
 void FrameEffects::AddEffect(PostEffect* effect)
@@ -86,77 +106,69 @@ void FrameEffects::RemoveEffect(int slot)
 	layersOfEffects.erase(layersOfEffects.begin() + slot);
 }
 
-void FrameEffects::Clear()
+void FrameEffects::Clear(bool paused)
 {
-	baseEffect.Clear();
-	shadowMap.Clear();
-	//transparencyLayer.Clear();
+	if (!paused)
+		shadowMap->Clear();
+
+	baseEffect->Clear();
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->Clear();
 	}
 	//pauseEffect.Clear();
 	
 	//clear the illum buffer with white instead of clear colour
-	glClearColor(1.f, 1.f, 1.f, 0.3f);
+	glClearColor(1.f, 1.f, 1.f, 0.f);
 	illumBuffer.Clear();
+	transparencyLayer.Clear();
 }
 
 void FrameEffects::Bind()
 {
-	baseEffect.Bind();
+	baseEffect->Bind();
 }
 
 void FrameEffects::UnBind()
 {
-	baseEffect.Unbind();
+	baseEffect->Unbind();
 }
 
-void FrameEffects::BindShadowMap(bool front)
+void FrameEffects::BindShadowMap()
 {
-	if (front) {
-		shadowMap.Bind();
-		glCullFace(GL_FRONT);
-	}
-	else {
-		shadowMap.Bind();
-		glCullFace(GL_BACK);
-	}
+	shadowMap->Bind();
+	glDisable(GL_CULL_FACE);
 }
 
 void FrameEffects::UnBindShadowMap()
 {
-	shadowMap.Unbind();
+	shadowMap->Unbind();
+	glEnable(GL_CULL_FACE);
 }
 
 void FrameEffects::BindTransparency()
 {
-	//transparencyLayer.BindBuffer(0);
-	//usedTransparency = true;
+	transparencyLayer.BindBuffer(1);
+	glEnable(GL_BLEND);
 }
 
 void FrameEffects::UnBindTransparency()
 {
-	//transparencyLayer.UnbindBuffer();
+	transparencyLayer.UnbindBuffer();
+	glDisable(GL_BLEND);
 }
 
 void FrameEffects::Draw(/*bool paused*/)
 {
-	if (m_usingShadows)		shadowMap.BindDepthAsTexture(30);
+	if (m_usingShadows)		shadowMap->BindDepthAsTexture(30);
 	else		Sprite::m_textures[0].texture->Bind(30);
-	
-	illumBuffer.ApplyEffect(&baseEffect);
+
+	illumBuffer.ApplyEffect(baseEffect);
 
 	Texture2D::Unbind(30);
 
+	transparencyLayer.ApplyEffect(&illumBuffer, baseEffect);
 
-	PostEffect* prev = &illumBuffer;
-
-	/*if (usedTransparency) {
-		usedTransparency = false;
-
-		transparencyLayer.ApplyEffect(prev, &baseEffect);
-		prev = &transparencyLayer;
-	}*/
+	PostEffect* prev = &transparencyLayer;
 
 	for (int i(0); i < layersOfEffects.size(); ++i) {
 		layersOfEffects[i]->ApplyEffect(prev);
@@ -177,6 +189,7 @@ void FrameEffects::SetShadowVP(const glm::mat4& VP)
 {
 	m_shadowVP = VP;
 	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+	illumBuffer.SetSun(m_sun);
 }
 
 void FrameEffects::SetShadowVP(float left, float right, float nearZ, float farZ, const glm::vec3& position)
@@ -184,13 +197,16 @@ void FrameEffects::SetShadowVP(float left, float right, float nearZ, float farZ,
 	//Projection
 	m_shadowVP = glm::ortho(left, right, left, right, nearZ, farZ) *
 		//view rotation
-		glm::lookAt(position + glm::vec3(illumBuffer.GetSunRef()._lightDirection), position, BLM::GLMup);
+		glm::lookAt(position + glm::vec3(m_sun._lightDirection), position, BLM::GLMup);
 	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+	illumBuffer.SetSun(m_sun);
 }
 
 FrameEffects& FrameEffects::Reattach()
 {
+	shadowMap->Clear();
 	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
+	illumBuffer.SetSun(m_sun);
 
 	return *this;
 }

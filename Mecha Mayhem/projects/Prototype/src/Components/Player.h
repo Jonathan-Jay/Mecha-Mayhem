@@ -117,7 +117,7 @@ public:
 			m_health = m_maxHealth;
 	}
 
-	//void GivePoints(int amt) { m_killCount += amt; }
+	void GivePoints(int amt) { m_killCount += amt; }
 
 	//returns health
 	short GetHealth() { return m_health; }
@@ -132,6 +132,7 @@ public:
 			m_damageCounter = 0;
 			
 			//do death management in Update()
+			ClearWeapons();
 
 			return true;
 		}

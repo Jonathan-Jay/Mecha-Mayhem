@@ -40,9 +40,18 @@ public:
 	virtual void ImGuiFunc() {
 		/*ImGui::SetWindowSize(ImVec2(150, 50));
 		ImGui::Text("Empty");*/
-		if (ImGui::SliderFloat("SpecularPower", &m_frameEffects.GetSun()._lightSpecularPow, 0.f, 100.f)) {
-			//blank lol
-		}
+		//if (ImGui::SliderFloat("Specular Power", &m_frameEffects.GetSun()._lightSpecularPow, 0.f, 100.f)) {
+		//	//blank lol
+		//}
+		//if (ImGui::SliderFloat("Shadow Max", &m_frameEffects.GetSun()._shadowBiasMax, 0.f, 0.005f, "%.7f")) {
+		//	//blank lol
+		//}
+		//if (ImGui::SliderFloat("Shadow Min", &m_frameEffects.GetSun()._shadowBiasMin, 0.f, 0.00005f, "%.7f")) {
+		//	//blank lol
+		//}
+		//if (ImGui::SliderFloat3("Direction", &m_frameEffects.GetSun()._lightDirection[0], -15.f, 15.f, "%.2f")) {
+		//	//blank lol
+		//}
 
 		if (ImGui::CollapsingHeader("Post Processing Effects"))
 		{

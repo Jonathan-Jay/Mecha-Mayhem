@@ -41,6 +41,10 @@ uniform int camCount;
 
 out vec4 frag_color;
 
+const int softRange = 2;
+const float texelSize = 1.0 / 4096;
+const float area = 1.0 / ((softRange * 2 + 1) * (softRange * 2 + 1));
+
 float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 {
 	//Perspective division
@@ -49,8 +53,22 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 	//Transform into a [0,1] range
 	projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
 
+//	if (projectionCoordinates.z > 1.0)
+//		return 0.0;
+
+	float currDepth = projectionCoordinates.z - bias;
+	float shadow = 0.0;
+	for (int x = -softRange; x <= softRange; ++x) {
+		for (int y = -softRange; y <= softRange; ++y) {
+			shadow += float(currDepth >
+				texture(s_ShadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r
+				);
+		}
+	}
+	return shadow * area;
+	
 	//Get the closest depth value from light's perspective (using our 0-1 range)
-	float closestDepth = texture(s_ShadowMap, projectionCoordinates.xy).r;
+	//float closestDepth = texture(s_ShadowMap, projectionCoordinates.xy).r;
 
 	//Get the current depth according to the light
 	//float currentDepth = projectionCoordinates.z;
@@ -59,21 +77,22 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 	//float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
 	//Return the value
-	return float(projectionCoordinates.z - bias > closestDepth);
+	//return float(projectionCoordinates.z - bias > closestDepth);
 	//return shadow;
 }
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
 	//Normals
-	vec3 inNormal = texture(s_normalsTex, inUV).xyz;
+//	vec3 inNormal = texture(s_normalsTex, inUV).xyz;
 
-	if (length(inNormal) < 0.25) {
-		frag_color = vec4(1.0, 1.0, 1.0, 1.0);
-		return;
-	}
+//	if (length(inNormal) < 0.25) {
+//		frag_color = vec4(1.0, 1.0, 1.0, 1.0);
+//		return;
+//	}
 
-	inNormal = (normalize(inNormal) * 2.0) - 1.0;
+//	inNormal = (normalize(inNormal) * 2.0) - 1.0;
+	vec3 inNormal = (normalize(texture(s_normalsTex, inUV).xyz) * 2.0) - 1.0;
 
 	//Albedo
 	vec4 textureColor = texture(s_albedoTex, inUV);

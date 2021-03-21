@@ -14,11 +14,11 @@ namespace Rendering {
 	{
 		//sending clear colour first because of illum buffer
 		glClearColor(BackColour.x, BackColour.y, BackColour.z, 0.3f);
-		frameEffects->Clear();
+		frameEffects->Clear(paused);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		frameEffects->Bind();
+		//frameEffects->Bind();
 
 		auto objView = reg->view<ObjLoader, Transform>();
 		auto textObjView = reg->view<MultiTextObj, Transform>();
@@ -30,7 +30,7 @@ namespace Rendering {
 
 		//reserve some queue size
 		ObjLoader::BeginDraw(objView.size());
-		ObjMorphLoader::BeginDraw(morphView.size() + spawnerView.size());
+		ObjMorphLoader::BeginDraw(morphView.size() + spawnerView.size(), effects->size());
 
 		//send all objs to the vectors
 		objView.each(
@@ -63,8 +63,10 @@ namespace Rendering {
 		short count = 0;
 		for (auto cam : cameraView)
 		{
-			//glViewport((count % 2 == 0 ? width : 0), ((count < 3) && (numOfCams > 2) ? height : 0),
-			//    width * (numOfCams == 1 ? 2 : 1), height * (numOfCams > 2 ? 1 : 2));
+			FrameEffects::Bind();
+
+			//glViewport((count % 2) * width, ((count < 2) && (numOfCams > 2)) * height,
+			//    width * ((numOfCams == 1) + 1), height * (2 - (numOfCams > 2)));
 
 			if (numOfCams > 2)
 				glViewport(((count % 2) * width), ((count < 2) * height), width, height);
@@ -114,15 +116,22 @@ namespace Rendering {
 			ObjMorphLoader::PerformDraw(view, camCam, DefaultColour, 1, 4);
 			Sprite::PerformDraw();
 
+			FrameEffects::BindTransparency();
+
+			ObjMorphLoader::PerformDrawTrans(view, camCam);
+
+			FrameEffects::UnBindTransparency();
+			
+			//frameEffects->Bind();
 
 			//exit even if some cams haven't been checked, because only the amount specified should render
 			if (++count >= numOfCams)
 				break;
 		}
 
-		frameEffects->UnBind();
+		//frameEffects->UnBind();
 
-		frameEffects->SetCamCount(numOfCams);
+		FrameEffects::SetCamCount(numOfCams);
 	}
 
 	void RenderForShading(entt::registry* reg)
@@ -138,28 +147,35 @@ namespace Rendering {
 		auto playerView = reg->view<Player, Transform>();
 		auto spawnerView = reg->view<Spawner, Transform>();
 
-		for (int i(0); i < 2; ++i) {
-			frameEffects->BindShadowMap(i);
+		//for (int i(0); i < 2; ++i) {
+			//frameEffects->BindShadowMap(i);
+
+			FrameEffects::BindShadowMap();
 
 			//reserve some queue size
 			ObjLoader::BeginDraw(objView.size());
-			ObjMorphLoader::BeginDraw(morphView.size() + spawnerView.size() + playerView.size());
+			ObjMorphLoader::BeginDraw(morphView.size());
 			Sprite::BeginDraw(spriteView.size());
+			ObjLoader::BeginTempDraw();
+			ObjMorphLoader::BeginTempDraw();
 
 			objView.each([](ObjLoader& obj, Transform& trans) {
-				obj.Draw(trans.GetModel());
+				if (obj.GetCastShadows())
+					obj.Draw(trans.GetModel());
 				});
 
 			morphView.each([](ObjMorphLoader& obj, Transform& trans) {
-				obj.Draw(trans.GetModel());
+				if (obj.GetCastShadows())
+					obj.Draw(trans.GetModel());
 				});
 
 			spriteView.each([](Sprite& spr, Transform& trans) {
-				spr.Draw(BLM::GLMMat, trans.GetModel());
+				if (spr.GetCastShadows())
+					spr.Draw(BLM::GLMMat, trans.GetModel());
 				});
 
 			spawnerView.each([](Spawner& spawn, Transform& trans) {
-				spawn.Render(trans.GetModel());
+				spawn.Render(trans.GetModel(), false);
 				});
 
 			//draw all players, cams are limited from 0-3, so this ignores all cams
@@ -181,9 +197,8 @@ namespace Rendering {
 			textObjView.each([](MultiTextObj& obj, Transform& trans) {
 				obj.DrawShadow(trans.GetModel());
 				});
-		}
-
-		frameEffects->UnBindShadowMap();
+		//}
+		FrameEffects::UnBindShadowMap();
 	}
 
 	/*void DrawPauseScreen(Sprite image)

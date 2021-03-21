@@ -16,7 +16,7 @@ public:
 	}
 
 	Spawner& Init(float radius, float delay) {
-		m_spawnerModel.LoadMeshs("spawner/spawner", true);
+		m_spawnerModel.LoadMeshs("spawner/spawner", true).SetCastShadows(false);
 		m_radius = radius;
 		m_timer = m_delay = delay;
 		m_spawnerModel.SetDirection(false);
@@ -31,7 +31,7 @@ public:
 		upperBound = upper - lower + 1;
 	}
 
-	void Render(const glm::mat4& model) {
+	void Render(const glm::mat4& model, bool notShadow = true) {
 		
 		if (m_timer == 0) {
 			glm::vec3 colour = BLM::GLMzero;
@@ -46,7 +46,8 @@ public:
 			else			Player::GetWeaponModel(m_currWeapon).Draw(model * rot * m_gunOffset, colour);
 		}
 
-		m_spawnerModel.Draw(model);
+		if (notShadow)
+			m_spawnerModel.Draw(model);
 	}
 
 	//return true if colelcted

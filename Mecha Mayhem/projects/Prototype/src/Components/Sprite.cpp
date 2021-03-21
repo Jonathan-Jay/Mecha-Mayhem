@@ -90,18 +90,22 @@ void Sprite::BeginUIDraw(unsigned UIamt, unsigned camCount)
 
 void Sprite::Draw(const glm::mat4& VP, const glm::mat4& model)
 {
-	glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
+	//glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
+
+	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 	
-	m_Queue.push_back({ m_index, MVP });
+	m_Queue.push_back({ m_index, scaledModel, VP * scaledModel, m_receiveShadows });
 }
 
 void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
 {
 	m_shader->Bind();
 
-	m_shader->SetUniformMatrix("MVP",
-		VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1))
-	);
+	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
+
+	m_shader->SetUniformMatrix("MVP", VP * scaledModel);
+	m_shader->SetUniformMatrix("model", scaledModel);
+	m_shader->SetUniform("receiveShadows", m_receiveShadows);
 	m_textures[m_index].texture->Bind(0);
 
 	m_square->Render();
@@ -111,18 +115,22 @@ void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
 
 void Sprite::DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum)
 {
-	glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
+	//glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 
-	m_UIQueue[camNum].push_back({ m_index, MVP });
+	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
+
+	m_UIQueue[camNum].push_back({ m_index, scaledModel, VP * scaledModel });
 }
 
 void Sprite::PerformDraw()
 {
-	if (m_Queue.size() != 0) {
+	if (m_Queue.size()) {
 		m_shader->Bind();
 
 		for (int i(0); i < m_Queue.size(); ++i) {
 			m_shader->SetUniformMatrix("MVP", m_Queue[i].MVP);
+			m_shader->SetUniformMatrix("model", m_Queue[i].model);
+			m_shader->SetUniform("receiveShadows", m_Queue[i].receiveShadows);
 			m_textures[m_Queue[i].index].texture->Bind(0);
 
 			m_square->Render();
@@ -134,7 +142,7 @@ void Sprite::PerformDraw()
 
 void Sprite::PerformUIDraw(int numOfCams)
 {
-	if (m_UIQueue[0].size() != 0) {
+	if (m_UIQueue[0].size()) {
 		int height = BackEnd::GetHalfHeight();
 		int width = BackEnd::GetHalfWidth();
 
@@ -150,6 +158,8 @@ void Sprite::PerformUIDraw(int numOfCams)
 
 			for (int i(0); i < m_UIQueue[cam].size(); ++i) {
 				m_shader->SetUniformMatrix("MVP", m_UIQueue[cam][i].MVP);
+				m_shader->SetUniformMatrix("model", m_UIQueue[cam][i].model);
+				m_shader->SetUniform("receiveShadows", 0);
 				m_textures[m_UIQueue[cam][i].index].texture->Bind(0);
 
 				m_square->Render();
@@ -162,12 +172,12 @@ void Sprite::PerformUIDraw(int numOfCams)
 
 void Sprite::PerformDrawShadow(/*const glm::mat4& lightVPMatrix*/)
 {
-	if (m_Queue.size() != 0) {
+	if (m_Queue.size()) {
 		ObjLoader::m_shadowShader->Bind();
-		//ObjLoader::m_shadowShader->SetUniform("lightVPMatrix", lightVPMatrix);
+		//ObjLoader::m_shadowShader->SetUniformMatrix("lightVPMatrix", lightVPMatrix);
 
 		for (int i(0); i < m_Queue.size(); ++i) {
-			ObjLoader::m_shadowShader->SetUniformMatrix("model", m_Queue[i].MVP);
+			ObjLoader::m_shadowShader->SetUniformMatrix("model", m_Queue[i].model);
 
 			m_square->Render();
 		}

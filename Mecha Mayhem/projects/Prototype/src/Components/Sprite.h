@@ -72,15 +72,26 @@ public:
 
 	static std::vector<Texture> m_textures;
 
+	Sprite& SetReceiveShadows(bool choice) { m_receiveShadows = choice; return *this; }
+	bool GetReceiveShadows() { return m_receiveShadows; }
+
+	Sprite& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
+	bool GetCastShadows() { return m_castShadows; }
+
 private:
 	struct DrawData {
 		size_t index;
+		glm::mat4 model;
 		glm::mat4 MVP;
+		int receiveShadows = 0;
 	};
 	static std::vector<DrawData> m_Queue;
 	static std::vector<DrawData> m_UIQueue[4];
 	static VertexArrayObject::sptr m_square;
 	static Shader::sptr m_shader;
+
+	bool m_castShadows = true;
+	bool m_receiveShadows = true;
 
 	size_t m_index = 0;
 	float m_width = 0;

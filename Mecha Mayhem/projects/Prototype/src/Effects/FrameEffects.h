@@ -1,6 +1,6 @@
 #pragma once
 #include <GLM/gtc/matrix_transform.hpp>
-#include "IlluminationBuffer.h"
+#include "Post/TransparencyLayer.h"
 #include "Utilities/BLM.h"
 
 //aka the PP wrapper
@@ -8,15 +8,7 @@ class FrameEffects
 {
 public:
 	FrameEffects();
-	~FrameEffects() { UnloadAllBuffers(); }
-
-	//unload all buffers and stuff
-	void UnloadAllBuffers() {
-		baseEffect.Unload();
-		illumBuffer.Unload();
-		shadowMap.Unload();
-		RemoveAllEffects();
-	}
+	~FrameEffects() { RemoveAllEffects(); }
 
 	//ensure you can't copy it, because of Framebuffer
 	FrameEffects(const FrameEffects& other) = delete;
@@ -25,12 +17,12 @@ public:
 	FrameEffects& operator=(FrameEffects&& other) = delete;
 
 	//for all effects (put static inits here)
-	static void Init();
+	static void Init(unsigned width, unsigned height);
 	//same as the init, but for unloading
 	static void Unload();
 
 	//change the buffers
-	void Init(unsigned width, unsigned height);
+	void Init();
 	void Resize(unsigned width, unsigned height);
 
 	//in order of added
@@ -39,19 +31,19 @@ public:
 	void RemoveEffect(int slot);
 
 	//binds gBuffer
-	void Bind();
-	void UnBind();
+	static void Bind();
+	static void UnBind();
 
 	//binds shadow buffer
-	void BindShadowMap(bool front);
-	void UnBindShadowMap();
+	static void BindShadowMap();
+	static void UnBindShadowMap();
 
 	//binds transparency buffer
-	void BindTransparency();
-	void UnBindTransparency();
+	static void BindTransparency();
+	static void UnBindTransparency();
 
 	//for drawing purposes
-	void Clear();
+	void Clear(bool paused);
 	void Draw(/*bool paused*/);
 
 	//removes all effects
@@ -66,15 +58,15 @@ public:
 		return layersOfEffects[index];
 	}
 
-	Framebuffer* GetDrawBuffer() {
-		return &baseEffect.GetGBuffer();
+	static Framebuffer* GetDrawBuffer() {
+		return &baseEffect->GetGBuffer();
 	}
 
-	void SetCamPos(glm::vec3 pos, int camNum) {
+	static void SetCamPos(glm::vec3 pos, int camNum) {
 		illumBuffer.SetCamPos(pos, camNum);
 	}
 
-	void SetCamCount(int camNum) {
+	static void SetCamCount(int camNum) {
 		illumBuffer.SetCamCount(camNum);
 	}
 
@@ -83,29 +75,32 @@ public:
 
 	glm::mat4 GetShadowVP() const { return m_shadowVP; }
 
-	DirectionalLight& GetSun() { return illumBuffer.GetSunRef(); }
+	DirectionalLight& GetSun() {
+		return m_sun;
+	}
 
 	FrameEffects& Reattach();
 
 	void UsingShadows(bool choice) { m_usingShadows = choice; }
 	bool GetUsingShadows() { return m_usingShadows; }
 
-	static const unsigned shadowWidth	= 8192;//4096;
-	static const unsigned shadowHeight	= 8192;//4096;
+	static const unsigned shadowWidth	= 4096;//8192;
+	static const unsigned shadowHeight	= 4096;//8192;
 private:
 	bool m_usingShadows = true;
 
-	GBuffer baseEffect;
-	IlluminationBuffer illumBuffer;
-	//TransparencyLayer transparencyLayer;
-
-	Framebuffer shadowMap;
+	static GBuffer* baseEffect;
+	static IlluminationBuffer illumBuffer;
+	static TransparencyLayer transparencyLayer;
+	static Framebuffer* shadowMap;
 
 	std::vector<PostEffect*> layersOfEffects = {};
+
+	DirectionalLight m_sun;
 
 	glm::mat4 m_shadowVP =
 		//Projection
 		glm::ortho(-10.f, 10.f, -10.f, 10.f, 10.f, -10.f) *
 		//View
-		glm::lookAt(glm::vec3(illumBuffer.GetSunRef()._lightDirection), BLM::GLMzero, BLM::GLMup);
+		glm::lookAt(glm::vec3(m_sun._lightDirection), BLM::GLMzero, BLM::GLMup);
 };

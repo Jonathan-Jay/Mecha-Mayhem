@@ -34,7 +34,7 @@ void Tutorial::Init(int width, int height)
 	}
 
 	m_colliders.GenerateSpawners();
-
+	
 	/*{
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<Spawner>(entity).Init(0.3f, 2.5f).SetBounds(1, 5);
@@ -131,14 +131,16 @@ void Tutorial::Init(int width, int height)
 	Rendering::effects = &m_effects;
 	Rendering::frameEffects = &m_frameEffects;
 
-	m_frameEffects.Init(width, height);
+	m_frameEffects.Init();
 	m_frameEffects.SetShadowVP(-35, 35, 40, -60, glm::vec3(0, 0, -30));
+	m_frameEffects.GetSun()._shadowBiasMax = 0.0015f;
+	m_frameEffects.GetSun()._lightDirection = glm::vec4(-4, -5, -4, 0);
 
 	Player::SetCamDistance(camDistance);
 
 	Player::SetSkyPos(glm::vec3(0, 25, -45));
 
-	m_pauseSprite = Sprite("Pause.png", 8.952f, 3);
+	m_pauseSprite = { "Pause.png", 8.952f, 3 };
 }
 
 void Tutorial::SetDigits(int index, int number)

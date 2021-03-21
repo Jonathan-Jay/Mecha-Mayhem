@@ -11,13 +11,15 @@ public:
 	virtual void Update() override;
 	virtual void LateUpdate() override;
 	virtual Scene* Reattach() override;
-	/*virtual void ImGuiFunc() override {
+	virtual void ImGuiFunc() override {
+		Scene::ImGuiFunc();
+
 		for (int i(0); i < 4; ++i) {
 			if (bodyEnt[i] != entt::null)
 				if (ImGui::Button(("Give player " + std::to_string(i + 1) + " 1 kill").c_str()))
 					ECS::GetComponent<Player>(bodyEnt[i]).GivePoints(1);
 		}
-	}*/
+	}
 
 private:
 

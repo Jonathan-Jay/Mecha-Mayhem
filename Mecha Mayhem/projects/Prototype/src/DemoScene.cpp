@@ -34,8 +34,8 @@ void DemoScene::Init(int width, int height)
 	Rendering::effects = &m_effects;
 	Rendering::frameEffects = &m_frameEffects;
 
-	m_frameEffects.Init(width, height);
-	m_frameEffects.SetShadowVP(-70, 70, 20, -130, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
+	m_frameEffects.Init();
+	m_frameEffects.SetShadowVP(-70, 70, 40, -60, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
 
 	Player::SetUIAspect(width, height);
 	Player::SetCamDistance(camDistance);

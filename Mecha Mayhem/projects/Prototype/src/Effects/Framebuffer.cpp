@@ -42,10 +42,12 @@ Framebuffer::~Framebuffer()
 
 void Framebuffer::Unload()
 {
-	//Deletes the framebuffer
-	glDeleteFramebuffers(1, &_FBO);
-	//Sets init to false
-	_isInit = false;
+	if (_isInit) {
+		//Deletes the framebuffer
+		glDeleteFramebuffers(1, &_FBO);
+		//Sets init to false
+		_isInit = false;
+	}
 }
 
 void Framebuffer::Init(unsigned width, unsigned height)

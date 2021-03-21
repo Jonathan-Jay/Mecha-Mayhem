@@ -16,28 +16,28 @@ void LeaderBoard::Init(int windowWidth, int windowHeight)
 
 		//number is here because yea
 		playerScores[i].number = ECS::CreateEntity();
-		ECS::AttachComponent<Sprite>(playerScores[i].number);
+		ECS::AttachComponent<Sprite>(playerScores[i].number).SetReceiveShadows(false);
 		ECS::GetComponent<Transform>(playerScores[i].number).SetPosition(glm::vec3(-0.75f, 0, 0)).ChildTo(playerScores[i].parent);
 
 
 		//create digits and parent with the right position
 		playerScores[i].digit2 = ECS::CreateEntity();
-		ECS::AttachComponent<Sprite>(playerScores[i].digit2);
+		ECS::AttachComponent<Sprite>(playerScores[i].digit2).SetReceiveShadows(false);
 		ECS::GetComponent<Transform>(playerScores[i].digit2).SetPosition(glm::vec3(0.75f, 0, 0)).ChildTo(playerScores[i].parent);
 
 		playerScores[i].digit1 = ECS::CreateEntity();
-		ECS::AttachComponent<Sprite>(playerScores[i].digit1);					//0.8f unit to the right of digit2
+		ECS::AttachComponent<Sprite>(playerScores[i].digit1).SetReceiveShadows(false);		//0.8f unit to the right of digit2
 		ECS::GetComponent<Transform>(playerScores[i].digit1).SetPosition(glm::vec3(1.55f, 0, 0)).ChildTo(playerScores[i].parent);
 
 
 		{	//P is a constant
 			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Sprite>(entity).Init("P.png", -1.81f, 1.f);
+			ECS::AttachComponent<Sprite>(entity).Init("P.png", -1.81f, 1.f).SetReceiveShadows(false);
 			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(-1.025f, 0, -0.1f)).ChildTo(playerScores[i].parent);
 		}
 
 		playerScores[i].bar = ECS::CreateEntity();
-		ECS::AttachComponent<Sprite>(playerScores[i].bar).Init("leaderboardbar.png", -3.88f, 0.2f).SetWidth(0);
+		ECS::AttachComponent<Sprite>(playerScores[i].bar).Init("leaderboardbar.png", -3.88f, 0.2f).SetReceiveShadows(false).SetWidth(0);
 		ECS::GetComponent<Transform>(playerScores[i].bar).SetPosition(glm::vec3(0, -0.6f, -0.2f)).ChildTo(playerScores[i].parent);
 
 		SetDigits(0, i);
@@ -46,13 +46,13 @@ void LeaderBoard::Init(int windowWidth, int windowHeight)
 	//title
 	{
 		auto entity = ECS::CreateEntity();
-		ECS::AttachComponent<Sprite>(entity).Init("leaderboard.png", -3.60f, 0.5f);
+		ECS::AttachComponent<Sprite>(entity).Init("leaderboard.png", -3.60f, 0.5f).SetReceiveShadows(false);
 		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0.f, 1.2f, -3.f));
 	}
 
 	//continue text
 	text = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(text).Init("Start Text.png", -4.f, 1.f).SetWidth(0);
+	ECS::AttachComponent<Sprite>(text).Init("Exit Text.png", 5.51f, 1.f).SetReceiveShadows(false).SetWidth(0);
 	ECS::GetComponent<Transform>(text).SetPosition(glm::vec3(0.f, -3.25f, -8.f));
 
 	{	//background
@@ -72,8 +72,10 @@ void LeaderBoard::Init(int windowWidth, int windowHeight)
 	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);
 	Rendering::frameEffects = &m_frameEffects;
 
-	m_frameEffects.Init(windowWidth, windowHeight);
+	m_frameEffects.Init();
 	m_frameEffects.UsingShadows(false);
+	m_frameEffects.GetSun()._lightDirection = glm::vec4(0.5f, -0.5f, -0.5f, 0.f);
+	//m_frameEffects.SetShadowVP(-15, 15, 20, -20, BLM::GLMzero);
 }
 
 //lol is to avoid overwriting existing function lol
@@ -105,7 +107,7 @@ void LeaderBoard::Update()
 		}
 		if (m_timer < 1) {
 			//press A to continue here
-			ECS::GetComponent<Sprite>(text).SetWidth(fakeSmoothStep(-4.f, 0.f, m_timer));
+			ECS::GetComponent<Sprite>(text).SetWidth(fakeSmoothStep(-5.51f, 0.f, m_timer));
 			pTrans.SetPosition(fakeSmoothStep(glm::vec3(1.75f, -0.1f, -3.5f), glm::vec3(3, 0, -12), m_timer));
 		}
 		for (int i(0); i < 4; ++i) {
@@ -231,15 +233,15 @@ void LeaderBoard::SetDigits(int number, int index)
 void LeaderBoard::SortPlayers(std::vector<int>& playerIndices)
 {
 	int size = playerIndices.size() - 1;
-	//1 player would be 0, 2 player minimum
+	//1 player would be 0, so 2 player minimum
 	if (size) {
-		//simple sorting:
+		//bubble sorting (improved by following slides):
 		for (int i(0); i < size; ++i) {
-			for (int j(0); j < size; ++j) {
-				if (players[playerIndices[j]].score < players[playerIndices[j + 1]].score) {
+			for (int j(size); j > i; --j) {
+				if (players[playerIndices[j]].score > players[playerIndices[j - 1]].score) {
 					int temp = playerIndices[j];
-					playerIndices[j] = playerIndices[j + 1];
-					playerIndices[j + 1] = temp;
+					playerIndices[j] = playerIndices[j - 1];
+					playerIndices[j - 1] = temp;
 				}
 			}
 		}

@@ -1,7 +1,13 @@
 #version 410
 layout(location = 0) in vec2 inUV;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec3 inPosition;
 
 uniform sampler2D s_texture;
+uniform int receiveShadows;
+
+const float specularPow = 0.1;
+const float shininess = 4.0;
 
 //multi render target
 //we can render colour to all of these
@@ -18,7 +24,9 @@ void main() {
 
 	outColours = result;
 
-	outNormals = vec3(0);
-	outSpecs = vec3(0);
-	outPositions = vec3(0);
+	outNormals = (normalize(inNormal) * 0.5) + 0.5;
+
+	outSpecs = vec3(specularPow, shininess, receiveShadows);
+
+	outPositions = inPosition;
 }

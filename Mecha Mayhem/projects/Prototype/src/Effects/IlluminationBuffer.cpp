@@ -37,9 +37,6 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 
 void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 {
-	//send the directional light data and bind it
-	_sunBuffer.SendData(reinterpret_cast<void*>(&_sun), sizeof(DirectionalLight));
-
 	if (_sunEnabled) {
 		//bind directional light shader
 		_shaders[Lights::DIRECTIONAL]->Bind();
@@ -148,12 +145,18 @@ DirectionalLight& IlluminationBuffer::GetSunRef()
 void IlluminationBuffer::SetSun(DirectionalLight newSun)
 {
 	_sun = newSun;
+
+	//send the directional light data and bind it
+	_sunBuffer.SendData(reinterpret_cast<void*>(&_sun), sizeof(DirectionalLight));
 }
 
 void IlluminationBuffer::SetSun(glm::vec4 lightDir, glm::vec4 lightCol)
 {
 	_sun._lightDirection = lightDir;
 	_sun._lightCol = lightCol;
+
+	//send the directional light data and bind it
+	_sunBuffer.SendData(reinterpret_cast<void*>(&_sun), sizeof(DirectionalLight));
 }
 
 void IlluminationBuffer::EnableSun(bool enabled)

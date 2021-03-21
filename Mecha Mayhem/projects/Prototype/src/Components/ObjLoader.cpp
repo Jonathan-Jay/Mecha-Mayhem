@@ -535,13 +535,13 @@ void ObjLoader::Draw(const glm::mat4& model, const glm::vec3& colour)
 	if (!m_enabled)	return;
 
 	if (m_models[m_index].text) {
-		m_texQueue.push_back({ m_index, model, colour, m_receiveShadows });
+		m_texQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
 	}
 	else if (m_models[m_index].mat) {
-		m_matQueue.push_back({ m_index, model, colour, m_receiveShadows });
+		m_matQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
 	}
 	else {
-		m_defaultQueue.push_back({ m_index, model, colour, m_receiveShadows });
+		m_defaultQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
 	}
 }
 
@@ -550,13 +550,13 @@ void ObjLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
 	if (!m_enabled)	return;
 
 	if (m_models[m_index].text) {
-		m_texTempQueue.push_back({ m_index, model, colour, m_receiveShadows });
+		m_texTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
 	}
 	else if (m_models[m_index].mat) {
-		m_matTempQueue.push_back({ m_index, model, colour, m_receiveShadows });
+		m_matTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
 	}
 	else {
-		m_defaultTempQueue.push_back({ m_index, model, colour, m_receiveShadows });
+		m_defaultTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
 	}
 }
 

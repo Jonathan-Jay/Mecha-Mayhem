@@ -14,6 +14,7 @@ public:
 
 	virtual Scene* Reattach() override;
 	virtual void ImGuiFunc() override {
+		Scene::ImGuiFunc();
 		if (m_scenePos != 1)	return;
 
 		for (int i(0); i < 4; ++i) {
@@ -31,7 +32,6 @@ public:
 				if (ImGui::Button(("Remove player " + std::to_string(i + 1)).c_str())) {
 					ECS::GetComponent<Player>(models[i]).Init(LeaderBoard::players[i].user = CONUSER::NONE, 0);
 					playerSwapped[i] = true;
-					Rendering::LightsPos[2 + i] = BLM::GLMzero;
 				}
 			}
 		}
@@ -60,6 +60,8 @@ private:
 	}, 8 };
 
 	entt::entity charSelectParent = entt::null;
+
+	//entt::entity arena = entt::null;
 
 	entt::entity camera = entt::null;
 	entt::entity title = entt::null;
