@@ -46,6 +46,11 @@ int main() {
 		
 		bool paused = false;
 
+
+		//start teh game in fullscreen
+		BackEnd::SetFullscreen();
+
+
 		//called after init because init takes time, which breaks intro anim
 		Time::Update(glfwGetTime());
 		Time::dt = 0;

@@ -78,6 +78,9 @@ public:
 	Sprite& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
 	bool GetCastShadows() { return m_castShadows; }
 
+	void SetEnabled(bool choice) { m_enabled = choice; }
+	bool GetEnabled() { return m_enabled; }
+
 private:
 	struct DrawData {
 		size_t index;
@@ -90,6 +93,7 @@ private:
 	static VertexArrayObject::sptr m_square;
 	static Shader::sptr m_shader;
 
+	bool m_enabled = true;
 	bool m_castShadows = true;
 	bool m_receiveShadows = true;
 

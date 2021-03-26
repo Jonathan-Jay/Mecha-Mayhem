@@ -63,6 +63,7 @@ private:
 
 	//entt::entity arena = entt::null;
 
+	entt::entity timerText = entt::null;
 	entt::entity camera = entt::null;
 	entt::entity title = entt::null;
 	entt::entity text = entt::null;

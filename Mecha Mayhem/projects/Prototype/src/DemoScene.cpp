@@ -124,6 +124,13 @@ void DemoScene::Update()
 			winner = true;
 	}
 
+	if (m_gameTimer > 0) {
+		m_gameTimer -= Time::dt;
+		if (m_gameTimer <= 0) {
+			winner = true;
+		}
+	}
+
 	if (m_timer > 0) {
 		m_timer -= Time::dt;
 		if (m_timer <= 0) {
@@ -182,6 +189,8 @@ void DemoScene::Update()
 			}
 		}
 		m_timer = 5.f;
+		if (LeaderBoard::timedGoal)
+			m_gameTimer = 0.f;
 	}
 }
 
@@ -191,6 +200,54 @@ void DemoScene::LateUpdate()
 
 	for (int i(0); i < LeaderBoard::playerCount; ++i) {
 		Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup;
+	}
+}
+
+void DemoScene::DrawOverlay()
+{
+	//drawTimer if timed match
+	if (m_gameTimer >= 0) {
+		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
+		glm::mat4 timerMat = glm::mat4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			1.75f, m_yPos, -99.9f, 1
+		);
+
+		Sprite::BeginDraw(4);
+
+		//get digits
+		int min = m_gameTimer / 60;
+		//get seconds
+		int sec1 = m_gameTimer - (60 * min);
+		//get tens
+		int sec2 = sec1 / 10;
+		sec1 = sec1 - (sec2 * 10);
+
+		//draw digits here
+		Player::m_digits[min].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		//timerMat[3] = glm::vec4(0, 8.5f, -100, 1);
+		//m_colon.Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		timerMat[3].x = -0.5f;
+		Player::m_digits[sec2].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		timerMat[3].x = -1.75f;
+		Player::m_digits[sec1].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+
+		Sprite::PerformDraw();
+	}
+
+	if (m_paused) {
+		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
+		static const glm::mat4 pauseMat = glm::mat4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, -100, 1
+		);
+
+		m_pauseSprite.DrawSingle(Rendering::orthoVP.GetViewProjection(), pauseMat);
+		//Rendering::DrawPauseScreen(m_pauseSprite);
 	}
 }
 
@@ -206,8 +263,15 @@ Scene* DemoScene::Reattach()
 	Rendering::AmbientStrength = 1.f;
 
 	m_camCount = LeaderBoard::playerCount;
-
-	killGoal = LeaderBoard::scoreGoal;
+	if (LeaderBoard::timedGoal) {
+		m_gameTimer = LeaderBoard::scoreGoal * 60.f;
+		if (LeaderBoard::playerCount == 2)
+			m_yPos = -6.2f;
+		else
+			m_yPos = 8.85f;
+	}
+	else
+		killGoal = LeaderBoard::scoreGoal;
 
 	std::vector<float> spawntests = {};
 	std::vector<glm::vec3> spawnPos = {

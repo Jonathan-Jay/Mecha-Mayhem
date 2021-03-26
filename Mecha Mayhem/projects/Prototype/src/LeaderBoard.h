@@ -29,6 +29,7 @@ public:
 	static PlayerChoice players[4];
 	static size_t playerCount;
 	static int scoreGoal;
+	static bool timedGoal;
 
 private:
 	void SetDigits(int number, int index);
@@ -59,3 +60,4 @@ private:
 inline LeaderBoard::PlayerChoice LeaderBoard::players[4] = {};
 inline size_t LeaderBoard::playerCount = 0;
 inline int LeaderBoard::scoreGoal = 5;
+inline bool LeaderBoard::timedGoal = false;

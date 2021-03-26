@@ -95,17 +95,23 @@ public:
 				if (touched->PickUpOffhand(Player::OFFHAND::HEALPACK2)) {
 					m_timer = m_delay;
 					m_spawnerModel.SetDirection(false);
+
+					AudioEngine::Instance().GetEvent("pickup").Restart();
 				}
 			}
 			else if (m_currWeapon == Player::WEAPON::SWORD) {
 				if (touched->PickUpSword()) {
 					m_timer = m_delay;
 					m_spawnerModel.SetDirection(false);
+
+					AudioEngine::Instance().GetEvent("pickup").Restart();
 				}
 			}
 			else if (touched->PickUpWeapon(m_currWeapon)) {
 				m_timer = m_delay;
 				m_spawnerModel.SetDirection(false);
+
+				AudioEngine::Instance().GetEvent("pickup").Restart();
 			}
 		}
 	}

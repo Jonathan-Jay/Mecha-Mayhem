@@ -10,6 +10,7 @@ public:
 
 	virtual void Init(int windowWidth, int windowHeight) override;
 	virtual void Update() override;
+	virtual void DrawOverlay() override;
 	virtual Scene* Reattach() override;
 	/*virtual void ImGuiFunc() override
 	{
@@ -82,5 +83,7 @@ private:
 	entt::entity lightDrone = entt::null;
 	entt::entity cameraDrone = entt::null;
 	entt::entity speakerDrone = entt::null;
+
+	Sprite m_pauseSprite;
 };
 

@@ -147,19 +147,7 @@ void Scene::BackEndUpdate()
 
 	Sprite::PerformUIDraw(m_camCount);
 
-	if (m_paused)   if (m_pauseSprite.IsValid()) {
-		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
-
-		static const glm::mat4 pauseMat = glm::mat4(
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, -100, 1
-		);
-
-		m_pauseSprite.DrawSingle(Rendering::orthoVP.GetViewProjection(), pauseMat);
-		//Rendering::DrawPauseScreen(m_pauseSprite);
-	}
+	DrawOverlay();
 }
 
 void Scene::QueueSceneChange(size_t index) {

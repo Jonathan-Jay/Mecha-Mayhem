@@ -18,6 +18,7 @@ Sprite::Sprite(const glm::vec4& colour, float width, float height)
 
 Sprite& Sprite::Init(const std::string& textureName, float width, float height)
 {
+	m_enabled = true;
 	m_width = width;
 	m_height = height;
 
@@ -46,6 +47,7 @@ Sprite& Sprite::Init(const std::string& textureName, float width, float height)
 
 Sprite& Sprite::Init(const glm::vec4& colour, float width, float height)
 {
+	m_enabled = true;
 	m_width = width;
 	m_height = height;
 
@@ -90,6 +92,7 @@ void Sprite::BeginUIDraw(unsigned UIamt, unsigned camCount)
 
 void Sprite::Draw(const glm::mat4& VP, const glm::mat4& model)
 {
+	if (!m_enabled)	return;
 	//glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 
 	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
@@ -99,6 +102,7 @@ void Sprite::Draw(const glm::mat4& VP, const glm::mat4& model)
 
 void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
 {
+	if (!m_enabled)	return;
 	m_shader->Bind();
 
 	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
@@ -115,6 +119,7 @@ void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
 
 void Sprite::DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum)
 {
+	if (!m_enabled)	return;
 	//glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 
 	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));

@@ -161,8 +161,6 @@ public:
 		if (m_meleeDmg == m_punchDmg) {
 			m_meleeDmg = m_swordDmg;
 
-			AudioEngine::Instance().GetEvent("pickup").Restart();
-
 			return true;
 		}
 		return false;
@@ -174,6 +172,7 @@ public:
 	//return score
 	short GetScore() { return m_killCount; }
 
+	static Sprite m_digits[10];
 private:
 	bool groundTest(float yVelo, PhysBody& bodyPos);
 
@@ -219,7 +218,6 @@ private:
 	static Sprite m_dashBarBack;
 	static Sprite m_reticle;
 	static Sprite m_scoreBack;
-	static Sprite m_digits[10];
 	static Sprite m_ammoBar;
 	static Sprite m_ammoBarBack;
 	
@@ -259,8 +257,8 @@ private:
 	bool m_stepped = false;
 	bool m_invincible = false;
 
-	static const short m_punchDmg = 8;
-	static const short m_swordDmg = 16;
+	static const short m_punchDmg = 10;
+	static const short m_swordDmg = 25;
 
 	short m_walkFrame = 0;
 	short m_meleeDmg = m_punchDmg;

@@ -249,10 +249,10 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 		}
 		else {
 			UIMat[3][0] = x - 0.65f * scaleMod;
-			m_digits[0].DrawToUI(VP, UIMat, camNum);
+			m_digits[9].DrawToUI(VP, UIMat, camNum);
 
 			UIMat[3][0] = x + 0.65f * scaleMod;
-			m_digits[0].DrawToUI(VP, UIMat, camNum);
+			m_digits[9].DrawToUI(VP, UIMat, camNum);
 		}
 
 
@@ -887,27 +887,45 @@ btVector3 Player::Melee(const glm::vec3& pos)
 
 bool Player::PickUpWeapon(WEAPON pickup)
 {
-	GunProperties selectedGun = GetProperties(pickup);
 	if (m_currWeapon == WEAPON::FIST) {
+		const GunProperties& selectedGun = GetProperties(pickup);
 		m_currWeapon = pickup;
 		m_currWeaponAmmo = selectedGun.ammoCapacity;
 		m_speed = selectedGun.movementSpeed;
-		//m_swapWeapon.play();
-		AudioEngine::Instance().GetEvent("pickup").Restart();
 
 		return true;
 	}
+	//if gun matches current weapon, then replenish ammo
+	if (m_currWeapon == pickup) {
+		short tempAmmo = GetProperties(pickup).ammoCapacity;
+		if (m_currWeaponAmmo != tempAmmo) {
+			m_currWeaponAmmo = tempAmmo;
+
+			return true;
+		}
+		return false;
+
+	}
+
 	if (m_secWeapon == WEAPON::FIST) {
-		if (m_currWeapon == pickup)
-			return false;
+		const GunProperties& selectedGun = GetProperties(pickup);
 		m_secWeapon = pickup;
 		m_secWeaponAmmo = selectedGun.ammoCapacity;
 		m_speed = selectedGun.movementSpeed;
 
-		AudioEngine::Instance().GetEvent("pickup").Restart();
-
 		return true;
 	}
+	//if gun matches secondary weapon, then replenish ammo
+	if (m_secWeapon == pickup) {
+		short tempAmmo = GetProperties(pickup).ammoCapacity;
+		if (m_secWeaponAmmo != tempAmmo) {
+			m_secWeaponAmmo = tempAmmo;
+
+			return true;
+		}
+		return false;
+	}
+
 	return false;
 }
 
@@ -915,9 +933,6 @@ bool Player::PickUpOffhand(OFFHAND pickup)
 {
 	if (m_offhand == OFFHAND::EMPTY || m_offhand == OFFHAND::HEALPACK1) {
 		m_offhand = pickup;
-
-		AudioEngine::Instance().GetEvent("pickup").Restart();
-
 		return true;
 	}
 	return false;

@@ -10,9 +10,12 @@ public:
 	virtual void Init(int windowWidth, int windowHeight) override;
 	virtual void Update() override;
 	virtual void LateUpdate() override;
+	virtual void DrawOverlay() override;
 	virtual Scene* Reattach() override;
 	virtual void ImGuiFunc() override {
 		Scene::ImGuiFunc();
+
+		ImGui::SliderFloat("timerPos", &m_yPos, -10, 10);
 
 		for (int i(0); i < 4; ++i) {
 			if (bodyEnt[i] != entt::null)
@@ -20,16 +23,24 @@ public:
 					ECS::GetComponent<Player>(bodyEnt[i]).GivePoints(1);
 		}
 	}
+	virtual void Exit() override {
+		m_gameTimer = -1.f;
+		//impossible goal (if it does happen, then the game jsut ends)
+		killGoal = 100;
+	}
 
 private:
-
-	size_t killGoal = 10;
+	float m_yPos = 8.5f;
+	size_t killGoal = 100;
 
 	float camDistance = 2.5f;
 	float m_timer = 0.f;
+	float m_gameTimer = -1.f;
 
 	entt::entity bodyEnt[4] = { entt::null, entt::null, entt::null, entt::null };
 	entt::entity Head[4] = { entt::null, entt::null, entt::null, entt::null };
 	entt::entity cameraEnt[4] = { entt::null, entt::null, entt::null, entt::null };
+
+	Sprite m_pauseSprite;
 };
 

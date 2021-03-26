@@ -31,6 +31,12 @@ public:
 	//after physics update, mainly for lights and stuff
 	virtual void LateUpdate() {}
 
+	//drawing pauseScrenes and stuff
+	virtual void DrawOverlay() {
+		//Gbuffer fixes this
+		//glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
+	}
+
 	//called on scene change
 	virtual void Exit() {
 		AudioEngine::Instance().StopAllSounds();
@@ -208,7 +214,6 @@ protected:
 	btDiscreteDynamicsWorld *m_world = nullptr;
 	HitboxGen m_colliders;
 	Effects m_effects;
-	Sprite m_pauseSprite;
 	FrameEffects m_frameEffects;
 
 	btDbvtBroadphase *_broadphase = nullptr;

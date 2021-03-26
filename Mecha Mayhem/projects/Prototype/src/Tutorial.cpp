@@ -94,7 +94,7 @@ void Tutorial::Init(int width, int height)
 	//map
 	{
 		auto entity = ECS::CreateEntity();
-		ECS::AttachComponent<ObjLoader>(entity).LoadMesh("maps/tutorialMap.obj", true);
+		ECS::AttachComponent<MultiTextObj>(entity).LoadMesh("maps/tutorialMap.obj");
 		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0, 0, 0));
 	}
 
@@ -341,6 +341,22 @@ void Tutorial::Update()
 	ECS::GetComponent<Transform>(lightDrone).SetPosition(dronePath.Update(Time::dt).GetPosition()).SetRotation(dronePath.GetLookingForwards(0.5f));
 	ECS::GetComponent<Transform>(cameraDrone).SetPosition(dronePath2.Update(Time::dt).GetPosition()).SetRotation(dronePath2.GetLookingForwards(0.5f));
 	ECS::GetComponent<Transform>(speakerDrone).SetPosition(dronePath3.Update(Time::dt).GetPosition()).SetRotation(dronePath3.GetLookingForwards(0.5f));
+}
+
+void Tutorial::DrawOverlay()
+{
+
+	if (m_paused) {
+		static const glm::mat4 pauseMat = glm::mat4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, -100, 1
+		);
+
+		m_pauseSprite.DrawSingle(Rendering::orthoVP.GetViewProjection(), pauseMat);
+		//Rendering::DrawPauseScreen(m_pauseSprite);
+	}
 }
 
 Scene* Tutorial::Reattach()

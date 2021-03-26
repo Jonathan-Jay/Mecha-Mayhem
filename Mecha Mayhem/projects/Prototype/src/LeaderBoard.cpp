@@ -116,13 +116,13 @@ void LeaderBoard::Update()
 				if (m_timer < 1) {
 					ECS::GetComponent<Sprite>(playerScores[i].bar).SetWidth(fakeSmoothStep(-3.88f, 0.f, m_timer));
 				}
-				if (m_timer < 2) {
+				if (m_timer < 3) {
 					//lerp
 					ECS::GetComponent<Transform>(playerScores[i].parent).SetPosition(fakeSmoothStep(
-						playerScores[i].finalPos, playerScores[i].startingPos, glm::clamp(m_timer - 1, 0.f, 1.f)
+						playerScores[i].finalPos, playerScores[i].startingPos, glm::clamp((m_timer - 1.f) - 0.25f * i, 0.f, 1.f)
 					));
 				}
-				if (m_timer < 3) {
+				if (m_timer < 4) {
 					//display digits (takes a second)
 					float percent = (m_timer - 2) * 2.f;
 					ECS::GetComponent<Sprite>(playerScores[i].digit2).SetWidth(-0.75f * glm::clamp(2.f - percent, 0.f, 1.f));
@@ -187,7 +187,7 @@ Scene* LeaderBoard::Reattach()
 	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);
 	Rendering::BackColour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
 
-	m_timer = 3.25f;
+	m_timer = 4.25f;
 
 	playerIndexes.clear();
 
@@ -221,8 +221,12 @@ Scene* LeaderBoard::Reattach()
 
 void LeaderBoard::SetDigits(int number, int index)
 {
-	if (number > 99)	return;
 	if (index < 0 || index > 3)	return;
+	if (number > 99) {
+		ECS::GetComponent<Sprite>(playerScores[index].digit1).Init("num/9.png", 0.f, 1.f);
+		ECS::GetComponent<Sprite>(playerScores[index].digit2).Init("num/9.png", 0.f, 1.f);
+		return;
+	}
 
 	int val = number / 10;
 	ECS::GetComponent<Sprite>(playerScores[index].digit1).Init(
