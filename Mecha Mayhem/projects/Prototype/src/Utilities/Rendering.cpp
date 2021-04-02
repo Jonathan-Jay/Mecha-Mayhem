@@ -191,11 +191,11 @@ namespace Rendering {
 			ObjMorphLoader::PerformDrawShadow(lightVPMatrix);
 
 			//make sure this runs after ObjDraw
-			Sprite::PerformDrawShadow(/*lightVPMatrix*/);
+			Sprite::PerformDrawShadow(lightVPMatrix);
 
 			//map drawn last becuase shader reuse lol
-			textObjView.each([](MultiTextObj& obj, Transform& trans) {
-				obj.DrawShadow(trans.GetModel());
+			textObjView.each([&](MultiTextObj& obj, Transform& trans) {
+				obj.DrawShadow(lightVPMatrix * trans.GetModel());
 				});
 		//}
 		FrameEffects::UnBindShadowMap();

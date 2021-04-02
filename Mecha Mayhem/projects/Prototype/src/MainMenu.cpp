@@ -19,7 +19,8 @@ void MainMenu::Init(int width, int height)
 
 	{
 		auto entity = ECS::CreateEntity();
-		ECS::AttachComponent<ObjLoader>(entity).LoadMesh("models/cringe.obj");
+		//ECS::AttachComponent<ObjLoader>(entity).LoadMesh("models/cringe.obj");
+		ECS::AttachComponent<ObjLoader>(entity).LoadMesh("maps/MapUntextured.obj");
 		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(0, -5, 0));
 
 		//arena = entity;
@@ -217,7 +218,7 @@ void MainMenu::Update()
 				ControllerInput::GetButtonDown(BUTTON::A, CONUSER::TWO) ||
 				ControllerInput::GetButtonDown(BUTTON::A, CONUSER::THREE) ||
 				ControllerInput::GetButtonDown(BUTTON::A, CONUSER::FOUR)) {
-				ECS::GetComponent<ObjMorphLoader>(title).ToggleDirection();
+				ECS::GetComponent<ObjMorphLoader>(title).ToggleDirection();// .SetSpeed(0.75f);
 				m_exit = true;
 			}
 

@@ -1041,40 +1041,39 @@ void ObjMorphLoader::PerformDrawTrans(const glm::mat4& view, const Camera& camer
 void ObjMorphLoader::PerformDrawShadow(const glm::mat4& lightVPMatrix)
 {
 	m_shadowShader->Bind();
-	m_shadowShader->SetUniformMatrix("lightVPMatrix", lightVPMatrix);
 
 	for (int i(0); i < m_matQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_matQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_matQueue[i].model);
 		m_shadowShader->SetUniform("t", m_matQueue[i].t);
 
 		m_matQueue[i].vao->Render();
 	}
 	for (int i(0); i < m_texQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_texQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_texQueue[i].model);
 		m_shadowShader->SetUniform("t", m_texQueue[i].t);
 
 		m_texQueue[i].vao->Render();
 	}
 	for (int i(0); i < m_defaultQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_defaultQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_defaultQueue[i].model);
 		m_shadowShader->SetUniform("t", m_defaultQueue[i].t);
 
 		m_defaultQueue[i].vao->Render();
 	}
 	for (int i(0); i < m_matTempQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_matTempQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_matTempQueue[i].model);
 		m_shadowShader->SetUniform("t", m_matTempQueue[i].t);
 
 		m_matTempQueue[i].vao->Render();
 	}
 	for (int i(0); i < m_texTempQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_texTempQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_texTempQueue[i].model);
 		m_shadowShader->SetUniform("t", m_texTempQueue[i].t);
 
 		m_texTempQueue[i].vao->Render();
 	}
 	for (int i(0); i < m_defaultTempQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_defaultTempQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_defaultTempQueue[i].model);
 		m_shadowShader->SetUniform("t", m_defaultTempQueue[i].t);
 
 		m_defaultTempQueue[i].vao->Render();

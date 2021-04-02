@@ -214,8 +214,15 @@ void Tutorial::Update()
 		}
 	}
 
-	if (m_paused)
+	if (m_paused) {
+		for (int i(0), temp(0); i < 4; ++i) {
+			if (LeaderBoard::players[i].user != CONUSER::NONE) {
+				LeaderBoard::players[i].sensitivity = ECS::GetComponent<Player>(bodyEnt[temp]).EditSensitivity();
+				++temp;
+			}
+		}
 		return;
+	}
 
 	/*auto &p1 = ECS::GetComponent<Player>(bodyEnt1);
 	auto &p2 = ECS::GetComponent<Player>(bodyEnt2);
@@ -379,15 +386,15 @@ Scene* Tutorial::Reattach()
 		--i;
 		cameraEnt[i] = ECS::CreateEntity();
 		if (m_camCount == 2)
-			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(100.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
 		else
-			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(100.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
 
 		bodyEnt[i] = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(bodyEnt[i]).CreatePlayer(bodyEnt[i], BLM::GLMQuat, glm::vec3(0, 1.5f, 0));
 		ECS::AttachComponent<Player>(bodyEnt[i]).Init(
 			LeaderBoard::players[temp].user, LeaderBoard::players[temp].model, LeaderBoard::players[temp].colour, i
-		).SetRotation(glm::radians(180.f), 0).SetSpawn(glm::vec3(0, 1.5f, 0));
+		).SetRotation(glm::radians(180.f), 0).SetSpawn(glm::vec3(0, 1.5f, 0)).SetSensitivity(LeaderBoard::players[temp].sensitivity);
 
 		Head[i] = ECS::CreateEntity();
 		ECS::GetComponent<Transform>(Head[i]).SetPosition(glm::vec3(0, 0.75f, 0)).

@@ -688,35 +688,34 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 void ObjLoader::PerformDrawShadow(const glm::mat4& lightVPMatrix)
 {
 	m_shadowShader->Bind();
-	m_shadowShader->SetUniformMatrix("lightVPMatrix", lightVPMatrix);
 
 	for (int i(0); i < m_matQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_matQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_matQueue[i].model);
 
 		m_models[m_matQueue[i].modelIndex].vao->Render();
 	}
 	for (int i(0); i < m_texQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_texQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_texQueue[i].model);
 
 		m_models[m_texQueue[i].modelIndex].vao->Render();
 	}
 	for (int i(0); i < m_defaultQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_defaultQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_defaultQueue[i].model);
 
 		m_models[m_defaultQueue[i].modelIndex].vao->Render();
 	}
 	for (int i(0); i < m_matTempQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_matTempQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_matTempQueue[i].model);
 
 		m_models[m_matTempQueue[i].modelIndex].vao->Render();
 	}
 	for (int i(0); i < m_texTempQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_texTempQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_texTempQueue[i].model);
 
 		m_models[m_texTempQueue[i].modelIndex].vao->Render();
 	}
 	for (int i(0); i < m_defaultTempQueue.size(); ++i) {
-		m_shadowShader->SetUniformMatrix("model", m_defaultTempQueue[i].model);
+		m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_defaultTempQueue[i].model);
 
 		m_models[m_defaultTempQueue[i].modelIndex].vao->Render();
 	}

@@ -172,6 +172,9 @@ public:
 	//return score
 	short GetScore() { return m_killCount; }
 
+	Player& SetSensitivity(glm::vec2 sensitivity) { m_sensitivity = sensitivity; return *this; }
+	glm::vec2 EditSensitivity();
+
 	static Sprite m_digits[10];
 private:
 	bool groundTest(float yVelo, PhysBody& bodyPos);
@@ -200,8 +203,11 @@ private:
 
 	static const glm::mat4 m_gunOffsetMat;
 	static const glm::mat4 m_swordOffsetMat;
+	static const glm::mat4 m_rotation90;
 	static constexpr float pi = glm::half_pi<float>() - 0.01f;
 
+	static const float m_maxSensitivity;
+	static const float m_minSensitivity;
 	static const glm::vec4 m_gunOffset;
 	static const btVector3 m_gravity;
 	static glm::vec3 m_skyPos;
@@ -211,7 +217,6 @@ private:
 
 	static Sprite m_healthBarOutline;
 	static Sprite m_healthBar;
-	static Sprite m_healthBarDamaged;
 	static Sprite m_healthBarBack;
 	static Sprite m_dashBarOutline;
 	static Sprite m_dashBar;
@@ -304,5 +309,6 @@ private:
 	glm::vec3 m_deathPos = glm::vec3(0.f);
 	glm::vec2 m_rot = glm::vec2(0.f);
 	glm::vec2 m_deathRot = glm::vec2(0.f);
+	glm::vec2 m_sensitivity = glm::vec2(2.f, 1.5f);
 };
 

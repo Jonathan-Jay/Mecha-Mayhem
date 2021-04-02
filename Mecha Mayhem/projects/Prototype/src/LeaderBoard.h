@@ -24,6 +24,7 @@ public:
 		int model = 0;
 		int score = 0;
 		glm::vec3 colour = BLM::GLMzero;
+		glm::vec2 sensitivity = glm::vec2(2.f, 1.5f);
 	};
 
 	static PlayerChoice players[4];

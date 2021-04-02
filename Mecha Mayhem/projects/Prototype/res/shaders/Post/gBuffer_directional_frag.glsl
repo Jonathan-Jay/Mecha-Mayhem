@@ -53,8 +53,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 	//Transform into a [0,1] range
 	projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
 
-//	if (projectionCoordinates.z > 1.0)
-//		return 0.0;
+	//if (projectionCoordinates.z > 1.0)
+	//	return 0.0;
 
 	float currDepth = projectionCoordinates.z - bias;
 	float shadow = 0.0;

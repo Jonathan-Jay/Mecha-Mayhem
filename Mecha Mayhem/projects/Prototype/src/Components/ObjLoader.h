@@ -1,6 +1,5 @@
 #pragma once
 #include "Sprite.h"
-#include "Utilities/BLM.h"
 
 class ObjLoader
 {

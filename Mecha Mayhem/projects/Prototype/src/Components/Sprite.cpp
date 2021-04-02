@@ -90,17 +90,17 @@ void Sprite::BeginUIDraw(unsigned UIamt, unsigned camCount)
 	}
 }
 
-void Sprite::Draw(const glm::mat4& VP, const glm::mat4& model)
+void Sprite::Draw(const glm::mat4& VP, const glm::mat4& model, const glm::vec3& addColour)
 {
 	if (!m_enabled)	return;
 	//glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 
 	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 	
-	m_Queue.push_back({ m_index, scaledModel, VP * scaledModel, m_receiveShadows });
+	m_Queue.push_back({ m_index, scaledModel, VP * scaledModel, addColour, m_receiveShadows });
 }
 
-void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
+void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model, const glm::vec3& addColour)
 {
 	if (!m_enabled)	return;
 	m_shader->Bind();
@@ -110,6 +110,7 @@ void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
 	m_shader->SetUniformMatrix("MVP", VP * scaledModel);
 	m_shader->SetUniformMatrix("model", scaledModel);
 	m_shader->SetUniform("receiveShadows", m_receiveShadows);
+	m_shader->SetUniform("addColour", addColour);
 	m_textures[m_index].texture->Bind(0);
 
 	m_square->Render();
@@ -117,14 +118,14 @@ void Sprite::DrawSingle(const glm::mat4& VP, const glm::mat4& model)
 	Shader::UnBind();
 }
 
-void Sprite::DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum)
+void Sprite::DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum, const glm::vec3& addColour)
 {
 	if (!m_enabled)	return;
 	//glm::mat4 MVP = VP * glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 
 	glm::mat4 scaledModel = glm::scale(model, glm::vec3(m_width * m_scale, m_height * m_scale, 1));
 
-	m_UIQueue[camNum].push_back({ m_index, scaledModel, VP * scaledModel });
+	m_UIQueue[camNum].push_back({ m_index, scaledModel, VP * scaledModel, addColour, 0 });
 }
 
 void Sprite::PerformDraw()
@@ -136,6 +137,7 @@ void Sprite::PerformDraw()
 			m_shader->SetUniformMatrix("MVP", m_Queue[i].MVP);
 			m_shader->SetUniformMatrix("model", m_Queue[i].model);
 			m_shader->SetUniform("receiveShadows", m_Queue[i].receiveShadows);
+			m_shader->SetUniform("addColour", m_Queue[i].additiveColour);
 			m_textures[m_Queue[i].index].texture->Bind(0);
 
 			m_square->Render();
@@ -165,6 +167,7 @@ void Sprite::PerformUIDraw(int numOfCams)
 				m_shader->SetUniformMatrix("MVP", m_UIQueue[cam][i].MVP);
 				m_shader->SetUniformMatrix("model", m_UIQueue[cam][i].model);
 				m_shader->SetUniform("receiveShadows", 0);
+				m_shader->SetUniform("addColour", m_UIQueue[cam][i].additiveColour);
 				m_textures[m_UIQueue[cam][i].index].texture->Bind(0);
 
 				m_square->Render();
@@ -175,14 +178,13 @@ void Sprite::PerformUIDraw(int numOfCams)
 	}
 }
 
-void Sprite::PerformDrawShadow(/*const glm::mat4& lightVPMatrix*/)
+void Sprite::PerformDrawShadow(const glm::mat4& lightVPMatrix)
 {
 	if (m_Queue.size()) {
 		ObjLoader::m_shadowShader->Bind();
-		//ObjLoader::m_shadowShader->SetUniformMatrix("lightVPMatrix", lightVPMatrix);
 
 		for (int i(0); i < m_Queue.size(); ++i) {
-			ObjLoader::m_shadowShader->SetUniformMatrix("model", m_Queue[i].model);
+			ObjLoader::m_shadowShader->SetUniformMatrix("MVP", lightVPMatrix * m_Queue[i].model);
 
 			m_square->Render();
 		}

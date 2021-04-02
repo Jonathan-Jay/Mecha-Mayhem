@@ -403,13 +403,12 @@ void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Cam
 
 }
 
-void MultiTextObj::DrawShadow(const glm::mat4& model)
+void MultiTextObj::DrawShadow(const glm::mat4& MVP)
 {
 	ObjLoader::m_shadowShader->Bind();
-	//the light matrix has already been sent
 
 	for (int i(0); i < m_models[m_index].vao.size(); ++i) {
-		ObjLoader::m_shadowShader->SetUniformMatrix("model", model);
+		ObjLoader::m_shadowShader->SetUniformMatrix("MVP", MVP);
 
 		m_models[m_index].vao[i]->Render();
 	}

@@ -29,7 +29,9 @@ public:
 		killGoal = 100;
 	}
 
+	static LUT3D gameEndCube;
 private:
+	static const float winWaitTime;
 	float m_yPos = 8.5f;
 	size_t killGoal = 100;
 
@@ -43,4 +45,7 @@ private:
 
 	Sprite m_pauseSprite;
 };
+
+inline const float DemoScene::winWaitTime = 5.f;
+inline LUT3D DemoScene::gameEndCube;
 

@@ -84,8 +84,12 @@ void DemoScene::Update()
 	bool winner = false;
 	if (m_paused) {
 		int allHolding = 0;
-		for (int i(0); i < LeaderBoard::playerCount; ++i) {
-			allHolding += ControllerInput::GetButton(BUTTON::SELECT, CONUSER(i));
+		for (int i(0), temp(0); i < 4; ++i) {
+			if (LeaderBoard::players[i].user != CONUSER::NONE) {
+				LeaderBoard::players[i].sensitivity = ECS::GetComponent<Player>(bodyEnt[temp]).EditSensitivity();
+				allHolding += ControllerInput::GetButton(BUTTON::SELECT, LeaderBoard::players[i].user);
+				++temp;
+			}
 		}
 
 		if (allHolding == LeaderBoard::playerCount) {
@@ -165,6 +169,10 @@ void DemoScene::Update()
 			Init(BackEnd::GetWidth(), BackEnd::GetHeight());
 			QueueSceneChange(3);
 		}
+		//we update the colour correction
+		else if (m_frameEffects[0]) {
+			((ColourCorrection*)m_frameEffects[0])->SetIntensity(1.f - (m_timer / winWaitTime));
+		}
 	}
 	else if (winner) {
 		for (int i(0), temp(0); i < 4; ++i) {
@@ -188,9 +196,17 @@ void DemoScene::Update()
 				++temp;
 			}
 		}
-		m_timer = 5.f;
+		m_timer = winWaitTime;
 		if (LeaderBoard::timedGoal)
 			m_gameTimer = 0.f;
+
+		//at end of game, add colour correction;
+		if (m_frameEffects[0] == nullptr) {
+			m_frameEffects.InsertEffect(new ColourCorrection(), 0);
+			m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+			((ColourCorrection*)m_frameEffects[0])->SetIntensity(0.f);
+			((ColourCorrection*)m_frameEffects[0])->SetCube(gameEndCube);
+		}
 	}
 }
 
@@ -321,7 +337,8 @@ Scene* DemoScene::Reattach()
 			m_colliders.SetSpawnNear(
 				ECS::AttachComponent<Player>(bodyEnt[i]).Init(
 					LeaderBoard::players[temp].user, LeaderBoard::players[temp].model, LeaderBoard::players[temp].colour, i
-				).SetRotation(glm::radians(180.f), 0), spawnPos[spawntests[i]], 25.f
+					).SetRotation(glm::radians(180.f), 0).SetSensitivity(LeaderBoard::players[temp].sensitivity),
+				spawnPos[spawntests[i]], 25.f
 			)
 		);
 

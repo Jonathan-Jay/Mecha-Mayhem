@@ -54,7 +54,7 @@ private:
 
 	CatmullFollower cameraPath{ 1, {
 		glm::vec3(-2.5f, 2.5f, 12.5f),
-		glm::vec3(12.5f, 0.f, 12.5f),
+		glm::vec3(12.5f, 1.f, 12.5f),
 		glm::vec3(12.5f, 2.5f, -2.5f),
 		glm::vec3(-2.5f, 0.f, -2.5f)
 	}, 8 };

@@ -8,6 +8,7 @@ const glm::vec4 Player::m_gunOffset = glm::vec4(
 	0.3f, -0.3f, -0.4f, 1
 );
 
+const glm::mat4 Player::m_rotation90 = glm::rotate(BLM::GLMMat, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
 const glm::mat4 Player::m_gunOffsetMat = glm::mat4(
 	1, 0, 0, 0,
 	0, 1, 0, 0,
@@ -31,6 +32,9 @@ const Player::GunProperties Player::missileLauncher	{ WEAPON::MISSILE,		1,		100,
 const Player::GunProperties Player::shotgun			{ WEAPON::SHOTGUN,		10,		30,		2.f,		 10.f,		25.f };
 const Player::GunProperties Player::machineGun		{ WEAPON::MACHINEGUN,	50,		7,		0.1f,		 10.f };
 
+const float Player::m_maxSensitivity = 7.5f;
+const float Player::m_minSensitivity = 0.75f;
+
 float Player::m_camDistance = 5.f;
 float Player::m_dashDistance = 7.5f;
 glm::vec3 Player::m_skyPos = glm::vec3(0, 50, 0);
@@ -38,7 +42,6 @@ glm::vec3 Player::m_skyPos = glm::vec3(0, 50, 0);
 Camera Player::m_orthoCam = {};
 Sprite Player::m_healthBarOutline = {};
 Sprite Player::m_healthBar = {};
-Sprite Player::m_healthBarDamaged = {};
 Sprite Player::m_healthBarBack = {};
 Sprite Player::m_dashBarOutline = {};
 Sprite Player::m_dashBar = {};
@@ -100,7 +103,6 @@ void Player::Init(int width, int height)
 
 	m_healthBarOutline = { "ui/healthbar.png", 15.96f, 1.5f };
 	m_healthBar = { glm::vec4(1, 0, 0, 1.f), 14.95f, 0.9f };
-	m_healthBarDamaged = { glm::vec4(1, 1, 1, 1.f), 14.95f, 0.9f };
 	m_healthBarBack = { glm::vec4(0, 0, 0, 1.f), 14.95f, 0.9f };
 
 	m_dashBarOutline = { "ui/energybar.png", 10.38f, 1.5f };
@@ -284,23 +286,15 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 		UIMat = BLM::GLMMat;
 
 		UIMat[3] = glm::vec4((1 - healthPercent) * 7.475f, -8.5f, -9.9f, 1);
-		if (m_damageCounter) 
-		{
-			m_healthBarDamaged.SetWidth(14.95f * healthPercent);
-			m_healthBarDamaged.DrawToUI(VP, UIMat, camNum);
-		}
-		else 
-		{
-			m_healthBar.SetWidth(14.95f * healthPercent);
-			m_healthBar.DrawToUI(VP, UIMat, camNum);
-		}
+		m_healthBar.SetWidth(14.95f * healthPercent);
+		m_healthBar.DrawToUI(VP, UIMat, camNum, glm::vec3(m_damageCounter * 2.f));
 
 		UIMat[3] = glm::vec4(0, -8.5f, -9.8f, 1);
 		m_healthBarBack.DrawToUI(VP, UIMat, camNum);
 
 		UIMat[3] = glm::vec4(dashPercent * 4.575f, -7.25f, -9.9f, 1);
 		m_dashBar.SetWidth(9.15f * (1 - dashPercent));
-		m_dashBar.DrawToUI(VP, UIMat, camNum);
+		m_dashBar.DrawToUI(VP, UIMat, camNum, glm::vec3((dashPercent != 0) * -0.25f));
 
 		UIMat[3] = glm::vec4(0, -7.25f, -9.8f, 1);
 		m_dashBarBack.DrawToUI(VP, UIMat, camNum);
@@ -313,9 +307,27 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 		UIMat[3] = glm::vec4(0, -7.25f, -10.f, 1);
 		m_dashBarOutline.DrawToUI(VP, UIMat, camNum);
 
+		//draw sensitivity ui when paused
+		if (paused) {
+			float xPercent = m_sensitivity.x / m_maxSensitivity;
+			float yPercent = m_sensitivity.y / m_maxSensitivity;
+			float tempY = (numOfCams == 1) * -3.f;
 
-		if (!paused && IsAlive()) {
-			UIMat[3] = glm::vec4(0, 0, -10, 1);
+			UIMat[3] = glm::vec4(0.f, tempY, -9.7f, 1);
+			m_ammoBarBack.DrawToUI(VP, UIMat, camNum);
+			UIMat[3] = glm::vec4(0.f, tempY + yPercent - 1.f, -9.9f, 1);
+			m_ammoBar.SetHeight(2.f * yPercent);
+			m_ammoBar.DrawToUI(VP, UIMat, camNum);
+
+			UIMat = m_rotation90;
+			UIMat[3] = glm::vec4(0.f, tempY, -9.8f, 1);
+			m_ammoBarBack.DrawToUI(VP, UIMat, camNum);
+			UIMat[3] = glm::vec4(1.f - xPercent, tempY, -10.f, 1);
+			m_ammoBar.SetHeight(2.f * xPercent);
+			m_ammoBar.DrawToUI(VP, UIMat, camNum);
+		}
+		else if (IsAlive()) {
+			UIMat[3] = glm::vec4(0, 0, -10.f, 1);
 			m_reticle.DrawToUI(VP, UIMat, camNum);
 		}
 
@@ -449,9 +461,9 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 
 	//Camera Rotation (above punch for user experience)
 	{
-		float multiplier = 2.f * (1 - ControllerInput::GetLT(m_user)) + 1.f;
-		m_rot.x += ControllerInput::GetRY(m_user) * multiplier * 0.75f * Time::dt;
-		m_rot.y += ControllerInput::GetRX(m_user) * multiplier * Time::dt;
+		float multiplier = 1.f - (ControllerInput::GetLT(m_user) * 0.666f);
+		m_rot.x += ControllerInput::GetRY(m_user) * multiplier * m_sensitivity.y * Time::dt;
+		m_rot.y += ControllerInput::GetRX(m_user) * multiplier * m_sensitivity.x * Time::dt;
 
 		//clamping vertical axis
 		if (m_rot.x > pi)			m_rot.x = pi;
@@ -503,7 +515,7 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 			xPos = 0;
 		}
 		if (!ControllerInput::GetButton(BUTTON::B, m_user))
-			distance *= multiplier * 0.333f;
+			distance *= multiplier;
 		if (m_drawSelf)		m_drawSelf = (distance > 0.75f);
 		personalCam.SetPosition(glm::vec3(xPos, 0, distance));
 	}
@@ -660,6 +672,35 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 	}
 
 	return;
+}
+
+glm::vec2 Player::EditSensitivity()
+{
+	if (ControllerInput::GetButton(BUTTON::DLEFT, m_user)) {
+		m_sensitivity.x -= Time::dt * 1.f;
+		if (m_sensitivity.x <= m_minSensitivity)
+			m_sensitivity.x = m_minSensitivity;
+	}
+	if (ControllerInput::GetButton(BUTTON::DRIGHT, m_user)) {
+		m_sensitivity.x += Time::dt * 1.f;
+		if (m_sensitivity.x >= m_maxSensitivity)
+			m_sensitivity.x = m_maxSensitivity;
+	}
+	if (ControllerInput::GetButton(BUTTON::DDOWN, m_user)) {
+		m_sensitivity.y -= Time::dt * 1.f;
+		if (m_sensitivity.y <= m_minSensitivity)
+			m_sensitivity.y = m_minSensitivity;
+	}
+	if (ControllerInput::GetButton(BUTTON::DUP, m_user)) {
+		m_sensitivity.y += Time::dt * 1.f;
+		if (m_sensitivity.y >= m_maxSensitivity)
+			m_sensitivity.y = m_maxSensitivity;
+	}
+
+	if (ControllerInput::GetButtonDown(BUTTON::Y, m_user))
+		m_sensitivity = glm::vec2(2.f, 1.5f);
+
+	return m_sensitivity;
 }
 
 //used this: https://gamedev.stackexchange.com/questions/58012/detect-when-a-bullet-rigidbody-is-on-ground

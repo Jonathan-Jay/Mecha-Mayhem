@@ -15,7 +15,11 @@ int main() {
 	if (!window)	return 1;
 
 	{
+		//set audio levels
 		AudioEngine::Instance().GetBus("Music").SetVolume(0.25f);
+
+		//this has to be done here
+		DemoScene::gameEndCube.loadFromFile("win.cube");
 
 		// Creating demo scenes
 		Scene::m_scenes.push_back(new MainMenu("Mecha Mayhem"));
@@ -28,12 +32,11 @@ int main() {
 		Scene::m_scenes[2]->Init(width, height);
 		Scene::m_scenes[3]->Init(width, height);
 
-									//controller	model	score	colour
+		//controller	model	score	colour
 		LeaderBoard::players[0] = { CONUSER::NONE,	1,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[1] = { CONUSER::NONE,	2,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[2] = { CONUSER::NONE,	3,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[3] = { CONUSER::NONE,	4,		0,		glm::vec3(0,0,0) };
-		//LeaderBoard::playerCount = 4;
 
 		Scene::m_activeScene = Scene::m_scenes[0]->Reattach();
 		/*Scene::m_scenes.push_back(new MapEditor("uh, not for playing"));
@@ -41,7 +44,15 @@ int main() {
 
 		Scene::m_activeScene->Exit();
 
-		Scene::m_activeScene = Scene::m_scenes[4]->Reattach();*/
+		Scene::m_activeScene = Scene::m_scenes[4]->Reattach();//*/
+		/*
+		LeaderBoard::players[0] = { CONUSER::ONE,	1,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::players[1] = { CONUSER::ONE,	2,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::players[2] = { CONUSER::ONE,	3,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::players[3] = { CONUSER::ONE,	4,		0,		glm::vec3(0,0,0) };
+		LeaderBoard::playerCount = 4;
+		LeaderBoard::scoreGoal = 0;
+		Scene::m_activeScene = Scene::m_scenes[2]->Reattach();//*/
 		glfwSetWindowTitle(window, Scene::m_activeScene->GetName().c_str());
 		
 		bool paused = false;
@@ -102,6 +113,9 @@ int main() {
 		}
 
 		Scene::m_activeScene->Exit();
+
+		//this has to be done here
+		DemoScene::gameEndCube.Unload();
 	}
 
 	Gameloop::Stop(usingImGui);

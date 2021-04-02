@@ -6,11 +6,11 @@
 
 //post effect stuff
 #include "Effects/Post/BloomEffect.h"
-#include "Effects/Post/ToonEffect.h"
 #include "Effects/Post/PixelEffect.h"
 #include "Effects/Post/SepiaEffect.h"
 #include "Effects/Post/GreyscaleEffect.h"
 #include "Effects/Post/DepthOfField.h"
+#include "Effects/Post/ColourCorrectionEffect.h"
 
 class Scene
 {
@@ -46,18 +46,6 @@ public:
 	virtual void ImGuiFunc() {
 		/*ImGui::SetWindowSize(ImVec2(150, 50));
 		ImGui::Text("Empty");*/
-		//if (ImGui::SliderFloat("Specular Power", &m_frameEffects.GetSun()._lightSpecularPow, 0.f, 100.f)) {
-		//	//blank lol
-		//}
-		//if (ImGui::SliderFloat("Shadow Max", &m_frameEffects.GetSun()._shadowBiasMax, 0.f, 0.005f, "%.7f")) {
-		//	//blank lol
-		//}
-		//if (ImGui::SliderFloat("Shadow Min", &m_frameEffects.GetSun()._shadowBiasMin, 0.f, 0.00005f, "%.7f")) {
-		//	//blank lol
-		//}
-		//if (ImGui::SliderFloat3("Direction", &m_frameEffects.GetSun()._lightDirection[0], -15.f, 15.f, "%.2f")) {
-		//	//blank lol
-		//}
 
 		if (ImGui::CollapsingHeader("Post Processing Effects"))
 		{
@@ -93,14 +81,6 @@ public:
 						float intensity = effect->GetIntensity();
 						if (ImGui::SliderFloat("Intensity", &intensity, 0.f, 1.f)) {
 							effect->SetIntensity(intensity);
-						}
-					}
-					else if (name == "Toon") {
-						ImGui::Text("Toon bands based on average of rgb");
-						ToonEffect* effect = (ToonEffect*)(m_frameEffects[i]);
-						int bands = effect->GetBands();
-						if (ImGui::SliderInt("Bands", &bands, 3, 15)) {
-							effect->SetBands(bands);
 						}
 					}
 					else if (name == "Pixel") {
@@ -143,14 +123,6 @@ public:
 					SepiaEffect* effect = new SepiaEffect();
 					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
 					effect->SetInfo("Sepia");
-					m_frameEffects.AddEffect(effect);
-					effect = nullptr;
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("\"Toon Shading\"")) {
-					ToonEffect* effect = new ToonEffect();
-					effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
-					effect->SetInfo("Toon");
 					m_frameEffects.AddEffect(effect);
 					effect = nullptr;
 				}

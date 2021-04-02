@@ -5,6 +5,7 @@ layout(location = 2) in vec3 inPosition;
 
 uniform sampler2D s_texture;
 uniform int receiveShadows;
+uniform vec3 addColour;
 
 const float specularPow = 0.1;
 const float shininess = 4.0;
@@ -22,7 +23,7 @@ void main() {
 	if (result.a < 0.5)
 		discard;
 
-	outColours = result;
+	outColours = vec4(result.rgb + addColour, 1.0);
 
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
 
