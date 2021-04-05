@@ -122,10 +122,19 @@ void Tutorial::Init(int width, int height)
 
 	/// End of creating entities
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightCount = 2;
+	/*Rendering::LightCount = 2;
 	Rendering::LightsColour[0] = glm::vec3(200.f);
 	Rendering::LightsPos[0] = glm::vec3(0, 10, -42.5f);
-	Rendering::LightsPos[1] = glm::vec3(0, 2, 0);
+	Rendering::LightsPos[1] = glm::vec3(0, 2, 0);*/
+
+	auto& lights = m_frameEffects.GetLights();
+	lights.clear();
+	lights.resize(2);
+	lights[0]._lightPos = glm::vec4(0, 10, -42.5f, 0.f);
+	lights[0]._lightCol = glm::vec4(10.f, 10.f, 10.f, 0.f);
+	lights[1]._lightPos = glm::vec4(0, 2, 0, 0.f);
+	lights[1]._lightCol = glm::vec4(5.f, 5.f, 0.f, 0.f);
+
 
 	Rendering::hitboxes = &m_colliders;
 	Rendering::effects = &m_effects;
@@ -371,11 +380,18 @@ Scene* Tutorial::Reattach()
 	Scene::Reattach();
 
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightsColour[0] = glm::vec3(200.f);
+	/*Rendering::LightsColour[0] = glm::vec3(200.f);
 	Rendering::LightCount = 2;
 	Rendering::LightsPos[0] = glm::vec3(0, 10, -42.5f);
 	Rendering::LightsPos[1] = glm::vec3(0, 2, 0);
-	Rendering::AmbientStrength = 1.f;
+	Rendering::AmbientStrength = 1.f;*/
+	auto& lights = m_frameEffects.GetLights();
+	lights.clear();
+	lights.resize(2);
+	lights[0]._lightPos = glm::vec4(0, 10, -42.5f, 0.f);
+	lights[0]._lightCol = glm::vec4(10.f, 10.f, 10.f, 0.f);
+	lights[1]._lightPos = glm::vec4(0, 2, 0, 0.f);
+	lights[1]._lightCol = glm::vec4(5.f, 5.f, 0.f, 0.f);
 
 	m_camCount = LeaderBoard::playerCount;
 

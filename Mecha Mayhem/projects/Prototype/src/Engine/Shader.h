@@ -1,5 +1,4 @@
 #pragma once
-#define MAX_LIGHTS 10
 #include <glad/glad.h>
 #include <memory>
 

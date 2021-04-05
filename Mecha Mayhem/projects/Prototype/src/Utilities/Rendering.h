@@ -1,4 +1,5 @@
 #pragma once
+#define MAX_LIGHTS 10
 #include "Engine/BackEnd.h"
 #include "Components/ECS.h"
 #include "Components/Player.h"
@@ -17,13 +18,13 @@ namespace Rendering
 	//doesn't bind the buffer
 	void RenderForShading(entt::registry* reg);
 
-	extern glm::vec3 BackColour;
-	extern std::array<glm::vec3, MAX_LIGHTS> LightsPos;
+	/*extern std::array<glm::vec3, MAX_LIGHTS> LightsPos;
 	extern std::array<glm::vec3, MAX_LIGHTS> LightsColour;
 	extern size_t LightCount;
-	extern glm::vec3 DefaultColour;
-	extern glm::vec3 AmbientColour;
 	extern glm::float32 AmbientStrength;
+	extern glm::vec3 AmbientColour;*/
+	extern glm::vec3 DefaultColour;
+	extern glm::vec3 BackColour;
 
 	extern HitboxGen* hitboxes;
 	extern Effects* effects;

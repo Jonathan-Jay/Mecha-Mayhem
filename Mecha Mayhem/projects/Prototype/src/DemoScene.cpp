@@ -25,10 +25,10 @@ void DemoScene::Init(int width, int height)
 
 	/// End of creating entities
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightCount = 2;
+	/*Rendering::LightCount = 2;
 	Rendering::LightsColour[0] = glm::vec3(200.f);
 	Rendering::LightsPos[0] = glm::vec3(20.5f, -1, 21.8f);
-	Rendering::LightsPos[1] = glm::vec3(20.5f, 3, 21.8f);
+	Rendering::LightsPos[1] = glm::vec3(20.5f, 3, 21.8f);*/
 
 	Rendering::hitboxes = &m_colliders;
 	Rendering::effects = &m_effects;
@@ -214,9 +214,10 @@ void DemoScene::Update()
 void DemoScene::LateUpdate()
 {
 	//this makes the light match the player's position
-
+	auto& lights = m_frameEffects.GetLights();
 	for (int i(0); i < LeaderBoard::playerCount; ++i) {
-		Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup;
+		//Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup;
+		lights[2 + i]._lightPos = glm::vec4(ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup, 0.f);
 	}
 }
 
@@ -273,12 +274,22 @@ Scene* DemoScene::Reattach()
 	Scene::Reattach();
 
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightsColour[0] = glm::vec3(200.f);
+	/*Rendering::LightsColour[0] = glm::vec3(200.f);
 	Rendering::LightCount = 2 + LeaderBoard::playerCount;
 	Rendering::LightsPos[0] = glm::vec3(20.5f, -1, 21.8f);
 	Rendering::LightsPos[1] = glm::vec3(20.5f, 3, 21.8f);
-	Rendering::AmbientStrength = 1.f;
-
+	Rendering::AmbientStrength = 1.f;*/
+	{
+		auto& lights = m_frameEffects.GetLights();
+		//reset lights, to be safe
+		int count = 2 + LeaderBoard::playerCount;
+		lights.clear();
+		lights.resize(count);
+		lights[0]._lightPos = glm::vec4(20.5f, -1, 21.8f, 0.f);
+		lights[0]._lightCol = glm::vec4(10.f, 10.f, 10.f, 0.f);
+		lights[1]._lightPos = glm::vec4(20.5f, 3, 21.8f, 0.f);
+		lights[1]._lightCol = glm::vec4(5.f, 5.f, 5.f, 0.f);
+	}
 	m_camCount = LeaderBoard::playerCount;
 	if (LeaderBoard::timedGoal) {
 		m_gameTimer = LeaderBoard::scoreGoal * 60.f;

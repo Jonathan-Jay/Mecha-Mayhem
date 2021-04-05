@@ -85,14 +85,19 @@ void MainMenu::Init(int width, int height)
 
 	Rendering::frameEffects = &m_frameEffects;
 	Rendering::DefaultColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
-	Rendering::LightCount = 6;
+	/*Rendering::LightCount = 6;
 	Rendering::LightsColour[0] = glm::vec3(3.f);
 	Rendering::LightsPos[2] = BLM::GLMzero;
 	Rendering::LightsPos[3] = BLM::GLMzero;
 	Rendering::LightsPos[4] = BLM::GLMzero;
-	Rendering::LightsPos[5] = BLM::GLMzero;
-
+	Rendering::LightsPos[5] = BLM::GLMzero;*/
 	m_frameEffects.Init();
+	auto& lights = m_frameEffects.GetLights();
+	lights.clear();
+	lights.resize(6);
+	lights[0]._lightCol = glm::vec4(2.f, 2.f, 2.f, 0.f);
+	lights[1]._lightCol = glm::vec4(5.f, 5.f, 0.f, 0.f);
+
 	m_frameEffects.SetShadowVP(-20, 20, 20, -10, glm::vec3(4.125f - 1.5f, 0, 4.45f + 1.5f));
 
 	if (m_frameEffects[0] == nullptr) {
@@ -140,6 +145,7 @@ void MainMenu::Update()
 	ECS::GetComponent<ObjLoader>(arena).SetAdditiveColour(colureeoiruuuuuut);
 	*/
 
+	auto& lights = m_frameEffects.GetLights();
 	if (m_scenePos == 0) {
 		float lx = 0, ly = 0, rx = 0, ry = 0;
 		for (int i(0); i < 4; ++i) {
@@ -157,18 +163,18 @@ void MainMenu::Update()
 		}
 
 
-		Rendering::LightsPos[0] = ECS::GetComponent<Transform>(camera).SetPosition(
+		lights[0]._lightPos = glm::vec4(ECS::GetComponent<Transform>(camera).SetPosition(
 			cameraPath.Update(Time::dt).GetPosition()).SetRotation(
 				cameraPath.GetLookingForwards(Time::dt) * glm::angleAxis(glm::radians(rx * 8), glm::vec3(0, -1, 0))
-				* glm::angleAxis(glm::radians(ry * 4), glm::vec3(1, 0, 0))).GetGlobalPosition() + glm::vec3(0, -0.5f, 0);
+				* glm::angleAxis(glm::radians(ry * 4), glm::vec3(1, 0, 0))).GetGlobalPosition() + glm::vec3(0, -0.5f, 0), 0.f);
 
-		Rendering::LightsPos[1] = ECS::GetComponent<Transform>(title).SetRotation(
+		lights[1]._lightPos = glm::vec4(ECS::GetComponent<Transform>(title).SetRotation(
 			glm::angleAxis(glm::radians(lx * 6), BLM::GLMup) * glm::angleAxis(glm::radians(ly * 6), glm::vec3(-1, 0, 0))
-		).GetGlobalPosition() + glm::vec3(0, -1, 0);
+		).GetGlobalPosition() + glm::vec3(0, -1, 0), 0.f);
 
-		Rendering::LightsPos[2] = ECS::GetComponent<Transform>(text).SetRotation(
+		lights[2]._lightPos = glm::vec4(ECS::GetComponent<Transform>(text).SetRotation(
 			glm::angleAxis(glm::radians(lx * 3), BLM::GLMup) * glm::angleAxis(glm::radians(ly * 3), glm::vec3(-1, 0, 0))
-		).GetGlobalPosition();
+		).GetGlobalPosition(), 0.f);
 
 
 		if (m_exit) {
@@ -203,12 +209,14 @@ void MainMenu::Update()
 				m_exitHoldTimer = 1.f;
 				m_confirmTimer = 1.f;
 				Rendering::BackColour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
-				Rendering::LightsPos[0] = glm::vec3(0, 100, -5);
+				/*Rendering::LightsPos[0] = glm::vec3(0, 100, -5);
 				Rendering::LightsPos[2] = BLM::GLMzero;
 				Rendering::LightsPos[3] = BLM::GLMzero;
 				Rendering::LightsPos[4] = BLM::GLMzero;
 				Rendering::LightsPos[5] = BLM::GLMzero;
-				Rendering::AmbientStrength = 1.5f;
+				Rendering::AmbientStrength = 1.5f;*/
+				for (int i(2); i < 6; ++i)
+					lights[i]._lightPos = glm::vec4(0.f);
 				//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(1.1f);
 				((BloomEffect*)m_frameEffects[1])->SetThreshold(1.f);
 			}
@@ -264,8 +272,8 @@ void MainMenu::Update()
 			auto &p = ECS::GetComponent<Player>(models[x]);
 
 			if (p.IsPlayer()) {
-				if (Rendering::LightsPos[2 + x] == BLM::GLMzero)
-					Rendering::LightsPos[2 + x] = (ECS::GetComponent<Transform>(models[x]).GetGlobalPosition() + glm::vec3(0, 0, 1.75f));
+				if (lights[2 + x]._lightPos == glm::vec4(0.f))
+					lights[2 + x]._lightPos = glm::vec4(ECS::GetComponent<Transform>(models[x]).GetGlobalPosition() + glm::vec3(0, 0, 1.75f), 0.f);
 
 				if (ControllerInput::GetButtonDown(BUTTON::Y, CONUSER(x))) {
 					//ECS::GetComponent<Sprite>(timerText).SetEnabled(LeaderBoard::timedGoal = !LeaderBoard::timedGoal);
@@ -312,7 +320,7 @@ void MainMenu::Update()
 				if (ControllerInput::GetButtonDown(BUTTON::B, CONUSER(x))) {
 					p.Init(LeaderBoard::players[x].user = CONUSER::NONE, 0);
 					playerSwapped[x] = true;
-					Rendering::LightsPos[2 + x] = BLM::GLMzero;
+					lights[2 + x]._lightPos = glm::vec4(0.f);
 					continue;
 				}
 
@@ -378,11 +386,13 @@ void MainMenu::Update()
 						playerSwapped[x] = true;
 
 						Rendering::BackColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
-						Rendering::LightsPos[2] = BLM::GLMzero;
+						/*Rendering::LightsPos[2] = BLM::GLMzero;
 						Rendering::LightsPos[3] = BLM::GLMzero;
 						Rendering::LightsPos[4] = BLM::GLMzero;
 						Rendering::LightsPos[5] = BLM::GLMzero;
-						Rendering::AmbientStrength = 1.f;
+						Rendering::AmbientStrength = 1.f;*/
+						for (int i(2); i < 6; ++i)
+							lights[i]._lightPos = glm::vec4(0.f);
 						//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 						((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
@@ -486,13 +496,17 @@ Scene* MainMenu::Reattach()
 
 	Rendering::BackColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 	Rendering::DefaultColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
-	Rendering::LightCount = 6;
+	/*Rendering::LightCount = 6;
 	Rendering::LightsColour[0] = glm::vec3(3.f);
 	Rendering::LightsPos[2] = BLM::GLMzero;
 	Rendering::LightsPos[3] = BLM::GLMzero;
 	Rendering::LightsPos[4] = BLM::GLMzero;
 	Rendering::LightsPos[5] = BLM::GLMzero;
-	Rendering::AmbientStrength = 1.f;
+	Rendering::AmbientStrength = 1.f;*/
+
+	auto& lights = m_frameEffects.GetLights();
+	for (int i(2); i < 6; ++i)
+		lights[i]._lightPos = glm::vec4(0.f);
 	//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 	((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 

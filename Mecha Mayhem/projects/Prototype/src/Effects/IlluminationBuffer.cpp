@@ -31,11 +31,12 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 	if (index == 0) {
 		_shaders.push_back(GetShader("shaders/Post/passthrough_frag.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/gBuffer_directional_frag.glsl"));
+		_shaders.push_back(GetShader("shaders/Post/gBuffer_point_frag.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/gBuffer_ambient_frag.glsl"));
 	}
 }
 
-void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
+void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer, std::vector<PointLight>& lights)
 {
 	if (_sunEnabled) {
 		//bind directional light shader
@@ -61,32 +62,30 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 	}
 
 	//insert all other lighting here
-	/*
-	if (_lights.size()) {
+	if (lights.size()) {
 		//bind point light shader
 		_shaders[Lights::POINT]->Bind();
 		_shaders[Lights::POINT]->SetUniform("u_camPos", *_camPos.data(), 4);
 		_shaders[Lights::POINT]->SetUniform("camCount", _camCount);
-		for (int i(0); i < _lights.size(); ++i) {
-			_lights[i].buffer.SendData(reinterpret_cast<void*>(&_lights[i].point), sizeof(PointLight));
+		for (int i(0); i < lights.size(); ++i) {
+			_pointBuffer.SendData(reinterpret_cast<void*>(&(lights[i])), sizeof(PointLight));
 
-			_lights[i].buffer.Bind(0);
+			_pointBuffer.Bind(0);
 
 			gBuffer->BindLighting();
 			//bind the light accum buffer to keep adding to it
-			_buffers[1]->BindColorAsTexture(0, 4);
+			_buffers[1]->BindColorAsTexture(0, 5);
 			_buffers[1]->RenderToFSQ();
-			_buffers[1]->UnbindTexture(4);
+			_buffers[1]->UnbindTexture(5);
 
 			gBuffer->UnbindLighting();
 
-			_lights[i].buffer.Unbind(0);
+			_pointBuffer.Unbind(0);
 
 
 		}
 		_shaders[Lights::POINT]->UnBind();
 	}
-	*/
 
 
 	_shaders[Lights::AMBIENT]->Bind();

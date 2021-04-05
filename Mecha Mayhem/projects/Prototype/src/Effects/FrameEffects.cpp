@@ -31,6 +31,7 @@ void FrameEffects::Init(unsigned width, unsigned height)
 
 	//gbuffer
 	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
+	PostEffect::Init("shaders/Post/gBuffer_point_frag.glsl");
 	PostEffect::Init("shaders/Post/gBuffer_ambient_frag.glsl");
 
 	//transparency
@@ -63,6 +64,7 @@ void FrameEffects::Unload()
 
 void FrameEffects::Init()
 {
+	m_lights.clear();
 	RemoveAllEffects();
 
 	illumBuffer.SetLightSpaceViewProj(m_shadowVP);
@@ -161,7 +163,7 @@ void FrameEffects::Draw(/*bool paused*/)
 	if (m_usingShadows)		shadowMap->BindDepthAsTexture(30);
 	else		Sprite::m_textures[0].texture->Bind(30);
 
-	illumBuffer.ApplyEffect(baseEffect);
+	illumBuffer.ApplyEffect(baseEffect, m_lights);
 
 	Texture2D::Unbind(30);
 

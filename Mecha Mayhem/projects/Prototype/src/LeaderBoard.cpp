@@ -68,8 +68,12 @@ void LeaderBoard::Init(int windowWidth, int windowHeight)
 	ECS::GetComponent<Transform>(playerEnt).SetPosition(glm::vec3(3, 0, -12))
 		.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
 	
-	Rendering::LightCount = 1;
-	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);
+	auto& lights = m_frameEffects.GetLights();
+	lights.clear();
+	lights.resize(1);
+	lights[0]._lightPos = glm::vec4(1.75f, -0.5f, 7.f, 0.f);
+	/*Rendering::LightCount = 1;
+	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);*/
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init();
@@ -183,8 +187,8 @@ Scene* LeaderBoard::Reattach()
 {
 	Scene::Reattach();
 
-	Rendering::LightCount = 1;
-	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);
+	/*Rendering::LightCount = 1;
+	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);*/
 	Rendering::BackColour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
 
 	m_timer = 4.25f;

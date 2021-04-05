@@ -3,7 +3,7 @@
 #include "Tutorial.h"
 #include "MainMenu.h"
 #include "LeaderBoard.h"
-//#include "MapEditorScene.h"
+#include "MapEditorScene.h"
 
 int main() {
 	int width = 1280, height = 720;
@@ -39,7 +39,7 @@ int main() {
 		LeaderBoard::players[3] = { CONUSER::NONE,	4,		0,		glm::vec3(0,0,0) };
 
 		Scene::m_activeScene = Scene::m_scenes[0]->Reattach();
-		/*
+		//*
 		Scene::m_scenes.push_back(new MapEditor("uh, not for playing"));
 		Scene::m_scenes[4]->Init(width, height);
 

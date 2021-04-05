@@ -81,6 +81,8 @@ public:
 
 	FrameEffects& Reattach();
 
+	std::vector<PointLight>& GetLights() { return m_lights; }
+
 	void UsingShadows(bool choice) { m_usingShadows = choice; }
 	bool GetUsingShadows() { return m_usingShadows; }
 
@@ -97,6 +99,7 @@ private:
 	std::vector<PostEffect*> layersOfEffects = {};
 
 	DirectionalLight m_sun;
+	std::vector<PointLight> m_lights = {};
 
 	glm::mat4 m_shadowVP =
 		//Projection

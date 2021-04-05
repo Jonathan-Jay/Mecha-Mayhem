@@ -5,17 +5,17 @@
 #include "Utilities/Lighting/PointLight.h"
 #include "Utilities/Lighting/DirectionalLight.h"
 
-enum Lights
-{
-	DIRECTIONAL = 1,
-	//POINT,
-	AMBIENT
-};
 
 //This is a post effect to make our job easier
 class IlluminationBuffer : public PostEffect
 {
 public:
+	enum Lights
+	{
+		DIRECTIONAL = 1,
+		POINT,
+		AMBIENT
+	};
 	//Initializes framebuffer
 	//Overrides post effect Init
 	void Init(unsigned width, unsigned height) override;
@@ -23,7 +23,7 @@ public:
 	//Makes it so apply effect with a PostEffect does nothing for this object
 	void ApplyEffect(PostEffect* buffer) override { };
 	//Can only apply effect using GBuffer object
-	void ApplyEffect(GBuffer* gBuffer);
+	void ApplyEffect(GBuffer* gBuffer, std::vector<PointLight>& lights);
 
 	//basically useless in our version
 	//void DrawIllumBuffer();
@@ -52,6 +52,7 @@ private:
 	bool _sunEnabled = true;
 
 	UniformBuffer _sunBuffer;
+	UniformBuffer _pointBuffer;
 	
 	DirectionalLight _sun;
 };

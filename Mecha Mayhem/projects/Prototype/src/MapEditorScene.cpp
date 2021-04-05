@@ -34,15 +34,20 @@ void MapEditor::Init(int windowWidth, int windowHeight)
 
 	/// End of creating entities
 	Rendering::DefaultColour = glm::vec4(1.f, 0.5f, 0.5f, 0.5f);
-	Rendering::LightCount = 2;
+	/*Rendering::LightCount = 2;
 	Rendering::LightsPos[0] = BLM::GLMzero;
-	Rendering::LightsColour[0] = glm::vec3(20.f);
+	Rendering::LightsColour[0] = glm::vec3(20.f);*/
 
 	Rendering::hitboxes = &m_colliders;
 	Rendering::effects = &m_effects;
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init();
+	auto& lights = m_frameEffects.GetLights();
+	lights.clear();
+	lights.resize(2);
+	lights[0]._lightCol = glm::vec4(10.f, 10.f, 10.f, 0.f);
+
 	m_frameEffects.SetShadowVP(-70, 70, 40, -60, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
 }
 
@@ -61,6 +66,7 @@ void MapEditor::Update()
 
 	//camera movement here
 	{
+		auto& lights = m_frameEffects.GetLights();
 		auto& camTrans = ECS::GetComponent<Transform>(cameraEnt);
 		glm::vec3 change = BLM::GLMzero;
 		//moving
@@ -92,14 +98,14 @@ void MapEditor::Update()
 		if (showRay) {
 			btVector3 rayPos = PhysBody::GetRaycast(camTrans.GetLocalPosition(), camTrans.GetForwards() * -10000.f);
 			if (rayPos != btVector3()) {
-				Rendering::LightsPos[1] = ECS::GetComponent<Transform>(rayPosEnt).SetPosition(rayPos).GetLocalPosition();
+				lights[1]._lightPos = glm::vec4(ECS::GetComponent<Transform>(rayPosEnt).SetPosition(rayPos).GetLocalPosition(), 0.f);
 			}
 		}
 		else {
 			ECS::GetComponent<Transform>(rayPosEnt).SetPosition(glm::vec3(0, 1000, 0));
 		}
 
-		Rendering::LightsPos[0] = camTrans.GetLocalPosition();
+		lights[0]._lightPos = glm::vec4(camTrans.GetLocalPosition(), 0.f);
 	}
 
 	/// End of loop
@@ -118,9 +124,9 @@ void MapEditor::Exit()
 Scene* MapEditor::Reattach()
 {
 	Rendering::DefaultColour = glm::vec4(1.f, 0.5f, 0.5f, 0.5f);
-	Rendering::LightCount = 2;
+	/*Rendering::LightCount = 2;
 	Rendering::LightsPos[0] = BLM::GLMzero;
-	Rendering::LightsColour[0] = glm::vec3(20.f);
+	Rendering::LightsColour[0] = glm::vec3(20.f);*/
 
 	return Scene::Reattach();
 }
@@ -132,7 +138,7 @@ void MapEditor::ImGuiFunc()
 
 	ImGui::Checkbox("Save on exit", &saveOnExit);
 	if (ImGui::Checkbox("Shoot ray from camera", &showRay)) {
-		Rendering::LightCount = size_t(1) + size_t(showRay);
+		m_frameEffects.GetLights().resize(1 + showRay);
 	}
 
 	if (ImGui::Button("Toggle render spawn(ers)(points)") || Input::GetKeyDown(KEY::FSLASH)) {
