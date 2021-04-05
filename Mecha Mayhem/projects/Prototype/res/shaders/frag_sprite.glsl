@@ -7,8 +7,9 @@ uniform sampler2D s_texture;
 uniform int receiveShadows;
 uniform vec3 addColour;
 
-const float specularPow = 0.1;
-const float shininess = 4.0;
+const float emissiveness = 0.0;
+uniform float divide = 0.5;
+const float shininess = 10.0;
 
 //multi render target
 //we can render colour to all of these
@@ -16,6 +17,7 @@ layout(location = 0) out vec4 outColours;
 layout(location = 1) out vec3 outNormals;
 layout(location = 2) out vec3 outSpecs;
 layout(location = 3) out vec3 outPositions;
+layout(location = 4) out vec4 outEmissive;
 
 void main() {
 	vec4 result = texture(s_texture, inUV);
@@ -23,11 +25,16 @@ void main() {
 	if (result.a < 0.5)
 		discard;
 
-	outColours = vec4(result.rgb + addColour, 1.0);
+	//other classes store in material
+	outSpecs.x = float(!bool(emissiveness));
+	outSpecs.y = shininess;
+	outSpecs.z = receiveShadows;
+
+	outColours.rgb = vec3(result.rgb + addColour) * outSpecs.x * divide;
+	outColours.a = 1.0;
+	outEmissive = vec4(result.rgb + addColour, 1.0) * emissiveness;
 
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
-
-	outSpecs = vec3(specularPow, shininess, receiveShadows);
 
 	outPositions = inPosition;
 }

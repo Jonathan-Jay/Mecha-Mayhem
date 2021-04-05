@@ -67,8 +67,9 @@ void MainMenu::Init(int width, int height)
 	FixDigits(LeaderBoard::scoreGoal);
 
 	timerText = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(timerText).SetReceiveShadows(false).Init(glm::vec4(0.f, 0.f, 0.f, 1.f), -1.7f, 1.2f).SetEnabled(LeaderBoard::timedGoal);
-	ECS::GetComponent<Transform>(timerText).SetPosition(glm::vec3(0.f, 96.75f - 100.f, -8.01f)).ChildTo(charSelectParent);
+	//ECS::AttachComponent<Sprite>(timerText).SetReceiveShadows(false).Init(glm::vec4(0.f, 0.f, 0.f, 1.f), -1.7f, 1.2f).SetEnabled(LeaderBoard::timedGoal);
+	ECS::AttachComponent<Sprite>(timerText).SetReceiveShadows(false).Init(LeaderBoard::timedGoal ? "timed.png" : "kills.png", -4.5184f, 1.f);
+	ECS::GetComponent<Transform>(timerText).SetPosition(glm::vec3(0.45f, 96.75f - 100.f, -8.01f)).ChildTo(charSelectParent);
 
 	backGround = ECS::CreateEntity();
 	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10)
@@ -267,7 +268,8 @@ void MainMenu::Update()
 					Rendering::LightsPos[2 + x] = (ECS::GetComponent<Transform>(models[x]).GetGlobalPosition() + glm::vec3(0, 0, 1.75f));
 
 				if (ControllerInput::GetButtonDown(BUTTON::Y, CONUSER(x))) {
-					ECS::GetComponent<Sprite>(timerText).SetEnabled(LeaderBoard::timedGoal = !LeaderBoard::timedGoal);
+					//ECS::GetComponent<Sprite>(timerText).SetEnabled(LeaderBoard::timedGoal = !LeaderBoard::timedGoal);
+					ECS::GetComponent<Sprite>(timerText).Init((LeaderBoard::timedGoal = !LeaderBoard::timedGoal) ? "timed.png" : "kills.png", -4.5184f, 1.f);
 				}
 
 				if (ControllerInput::GetButtonDown(BUTTON::DDOWN, CONUSER(x))) {

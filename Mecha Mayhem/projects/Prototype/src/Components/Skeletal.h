@@ -33,6 +33,88 @@ private:
 	//calculate the current pose
 	void CalcPose();
 
+#pragma region gltfloading
+			
+			//all here to load stuff, thanks spratley
+			// Custom vertex for VAO to store per-vertex joint and weight information
+			struct VertexPosNormColJointWeight
+			{
+			public:
+				glm::vec3 Position;
+				glm::vec3 Normal;
+				glm::vec3 Colour;
+				glm::vec4 Joints;
+				glm::vec4 Weights;
+
+				VertexPosNormColJointWeight() :
+					Position(glm::vec3(0.0f)),
+					Normal(glm::vec3(0.0f)),
+					Colour(glm::vec3(1.0f)),
+					Joints(glm::vec4(0.0f)),
+					Weights(glm::vec4(0.0f)) {}
+
+				VertexPosNormColJointWeight(const glm::vec3& pos, const glm::vec3& norm, const glm::vec3& col,
+					const glm::vec4& joints, const glm::vec4& weights) :
+					Position(glm::vec3(pos)),
+					Normal(glm::vec3(norm)),
+					Colour(glm::vec3(col)),
+					Joints(glm::vec4(joints)),
+					Weights(glm::vec4(weights)) {}
+
+				static const VertexPosNormColJointWeight* VPNTJW;
+				static const std::vector<BufferAttribute> V_DECL;
+			};
+
+			struct SimpleTransform
+			{
+			public:
+				SimpleTransform(glm::vec3 position = BLM::GLMzero, glm::quat rotation = BLM::GLMQuat)
+					: m_position(position), m_rotation(rotation) {}
+
+				//std::vector<SimpleTransform*> m_children = {};
+				//we can store indices since SimpleTransform isn't used anywhere else
+				std::vector<int> m_children = {};
+
+				glm::mat4 m_globalTransform = BLM::GLMMat;
+
+				glm::vec3 m_position;
+				glm::quat m_rotation;
+
+				glm::mat4 GetLocalTransformMatrix()
+				{
+					return glm::translate(BLM::GLMMat, m_position) * glm::toMat4(m_rotation);
+				}
+
+				void UpdateGlobalTransform(glm::mat4 parentTransform, std::vector<SimpleTransform>& list)
+				{
+					glm::mat4 localTransform = GetLocalTransformMatrix();
+
+					m_globalTransform = parentTransform * localTransform;
+
+					for (int child : m_children)
+					{
+						list[child].UpdateGlobalTransform(m_globalTransform, list);
+					}
+				}
+			};
+			bool LoadNodes(tinygltf::Model& const model);
+			bool LoadMesh(tinygltf::Model& const model, int const meshIndex, int const associatedSkin);
+			bool LoadSkin(tinygltf::Model& const model, int const skinIndex);
+			bool LoadAnims(tinygltf::Model& const model);
+
+			template<typename T, typename ComponentType>
+			std::vector<T> RetrieveDataFromAccessor(tinygltf::Model& const model, tinygltf::Accessor& const accessor) const;
+			template<typename T, typename ComponentType>
+			T RetrieveDataFromAccessor(tinygltf::Model& const model, tinygltf::Accessor& const accessor, unsigned int const dataIndex) const;
+
+			template <typename T>
+			std::vector<T> RetrieveModelData(tinygltf::Model& const model, int const accessorIndex, int const accessorType) const;
+			template <typename T>
+			T RetrieveModelData(tinygltf::Model& const model, int const accessorIndex, int const accessorType, unsigned int const dataIndex) const;
+
+			SimpleTransform CopyNodeLocalTransform(tinygltf::Node& const node);
+#pragma endregion
+
 	//skin data and all stored in one, sure it's not flexible, but it works since all our models use unique skeletons
 	struct JointData {
 		int index;
@@ -46,24 +128,32 @@ private:
 
 	struct Animation {
 		std::string animName;
-		float duration;
+		float duration = 0;
 		std::vector<JointData> data = {};
 	};
 
 	struct Model {
 		std::string filename;
-		VertexArrayObject::sptr mesh = VertexArrayObject::Create();
+		VertexArrayObject::sptr mesh = nullptr;
 		std::vector<Animation> animations = {};
+		std::vector<SimpleTransform> baseTrans = {};
+		std::vector<glm::mat4> inverseBind = {};
+		int rootIndex = 0;
 	};
 
 	static std::vector<Model> m_models;
 
 	static Shader::sptr m_shader;
 
+
 	//current joint matrices
-	std::array<glm::mat4, MAX_BONES> m_pose = {};
+	std::vector<glm::mat4> m_jointMatrices = {};
+	std::vector<glm::mat4> m_inverseBindMatrices = {};
+
 	//for blending
-	std::array<glm::mat4, MAX_BONES> m_tempPose = {};
+	std::vector<SimpleTransform> m_tempPose = {};
+	std::vector<SimpleTransform> m_pose = {};
+	SimpleTransform* m_root = nullptr;
 
 	//animation keys
 	std::vector<int> rotKey = {};

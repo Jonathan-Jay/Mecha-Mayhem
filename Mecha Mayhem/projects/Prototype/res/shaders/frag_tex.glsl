@@ -16,18 +16,22 @@ layout(location = 0) out vec4 outColours;
 layout(location = 1) out vec3 outNormals;
 layout(location = 2) out vec3 outSpecs;
 layout(location = 3) out vec3 outPositions;
+layout(location = 4) out vec4 outEmissive;
 
 void main() {
+	//other classes store in material
+	outSpecs.x = float(!bool(inSpec.x));
+	outSpecs.y = inSpec.y;
+	outSpecs.z = receiveShadows;
+
 	//colours
 	vec4 textureColour = texture(s_texture, inUV);
-	outColours = vec4(inColour * textureColour.rgb + addColour, textureColour.a * inSpec.z);
+	outColours.rgb = vec3(inColour * textureColour.rgb + addColour) * outSpecs.x;
+	outColours.a = textureColour.a * inSpec.z;
+	outEmissive = vec4(inColour * textureColour.rgb + addColour, textureColour.a * inSpec.z) * inSpec.x;
 	
 	//outputs normals as colour
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
-
-	//other classes store in material
-	outSpecs = inSpec;
-	outSpecs.z = receiveShadows;
 
 	//positions 
 	outPositions = inPos;

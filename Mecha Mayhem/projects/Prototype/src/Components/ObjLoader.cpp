@@ -75,15 +75,16 @@ ObjLoader& ObjLoader::LoadMesh(const std::string& fileName, bool usingMaterial)
 
 		std::string matLine;
 		size_t matIndex = 0;
-		float tempExponent = 1.f, tempTrans = 1;
+		float tempExponent = 1.f, tempTrans = 1.f, emissive = 0.f;
 		while (std::getline(materialFile, matLine))
 		{
 			stringTrimming::ltrim(matLine);
 			if (matLine.substr(0, 6) == "newmtl")
 			{
+				matIndex = materials.size();
 				materials.push_back({ matLine.substr(7), glm::vec3(1.f), glm::vec3(1.f) });
 				tempExponent = tempTrans = 1;
-				matIndex = materials.size() - 1;
+				emissive = 0.f;
 			}
 			else if (matLine.substr(0, 6) == "map_Kd")
 			{
@@ -135,19 +136,20 @@ ObjLoader& ObjLoader::LoadMesh(const std::string& fileName, bool usingMaterial)
 				std::istringstream ss = std::istringstream(matLine.substr(5));
 				ss >> tempTrans;
 			}
-			else if (matLine.size() > 1 && matLine[0] == 'K')
+			//else if (matLine.size() > 1 && matLine[0] == 'K')
+			else if (matLine.substr(0, 2) == "Kd")
 			{
 				//only colour data is taken for now, textures later
-				if (matLine[1] == 'd')
-				{
+				//if (matLine[1] == 'd')
+				//{
 					//diffuse Colour, aka object colour
-					std::istringstream ss = std::istringstream(matLine.substr(2));
-					glm::vec3 colour;
-					ss >> colour.x >> colour.y >> colour.z;
+				std::istringstream ss = std::istringstream(matLine.substr(2));
+				glm::vec3 colour;
+				ss >> colour.x >> colour.y >> colour.z;
 
-					materials[matIndex].colours = colour;
-				}
-				else if (matLine[1] == 's')
+				materials[matIndex].colours = colour;
+				//}
+				/*else if (matLine[1] == 's')
 				{
 					//specular Colour
 					//diffuse Colour, aka object colour
@@ -160,7 +162,15 @@ ObjLoader& ObjLoader::LoadMesh(const std::string& fileName, bool usingMaterial)
 				else if (matLine[1] == 'a')
 				{
 					//ambient Colour, ignored
-				}
+				}*/
+			}
+			else if (matLine.substr(0, 4) == "emis") {
+				std::istringstream ss = std::istringstream(matLine.substr(4));
+				ss >> emissive;
+			}
+			//send the data at the end
+			else if (matLine.substr(0, 5) == "illum") {
+				materials[matIndex].specStrength = glm::vec3(emissive, tempExponent, tempTrans);
 			}
 			else if (matLine[0] == '#')
 			{
@@ -563,7 +573,7 @@ void ObjLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
 /*void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount,
 	float specularStrength, float shininess,
 	float ambientLightStrength, const glm::vec3& ambientColour, float ambientStrength)*/
-void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float specularStrength, float shininess)
+void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float emissiveness, float shininess)
 {
 	glm::mat4 VP = camera.GetProjection() * view;
 
@@ -579,7 +589,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 		//global stuff
 		m_shader->Bind();
 		m_shader->SetUniform("colour", colour);
-		m_shader->SetUniform("specularStrength", specularStrength);
+		m_shader->SetUniform("emissiveness", emissiveness);
 		m_shader->SetUniform("shininess", shininess);
 
 		/*m_shader->SetUniform("camPos", camera.GetPosition());

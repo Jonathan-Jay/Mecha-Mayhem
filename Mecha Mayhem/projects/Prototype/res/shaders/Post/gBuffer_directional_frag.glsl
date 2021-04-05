@@ -34,6 +34,7 @@ layout(binding = 0) uniform sampler2D s_albedoTex;
 layout(binding = 1) uniform sampler2D s_normalsTex;
 layout(binding = 2) uniform sampler2D s_specularTex;
 layout(binding = 3) uniform sampler2D s_positionTex;
+layout(binding = 4) uniform sampler2D s_emissiveTex;
 
 uniform mat4 u_LightSpaceMatrix;
 uniform vec3 u_camPos[4];
@@ -96,6 +97,7 @@ void main() {
 
 	//Albedo
 	vec4 textureColor = texture(s_albedoTex, inUV);
+
 	//Specular
 	vec3 texSpec = texture(s_specularTex, inUV).rgb;
 	//Positions
@@ -115,7 +117,7 @@ void main() {
 
 	// Get the specular from the specular map
 	float spec = pow(max(dot(inNormal, h), 0.0), texSpec.y); // Shininess coefficient (can be a uniform)
-	vec3 specular = sun._lightSpecularPow * texSpec.x * spec * sun._lightCol.rgb; // Can also use a specular color
+	vec3 specular = sun._lightSpecularPow * spec * sun._lightCol.rgb; // Can also use a specular color
 
 	// Get the albedo from the diffuse / albedo map	
 
@@ -131,7 +133,9 @@ void main() {
 		(sun._ambientPow * sun._ambientCol.rgb) + // global ambient light
 		(1.0 - shadow) * //Shadow value
 		(diffuse + specular) // light factors from our single light
-		); // Object color, no
+		) * texSpec.x; // don't render when emissive
+
+		result += texture(s_emissiveTex, inUV).rgb;
 
 	if (textureColor.a < 0.31)
 		result = vec3(1.0, 1.0, 1.0);

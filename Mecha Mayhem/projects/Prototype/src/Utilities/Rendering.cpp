@@ -112,8 +112,8 @@ namespace Rendering {
 			);
 
 			//do all the draws
-			ObjLoader::PerformDraw(view, camCam, DefaultColour, 1, 4);
-			ObjMorphLoader::PerformDraw(view, camCam, DefaultColour, 1, 4);
+			ObjLoader::PerformDraw(view, camCam, DefaultColour);
+			ObjMorphLoader::PerformDraw(view, camCam, DefaultColour);
 			Sprite::PerformDraw();
 
 			FrameEffects::BindTransparency();

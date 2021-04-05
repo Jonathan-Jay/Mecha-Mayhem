@@ -53,12 +53,6 @@ private:
 		glm::vec3(2, 9, -30),
 		glm::vec3(0, 9, -50) },8
 	};
-	CatmullFollower dronePath4 = { 3, {
-		glm::vec3(-1, 5, 1),
-		glm::vec3(1, 5, 1),
-		glm::vec3(1, 5, -1),
-		glm::vec3(-1, 5, -1) },8
-	};
 
 	float camDistance = 2.5f;
 	float m_timer = 0.f;

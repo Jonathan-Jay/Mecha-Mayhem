@@ -44,6 +44,7 @@ private:
 	entt::entity cameraEnt[4] = { entt::null, entt::null, entt::null, entt::null };
 
 	Sprite m_pauseSprite;
+	Sprite m_colonSprite;
 };
 
 inline const float DemoScene::winWaitTime = 5.f;

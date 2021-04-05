@@ -27,9 +27,8 @@ const glm::mat4 Player::m_swordOffsetMat = glm::mat4(
 														//type,				ammo,	damage, cooldown,	movementSpeed,  maxRange (default 2000)
 const Player::GunProperties Player::pistol			{ WEAPON::PISTOL,		30,		25,		0.4f,		 10.f,				50.f };
 const Player::GunProperties Player::rifle			{ WEAPON::RIFLE,		7,		80,		3.5f,		 10.f };
-const Player::GunProperties Player::cannon			{ WEAPON::CANNON,		3,		50,		2.f,		 10.f };
-const Player::GunProperties Player::missileLauncher	{ WEAPON::MISSILE,		1,		100,	3.f,		 10.f };
-const Player::GunProperties Player::shotgun			{ WEAPON::SHOTGUN,		10,		30,		2.f,		 10.f,		25.f };
+const Player::GunProperties Player::cannon			{ WEAPON::CANNON,		3,		50,		2.5f,		 10.f,				75.f };
+const Player::GunProperties Player::shotgun			{ WEAPON::SHOTGUN,		10,		30,		2.f,		 10.f,				25.f };
 const Player::GunProperties Player::machineGun		{ WEAPON::MACHINEGUN,	50,		7,		0.1f,		 10.f };
 
 const float Player::m_maxSensitivity = 7.5f;
@@ -769,16 +768,33 @@ void Player::UseWeapon(PhysBody& body, Transform& head, float offset)
 
 	GunProperties selectedGun = GetProperties(m_currWeapon);
 	m_weaponCooldown = selectedGun.cooldown;
-	LaserGun(offset, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+
+	//calculate offset
+	glm::quat offsetQuat = glm::angleAxis(offset, glm::vec3(0.24253f, 0.97014f, 0.f));
+	//shotgun range < 30.f therefore we can do spread
+
 
 	//This branch *should* not be too bad since we are comparing 2 const variables.
-	if (selectedGun.type == WEAPON::SHOTGUN)
-	{
-		LaserGun(offset, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-		LaserGun(offset, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-		LaserGun(offset, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-		LaserGun(offset, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+	if (selectedGun.type != WEAPON::CANNON) {
+		if (selectedGun.type == WEAPON::SHOTGUN)
+		{
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
+			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+		}
+		LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
 	}
+	else {
+		//center
+		LaserGun(offsetQuat, head, selectedGun.damage * 0.2f, selectedGun.maxRange, m_currWeapon);
+		static const int loops = 9;
+		for (int i(0); i < loops; ++i)
+			LaserGun(offsetQuat, head, selectedGun.damage * 0.15f, selectedGun.maxRange, m_currWeapon,
+				glm::rotate(glm::angleAxis(glm::radians((360.f * i) / loops), glm::vec3(0, 0, -1)), BLM::GLMup * 0.25f));
+	}
+
 
 	//deal with ammo here
 	if (--m_currWeaponAmmo <= 0) {
@@ -792,19 +808,12 @@ float HalfCurve(float input) {
 }
 
 //does direction math for the shooting, ShootLazer does the actual projectile
-void Player::LaserGun(float offset, Transform& head, short damage, float distance, WEAPON type)
+void Player::LaserGun(glm::quat offsetQuat, Transform& head, short damage, float distance, WEAPON type, glm::vec3 poffset)
 {
 	AudioEngine::Instance().GetEvent("shoot").Restart();
 
-	glm::quat offsetQuat = glm::angleAxis(offset, glm::vec3(0.24253f, 0.97014f, 0.f));
-	//shotgun range < 30.f therefore we can do spread
-	if (type == WEAPON::SHOTGUN)
-	{
-		//shotgun spread
-		offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
-	}
 	glm::vec3 rayPos =
-		head.GetGlobalPosition() + glm::vec3(m_gunOffset * glm::rotate(BLM::GLMMat, m_rot.y, BLM::GLMup));
+		head.GetGlobalPosition() + glm::vec3((m_gunOffset + glm::vec4(poffset, 1.f)) * glm::rotate(BLM::GLMMat, m_rot.y, BLM::GLMup));
 
 	RayResult p = PhysBody::GetRaycastResult(BLM::GLMtoBT(rayPos),
 		BLM::GLMtoBT(glm::rotate(offsetQuat, -head.GetForwards()) * distance * 100.f));

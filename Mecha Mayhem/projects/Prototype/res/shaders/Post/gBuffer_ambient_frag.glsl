@@ -28,7 +28,8 @@ layout (std140, binding = 0) uniform u_Lights
 };
 
 layout(binding = 0) uniform sampler2D s_albedoTex;
-layout(binding = 4) uniform sampler2D s_lightAccumTex;
+layout(binding = 4) uniform sampler2D s_emissiveTex;
+layout(binding = 5) uniform sampler2D s_lightAccumTex;
 
 //uniform vec3 for clear colour?
 
@@ -36,8 +37,8 @@ out vec4 frag_color;
 
 void main()
 {
-	//Albdeo
 	vec4 textureColour = texture(s_albedoTex, inUV);
+	vec4 emissiveColour = texture(s_emissiveTex, inUV);
 	//lights
 	vec4 lightAccum = texture(s_lightAccumTex, inUV);
 
@@ -45,7 +46,7 @@ void main()
 	vec3 ambient = light._lightAmbientPow * light._ambientCol.rgb;
 
 	//result of all lighting
-	vec3 result = (ambient + lightAccum.rgb) * textureColour.rgb;
+	vec3 result = (ambient + lightAccum.rgb) * (textureColour.rgb + emissiveColour.rgb * float(emissiveColour.a > 0.3));
 
 	//Add clear colour?
 	//result = result * skybox.rgb;

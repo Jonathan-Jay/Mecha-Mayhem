@@ -5,7 +5,7 @@ layout(location = 1) in vec3 inNormal;
 uniform vec3 colour;
 uniform vec3 addColour;
 
-uniform float specularStrength;
+uniform float emissiveness;
 uniform float shininess;
 uniform int receiveShadows;
 
@@ -15,16 +15,21 @@ layout(location = 0) out vec4 outColours;
 layout(location = 1) out vec3 outNormals;
 layout(location = 2) out vec3 outSpecs;
 layout(location = 3) out vec3 outPositions;
+layout(location = 4) out vec4 outEmissive;
 
 void main() {
+	//other classes store in material
+	outSpecs.x = float(!bool(emissiveness));
+	outSpecs.y = shininess;
+	outSpecs.z = receiveShadows;
+
 	//colours
-	outColours = vec4(colour + addColour, 1.0);
+	outColours.rgb = vec3(colour + addColour) * outSpecs.x;
+	outColours.a = 1.0;
+	outEmissive = vec4(colour + addColour, 1.0) * emissiveness;
 	
 	//outputs normals as colour
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
-
-	//other classes store in material
-	outSpecs = vec3(specularStrength, shininess, receiveShadows);
 
 	//positions 
 	outPositions = inPos;

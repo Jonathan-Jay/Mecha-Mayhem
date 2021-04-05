@@ -42,7 +42,8 @@ void DemoScene::Init(int width, int height)
 
 	Player::SetSkyPos(glm::vec3(20.5f, 10, 21.8f));
 
-	m_pauseSprite = Sprite("Pause.png", 8.952f, 3);
+	m_pauseSprite = { "Pause.png", 8.952f, 3 };
+	m_colonSprite = { "colon.png", 0.3736f, 1.6667f };
 }
 
 void DemoScene::Update()
@@ -231,7 +232,7 @@ void DemoScene::DrawOverlay()
 			1.75f, m_yPos, -99.9f, 1
 		);
 
-		Sprite::BeginDraw(4);
+		Sprite::BeginUIDraw(4, 1);
 
 		//get digits
 		int min = m_gameTimer / 60;
@@ -242,15 +243,15 @@ void DemoScene::DrawOverlay()
 		sec1 = sec1 - (sec2 * 10);
 
 		//draw digits here
-		Player::m_digits[min].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
-		//timerMat[3] = glm::vec4(0, 8.5f, -100, 1);
-		//m_colon.Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		Player::m_digits[min].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
+		timerMat[3].x = 0.625f;
+		m_colonSprite.DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 		timerMat[3].x = -0.5f;
-		Player::m_digits[sec2].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		Player::m_digits[sec2].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 		timerMat[3].x = -1.75f;
-		Player::m_digits[sec1].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		Player::m_digits[sec1].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 
-		Sprite::PerformDraw();
+		Sprite::PerformUIDraw(1);
 	}
 
 	if (m_paused) {

@@ -131,6 +131,10 @@ void Sprite::DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum,
 void Sprite::PerformDraw()
 {
 	if (m_Queue.size()) {
+
+		//fixes weird specular stuff
+		m_shader->SetUniform("divide", 0.75f);
+
 		m_shader->Bind();
 
 		for (int i(0); i < m_Queue.size(); ++i) {
@@ -144,12 +148,16 @@ void Sprite::PerformDraw()
 		}
 
 		Shader::UnBind();
+
+		//fixes weird specular stuff
+		m_shader->SetUniform("divide", 1.f);
 	}
 }
 
 void Sprite::PerformUIDraw(int numOfCams)
 {
 	if (m_UIQueue[0].size()) {
+
 		int height = BackEnd::GetHalfHeight();
 		int width = BackEnd::GetHalfWidth();
 

@@ -94,11 +94,11 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 	_sunBuffer.Bind(0);
 
 	gBuffer->BindLighting();
-	_buffers[1]->BindColorAsTexture(0, 4);
+	_buffers[1]->BindColorAsTexture(0, 5);
 
 	_buffers[0]->RenderToFSQ();
 
-	_buffers[1]->UnbindTexture(4);
+	_buffers[1]->UnbindTexture(5);
 	gBuffer->UnbindLighting();
 
 	_sunBuffer.Unbind(0);

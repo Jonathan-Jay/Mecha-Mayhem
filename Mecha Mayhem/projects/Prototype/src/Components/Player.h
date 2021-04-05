@@ -15,8 +15,7 @@ public:
 		RIFLE,
 		CANNON,
 		MACHINEGUN,
-		SHOTGUN,
-		MISSILE
+		SHOTGUN
 	};
 	enum class OFFHAND {
 		EMPTY = 0,	//continues from WEAPON to allow for rand() choice
@@ -182,7 +181,7 @@ private:
 	//attacking
 	btVector3 Melee(const glm::vec3& pos);
 	void UseWeapon(PhysBody& body, Transform& head, float offset);
-	void LaserGun(float offset, Transform& head, short damage, float distance, WEAPON type);
+	void LaserGun(glm::quat offsetQuat, Transform& head, short damage, float distance, WEAPON type, glm::vec3 poffset = BLM::GLMzero);
 
 	//other things
 	void SwapWeapon();
@@ -297,7 +296,6 @@ private:
 	static const GunProperties pistol;
 	static const GunProperties cannon;
 	static const GunProperties rifle;
-	static const GunProperties missileLauncher;
 	static const GunProperties shotgun;
 	static const GunProperties machineGun;
 	//static const float shotgunDistance;

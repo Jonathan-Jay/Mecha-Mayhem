@@ -166,8 +166,7 @@ ObjMorphLoader& ObjMorphLoader::LoadMeshs(const std::string& baseFileName, bool 
 
 		std::string matLine;
 		size_t matIndex = 0;
-		float tempExponent = 1.f;
-		float tempTrans = 1.f;
+		float tempExponent = 1.f, tempTrans = 1.f, emissive = 0.f;
 		while (std::getline(materialFile, matLine))
 		{
 			stringTrimming::ltrim(matLine);
@@ -176,6 +175,7 @@ ObjMorphLoader& ObjMorphLoader::LoadMeshs(const std::string& baseFileName, bool 
 				matIndex = materials.size();
 				materials.push_back({ matLine.substr(7), glm::vec3(1.f), glm::vec3(1.f) });
 				tempExponent = tempTrans = 1.f;
+				emissive = 0.f;
 			}
 			else if (matLine.substr(0, 6) == "map_Kd")
 			{
@@ -225,19 +225,20 @@ ObjMorphLoader& ObjMorphLoader::LoadMeshs(const std::string& baseFileName, bool 
 				std::istringstream ss = std::istringstream(matLine.substr(5));
 				ss >> tempTrans;
 			}
-			else if (matLine.size() > 1 && matLine[0] == 'K')
+			//else if (matLine.size() > 1 && matLine[0] == 'K')
+			else if (matLine.substr(0, 2) == "Kd")
 			{
 				//only colour data is taken for now, textures later
-				if (matLine[1] == 'd')
-				{
+				//if (matLine[1] == 'd')
+				//{
 					//diffuse Colour, aka object colour
 					std::istringstream ss = std::istringstream(matLine.substr(2));
 					glm::vec3 colour;
 					ss >> colour.x >> colour.y >> colour.z;
 
 					materials[matIndex].colours = colour;
-				}
-				else if (matLine[1] == 's')
+				//}
+				/*else if (matLine[1] == 's')
 				{
 					//specular Colour
 					//diffuse Colour, aka object colour
@@ -250,7 +251,15 @@ ObjMorphLoader& ObjMorphLoader::LoadMeshs(const std::string& baseFileName, bool 
 				else if (matLine[1] == 'a')
 				{
 					//ambient Colour, ignored
-				}
+				}*/
+			}
+			else if (matLine.substr(0, 4) == "emis") {
+				std::istringstream ss = std::istringstream(matLine.substr(4));
+				ss >> emissive;
+			}
+			//send the data at the end
+			else if (matLine.substr(0, 5) == "illum") {
+				materials[matIndex].specStrength = glm::vec3(emissive, tempExponent, tempTrans);
 			}
 			else if (matLine[0] == '#')
 			{
@@ -897,7 +906,7 @@ void ObjMorphLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
 /*void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour,
 	const std::array<glm::vec3, MAX_LIGHTS>& lightPos, const std::array<glm::vec3, MAX_LIGHTS>& lightColour, const int& lightCount, float specularStrength, float shininess,
 	float ambientLightStrength, const glm::vec3& ambientColour, float ambientStrength)*/
-void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float specularStrength, float shininess)
+void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float emissiveness, float shininess)
 {
 	glm::mat4 VP = camera.GetProjection() * view;
 
@@ -905,7 +914,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 		//global stuff
 		m_shader->Bind();
 		m_shader->SetUniform("colour", colour);
-		m_shader->SetUniform("specularStrength", specularStrength);
+		m_shader->SetUniform("emissiveness", emissiveness);
 		m_shader->SetUniform("shininess", shininess);
 
 		/*m_shader->SetUniform("camPos", camera.GetPosition());

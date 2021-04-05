@@ -27,7 +27,7 @@ public:
 		float specularStrength = 1.f, float shininess = 4,
 		float ambientLightStrength = 0.05f, const glm::vec3& ambientColour = glm::vec3(0.f), float ambientStrength = 0.f
 	);*/
-	static void PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float specularStrength, float shininess);
+	static void PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float emissiveness = 0, float shininess = 4);
 
 	static void PerformDrawShadow(const glm::mat4& lightVPMatrix);
 
