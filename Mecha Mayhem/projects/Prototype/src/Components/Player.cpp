@@ -138,6 +138,9 @@ void Player::Init(int width, int height)
 	ObjMorphLoader("char4/idle", true).LoadMeshs("char4/walk", true)
 		.LoadMeshs("char4/air", true).LoadMeshs("char4/death", true)
 		.LoadMeshs("char4/punch", true);
+	ObjMorphLoader("char5/idle", true).LoadMeshs("char5/walk", true)
+		.LoadMeshs("char5/air", true).LoadMeshs("char5/death", true)
+		.LoadMeshs("char5/punch", true);
 }
 
 void Player::Unload()
@@ -174,6 +177,8 @@ Player& Player::Init(CONUSER user, int characterModel, const glm::vec3& colour, 
 	case 3:		m_charModelIndex = "char3";	m_charModel.LoadMeshs("char3/idle", true);	break;
 		//Bag
 	case 4:		m_charModelIndex = "char4";	m_charModel.LoadMeshs("char4/idle", true);	break;
+		//Ryan's
+	case 5:		m_charModelIndex = "char5";	m_charModel.LoadMeshs("char5/idle", true);	break;
 	}
 
 	return *this;
@@ -340,6 +345,9 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 	if (!m_punched && m_currWeapon != WEAPON::FIST) {
 		GetWeaponModel(m_currWeapon).DrawTemp(model * m_gunOffsetMat);
 	}
+
+	if (m_charModelIndex == "char5")
+		tempModel = glm::rotate(model, glm::radians(180.f), BLM::GLMup);
 
 	//temporary Fix for misaligned players
 	tempModel = glm::translate(tempModel, glm::vec3(0, -1, 0));
@@ -780,9 +788,13 @@ void Player::UseWeapon(PhysBody& body, Transform& head, float offset)
 		{
 			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
 		}
 		LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
 	}

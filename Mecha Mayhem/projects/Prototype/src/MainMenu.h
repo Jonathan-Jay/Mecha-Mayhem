@@ -46,7 +46,7 @@ private:
 	bool playerSwapped[4] = {};
 
 	int m_scenePos = 0;
-	static const int maxSelect = 4;
+	static const int maxSelect = 5;
 
 	float zoomTime = 1.f;
 	float m_exitHoldTimer = 1.f;
