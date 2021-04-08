@@ -15,7 +15,7 @@ const float shininess = 10.0;
 //we can render colour to all of these
 layout(location = 0) out vec4 outColours;
 layout(location = 1) out vec3 outNormals;
-layout(location = 2) out vec3 outSpecs;
+layout(location = 2) out vec4 outSpecs;
 layout(location = 3) out vec3 outPositions;
 layout(location = 4) out vec4 outEmissive;
 
@@ -29,6 +29,7 @@ void main() {
 	outSpecs.x = float(!bool(emissiveness));
 	outSpecs.y = shininess;
 	outSpecs.z = receiveShadows;
+	outSpecs.w = 0;		//no rim lighting
 
 	outColours.rgb = vec3(result.rgb + addColour) * outSpecs.x * divide;
 	outColours.a = 1.0;

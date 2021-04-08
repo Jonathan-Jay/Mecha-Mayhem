@@ -212,21 +212,18 @@ namespace Rendering {
 	}*/
 
 	std::array<glm::vec3, MAX_LIGHTS> LightsColour = {
-	   glm::vec3(200.f),
-	   glm::vec3(15.f, 15.f, 0.f),
-	   glm::vec3(.5f), glm::vec3(.5f), glm::vec3(.5f), glm::vec3(.5f),
-	   glm::vec3(.5f), glm::vec3(.5f), glm::vec3(.5f), glm::vec3(.5f)
+	   glm::vec3(20.f),
+	   glm::vec3(1.5f, 1.5f, 0.f),
+	   glm::vec3(.25f), glm::vec3(.25f), glm::vec3(.25f), glm::vec3(.25f),
+	   glm::vec3(.25f), glm::vec3(.25f), glm::vec3(.25f), glm::vec3(.25f)
 	};
 	std::array<glm::vec3, MAX_LIGHTS> LightsPos = {
-		glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f),
-		glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f),
-		glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f)
+		glm::vec3(0.f), glm::vec3(0.f),	glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f),
+		glm::vec3(0.f),	glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f), glm::vec3(0.f)
 	};
 	size_t LightCount = 0;
 	glm::vec3 BackColour = { 0.2f, 0.2f, 0.2f };
 	glm::vec3 DefaultColour = glm::vec3(1.f);
-	glm::vec3 AmbientColour = glm::vec3(1.f);
-	glm::float32 AmbientStrength = 1.f;
 
 	HitboxGen* hitboxes = nullptr;
 	Effects* effects = nullptr;

@@ -545,13 +545,13 @@ void ObjLoader::Draw(const glm::mat4& model, const glm::vec3& colour)
 	if (!m_enabled)	return;
 
 	if (m_models[m_index].text) {
-		m_texQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
+		m_texQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	}
 	else if (m_models[m_index].mat) {
-		m_matQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
+		m_matQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	}
 	else {
-		m_defaultQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
+		m_defaultQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	}
 }
 
@@ -560,13 +560,13 @@ void ObjLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
 	if (!m_enabled)	return;
 
 	if (m_models[m_index].text) {
-		m_texTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
+		m_texTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	}
 	else if (m_models[m_index].mat) {
-		m_matTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
+		m_matTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	}
 	else {
-		m_defaultTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows });
+		m_defaultTempQueue.push_back({ m_index, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	}
 }
 
@@ -607,6 +607,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_shader->SetUniformMatrix("transform", m_defaultTempQueue[i].model);
 			m_shader->SetUniform("addColour", m_defaultTempQueue[i].colour);
 			m_shader->SetUniform("receiveShadows", m_defaultTempQueue[i].shaded);
+			m_shader->SetUniform("rimLighting", m_defaultTempQueue[i].rimLit);
 
 			m_models[m_defaultTempQueue[i].modelIndex].vao->Render();
 		}
@@ -616,6 +617,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_shader->SetUniformMatrix("transform", m_defaultQueue[i].model);
 			m_shader->SetUniform("addColour", m_defaultQueue[i].colour);
 			m_shader->SetUniform("receiveShadows", m_defaultQueue[i].shaded);
+			m_shader->SetUniform("rimLighting", m_defaultQueue[i].rimLit);
 
 			m_models[m_defaultQueue[i].modelIndex].vao->Render();
 		}
@@ -640,6 +642,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_texShader->SetUniformMatrix("transform", m_texTempQueue[i].model);
 			m_texShader->SetUniform("addColour", m_texTempQueue[i].colour);
 			m_texShader->SetUniform("receiveShadows", m_texTempQueue[i].shaded);
+			m_texShader->SetUniform("rimLighting", m_texTempQueue[i].rimLit);
 
 			Sprite::m_textures[m_models[m_texTempQueue[i].modelIndex].texture].texture->Bind(0);
 
@@ -651,6 +654,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_texShader->SetUniformMatrix("transform", m_texQueue[i].model);
 			m_texShader->SetUniform("addColour", m_texQueue[i].colour);
 			m_texShader->SetUniform("receiveShadows", m_texQueue[i].shaded);
+			m_texShader->SetUniform("rimLighting", m_texQueue[i].rimLit);
 
 			Sprite::m_textures[m_models[m_texQueue[i].modelIndex].texture].texture->Bind(0);
 
@@ -678,6 +682,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_matShader->SetUniformMatrix("transform", m_matTempQueue[i].model);
 			m_matShader->SetUniform("addColour", m_matTempQueue[i].colour);
 			m_matShader->SetUniform("receiveShadows", m_matTempQueue[i].shaded);
+			m_matShader->SetUniform("rimLighting", m_matTempQueue[i].rimLit);
 
 			m_models[m_matTempQueue[i].modelIndex].vao->Render();
 		}
@@ -687,6 +692,7 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_matShader->SetUniformMatrix("transform", m_matQueue[i].model);
 			m_matShader->SetUniform("addColour", m_matQueue[i].colour);
 			m_matShader->SetUniform("receiveShadows", m_matQueue[i].shaded);
+			m_matShader->SetUniform("rimLighting", m_matQueue[i].rimLit);
 
 			m_models[m_matQueue[i].modelIndex].vao->Render();
 		}

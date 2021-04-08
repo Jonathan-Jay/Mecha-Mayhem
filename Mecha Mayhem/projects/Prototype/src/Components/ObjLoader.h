@@ -42,6 +42,8 @@ public:
 	bool GetReceiveShadows() { return m_receiveShadows; }
 	ObjLoader& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
 	bool GetCastShadows() { return m_castShadows; }
+	ObjLoader& SetRimLighting(bool choice) { m_rimLighting = choice; return *this; }
+	bool GetRimLighting() { return m_rimLighting; }
 private:
 
 	struct Models
@@ -59,6 +61,7 @@ private:
 		glm::mat4 model;
 		glm::vec3 colour;
 		int shaded;
+		int rimLit;
 	};
 
 	static std::vector<DrawData> m_matQueue;
@@ -81,6 +84,7 @@ private:
 
 	bool m_castShadows = true;
 	bool m_receiveShadows = true;
+	bool m_rimLighting = false;
 	bool m_enabled = false;
 	int m_index = -1;
 	glm::vec3 m_colour = BLM::GLMzero;

@@ -181,6 +181,7 @@ Player& Player::Init(CONUSER user, int characterModel, const glm::vec3& colour, 
 	case 5:		m_charModelIndex = "char5";	m_charModel.LoadMeshs("char5/idle", true);	break;
 	}
 
+	m_charModel.SetRimLighting(true);
 	return *this;
 }
 
@@ -351,6 +352,9 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 
 	//temporary Fix for misaligned players
 	tempModel = glm::translate(tempModel, glm::vec3(0, -1, 0));
+
+	//have rim lighting on all other players
+	//m_charModel.SetRimLighting(m_camPos != camNum);
 
 	m_charModel.DrawTemp(tempModel, m_colour - glm::vec3(sinf(m_damageCounter * 21.f)));
 	if (m_respawnTimer > 0) {
@@ -537,6 +541,7 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 		else	return;
 	}
 
+	m_bodPos = BLM::BTtoGLM(body.GetTransform().getOrigin());
 	//controls
 	{
 		glm::vec3 vel = glm::vec3(0.f);
@@ -558,9 +563,7 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 
 			if (m_punched = ControllerInput::GetButtonDown(BUTTON::X, m_user)) {
 				//punch only when on ground
-				body.SetVelocity(BLM::BTtoGLM(
-					Melee(BLM::BTtoGLM(body.GetTransform().getOrigin()) - head.GetForwards())
-				));
+				body.SetVelocity(BLM::BTtoGLM(Melee(m_bodPos - head.GetForwards())));
 				return;
 			}
 			else {
@@ -573,7 +576,8 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 						if (!m_stepped) {
 
 							//m_walk[rand() % 5].play();
-							AudioEngine::Instance().GetEvent("step").Restart();
+							//AudioEngine::Instance().GetEvent("step").Restart();
+							SoundEventManager::Play(SoundEventManager::SOUND::STEP, m_bodPos);
 
 							m_stepped = true;
 						}
@@ -618,14 +622,13 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 					//if (ControllerInput::GetButtonDown(BUTTON::RB, m_user)) {
 					if (ControllerInput::GetButton(BUTTON::LB, m_user)) {
 						m_dashTimer = m_dashDelay;
-						glm::vec3 ogPos = BLM::BTtoGLM(body.GetTransform().getOrigin());
-						btVector3 pos = PhysBody::GetRaycastWithDistanceLimit(ogPos,
+						btVector3 pos = PhysBody::GetRaycastWithDistanceLimit(m_bodPos,
 							glm::vec3(vel.x, 0, vel.z) * m_dashDistance * 10.f, m_dashDistance);
 
 						glm::vec3 newPos = BLM::BTtoGLM(pos);
 						Rendering::effects->ShootDash(glm::rotation(
 							glm::normalize(glm::vec3(vel.x, 0, -vel.z)), glm::vec3(0, 0, 1)),
-							newPos, glm::length(newPos - ogPos));
+							newPos, glm::length(newPos - m_bodPos));
 						body.SetPosition(pos);
 					}
 				}
@@ -635,14 +638,13 @@ void Player::GetInput(PhysBody& body, Transform& head, Transform& personalCam)
 				//if (ControllerInput::GetButtonDown(BUTTON::RB, m_user)) {
 				if (ControllerInput::GetButton(BUTTON::LB, m_user)) {
 					m_dashTimer = m_dashDelay;
-					glm::vec3 ogPos = BLM::BTtoGLM(body.GetTransform().getOrigin());
-					btVector3 pos = PhysBody::GetRaycastWithDistanceLimit(ogPos,
+					btVector3 pos = PhysBody::GetRaycastWithDistanceLimit(m_bodPos,
 						glm::vec4(0, 0, m_dashDistance * -50.f, 1)
 						* glm::rotate(BLM::GLMMat, m_rot.y, BLM::GLMup), m_dashDistance);
 
 					glm::vec3 newPos = BLM::BTtoGLM(pos);
 					Rendering::effects->ShootDash(BLM::BTtoGLM(body.GetTransform().getRotation()),
-						newPos, glm::length(newPos - ogPos));
+						newPos, glm::length(newPos - m_bodPos));
 					body.SetPosition(pos);
 				}
 			}
@@ -768,9 +770,7 @@ void Player::UseWeapon(PhysBody& body, Transform& head, float offset)
 	if (m_currWeapon == WEAPON::FIST)
 	{
 		if (m_grounded)
-			body.SetVelocity(BLM::BTtoGLM(
-				Melee(BLM::BTtoGLM(body.GetBody()->getWorldTransform().getOrigin()) - head.GetForwards())
-			));
+			body.SetVelocity(BLM::BTtoGLM(Melee(m_bodPos - head.GetForwards())));
 		return;
 	}
 
@@ -781,6 +781,8 @@ void Player::UseWeapon(PhysBody& body, Transform& head, float offset)
 	glm::quat offsetQuat = glm::angleAxis(offset, glm::vec3(0.24253f, 0.97014f, 0.f));
 	//shotgun range < 30.f therefore we can do spread
 
+	//AudioEngine::Instance().GetEvent("shoot").Restart();
+	SoundEventManager::Play(SoundEventManager::SOUND::SHOOT, m_bodPos);
 
 	//This branch *should* not be too bad since we are comparing 2 const variables.
 	if (selectedGun.type != WEAPON::CANNON) {
@@ -822,7 +824,6 @@ float HalfCurve(float input) {
 //does direction math for the shooting, ShootLazer does the actual projectile
 void Player::LaserGun(glm::quat offsetQuat, Transform& head, short damage, float distance, WEAPON type, glm::vec3 poffset)
 {
-	AudioEngine::Instance().GetEvent("shoot").Restart();
 
 	glm::vec3 rayPos =
 		head.GetGlobalPosition() + glm::vec3((m_gunOffset + glm::vec4(poffset, 1.f)) * glm::rotate(BLM::GLMMat, m_rot.y, BLM::GLMup));
@@ -862,7 +863,8 @@ void Player::LaserGun(glm::quat offsetQuat, Transform& head, short damage, float
 void Player::SwapWeapon()
 {
 	//m_swapWeapon.play();
-	AudioEngine::Instance().GetEvent("reload").Restart();
+	//AudioEngine::Instance().GetEvent("reload").Restart();
+	SoundEventManager::Play(SoundEventManager::SOUND::SWAP, m_bodPos);
 
 	WEAPON tempWeap = m_currWeapon;
 	m_currWeapon = m_secWeapon;
@@ -890,7 +892,8 @@ void Player::UseHeal()
 		m_health += 15;
 
 		//m_swapWeapon.play();
-		AudioEngine::Instance().GetEvent("reload").Restart();
+		//AudioEngine::Instance().GetEvent("reload").Restart();
+		SoundEventManager::Play(SoundEventManager::SOUND::RELOAD, m_bodPos);
 
 		if (m_health > m_maxHealth)
 			m_health = m_maxHealth;
@@ -900,7 +903,8 @@ void Player::UseHeal()
 		m_health += 15;
 
 		//m_swapWeapon.play();
-		AudioEngine::Instance().GetEvent("reload").Restart();
+		//AudioEngine::Instance().GetEvent("reload").Restart();
+		SoundEventManager::Play(SoundEventManager::SOUND::RELOAD, m_bodPos);
 
 		if (m_health > m_maxHealth)
 			m_health = m_maxHealth;
@@ -940,14 +944,15 @@ btVector3 Player::Melee(const glm::vec3& pos)
 
 	//if (hit)	m_punch.play();
 	//else		m_wiff.play();
-	AudioEvent& evnt = AudioEngine::Instance().GetEvent("hit");
+	AudioEvent& evnt = SoundEventManager::Create(SoundEventManager::SOUND::PUNCH);
 	evnt.SetParameter("punchHit", hit);
+	evnt.SetPosition(m_bodPos);
 	evnt.Restart();
 
 	return BLM::BTzero;
 }
 
-bool Player::PickUpWeapon(WEAPON pickup)
+int Player::PickUpWeapon(WEAPON pickup)
 {
 	if (m_currWeapon == WEAPON::FIST) {
 		const GunProperties& selectedGun = GetProperties(pickup);
@@ -955,7 +960,7 @@ bool Player::PickUpWeapon(WEAPON pickup)
 		m_currWeaponAmmo = selectedGun.ammoCapacity;
 		m_speed = selectedGun.movementSpeed;
 
-		return true;
+		return 1;
 	}
 	//if gun matches current weapon, then replenish ammo
 	if (m_currWeapon == pickup) {
@@ -963,9 +968,9 @@ bool Player::PickUpWeapon(WEAPON pickup)
 		if (m_currWeaponAmmo != tempAmmo) {
 			m_currWeaponAmmo = tempAmmo;
 
-			return true;
+			return 2;
 		}
-		return false;
+		return 0;
 
 	}
 
@@ -975,7 +980,7 @@ bool Player::PickUpWeapon(WEAPON pickup)
 		m_secWeaponAmmo = selectedGun.ammoCapacity;
 		m_speed = selectedGun.movementSpeed;
 
-		return true;
+		return 1;
 	}
 	//if gun matches secondary weapon, then replenish ammo
 	if (m_secWeapon == pickup) {
@@ -983,12 +988,12 @@ bool Player::PickUpWeapon(WEAPON pickup)
 		if (m_secWeaponAmmo != tempAmmo) {
 			m_secWeaponAmmo = tempAmmo;
 
-			return true;
+			return 2;
 		}
-		return false;
+		return 0;
 	}
 
-	return false;
+	return 0;
 }
 
 bool Player::PickUpOffhand(OFFHAND pickup)

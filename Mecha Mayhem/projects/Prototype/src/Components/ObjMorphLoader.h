@@ -65,6 +65,8 @@ public:
 	bool GetReceiveShadows() { return m_receiveShadows; }
 	ObjMorphLoader& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
 	bool GetCastShadows() { return m_castShadows; }
+	ObjMorphLoader& SetRimLighting(bool choice) { m_rimLighting = choice; return *this; }
+	bool GetRimLighting() { return m_rimLighting; }
 
 	void Update(float dt);
 
@@ -127,6 +129,7 @@ private:
 		glm::mat4 model;
 		glm::vec3 colour;
 		int shaded;
+		int rimLit;
 		int texture = -1;
 	};
 
@@ -168,6 +171,7 @@ private:
 
 	bool m_castShadows = true;
 	bool m_receiveShadows = true;
+	bool m_rimLighting = false;
 	bool m_reversing = false;
 	bool m_bounce = false;
 	bool m_loop = false;

@@ -77,7 +77,7 @@ int main() {
 			if (!BackEnd::HasFocus()) {
 				if (!paused) {
 					AudioEngine::Instance().PauseEverything();
-					AudioEngine::Instance().Update();
+					SoundEventManager::Update();
 					paused = true;
 				}
 				//has to update all the time

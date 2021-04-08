@@ -113,6 +113,8 @@ void MapEditor::Exit()
 		else
 			std::cout << (debugText = "file save failed\n");
 	}
+
+	Scene::Exit();
 }
 
 Scene* MapEditor::Reattach()
@@ -121,6 +123,8 @@ Scene* MapEditor::Reattach()
 	Rendering::LightCount = 2;
 	Rendering::LightsPos[0] = BLM::GLMzero;
 	Rendering::LightsColour[0] = glm::vec3(20.f);
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 
 	return Scene::Reattach();
 }

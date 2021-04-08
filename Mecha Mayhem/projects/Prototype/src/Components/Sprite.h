@@ -77,7 +77,7 @@ public:
 	Sprite& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
 	bool GetCastShadows() { return m_castShadows; }
 
-	void SetEnabled(bool choice) { m_enabled = choice; }
+	Sprite& SetEnabled(bool choice) { m_enabled = choice;	return *this; }
 	bool GetEnabled() { return m_enabled; }
 
 private:

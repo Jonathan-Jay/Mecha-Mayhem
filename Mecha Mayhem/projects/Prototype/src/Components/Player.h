@@ -3,7 +3,7 @@
 #include "PhysBody.h"
 #include "ObjMorphLoader.h"
 #include "Utilities/Time.h"
-#include <AudioEngine.h>
+#include "Utilities/SoundEventManager.h"
 
 class Player
 {
@@ -150,8 +150,8 @@ public:
 	//returns true if <= than timer
 	bool RespawnDelayTest(float timer) { return m_respawnTimer <= timer; }
 
-	//returns true if successful
-	bool PickUpWeapon(WEAPON pickup);
+	//returns 1 if successful, 2 if picked up ammo, 0 if failed
+	int PickUpWeapon(WEAPON pickup);
 
 	//returns true if successful
 	bool PickUpOffhand(OFFHAND pickup);
@@ -298,13 +298,16 @@ private:
 	static const GunProperties rifle;
 	static const GunProperties shotgun;
 	static const GunProperties machineGun;
-	//static const float shotgunDistance;
 
-	glm::vec3 m_colour = glm::vec3(0.f);
+	//	store this for sounds
+	glm::vec3 m_bodPos = BLM::GLMzero;
+
+	//additive colour
+	glm::vec3 m_colour = BLM::GLMzero;
 
 	//glm::quat m_startRot = glm::quat(1, 0, 0, 0);
-	glm::vec3 m_spawnPos = glm::vec3(0.f);
-	glm::vec3 m_deathPos = glm::vec3(0.f);
+	glm::vec3 m_spawnPos = BLM::GLMzero;
+	glm::vec3 m_deathPos = BLM::GLMzero;
 	glm::vec2 m_rot = glm::vec2(0.f);
 	glm::vec2 m_deathRot = glm::vec2(0.f);
 	glm::vec2 m_sensitivity = glm::vec2(2.f, 1.5f);

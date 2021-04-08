@@ -1,6 +1,12 @@
 #include "DemoScene.h"
 #include "LeaderBoard.h"
 
+DemoScene::DemoScene(const std::string& name, const glm::vec3& gravity)
+	: Scene(name, gravity, true)
+{
+	m_frameEffects.SetShadowVP(-70, 70, 40, -60, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
+}
+
 void DemoScene::Init(int width, int height)
 {
 	ECS::AttachRegistry(&m_reg);
@@ -35,7 +41,6 @@ void DemoScene::Init(int width, int height)
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init();
-	m_frameEffects.SetShadowVP(-70, 70, 40, -60, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
 
 	Player::SetUIAspect(width, height);
 	Player::SetCamDistance(camDistance);
@@ -216,8 +221,10 @@ void DemoScene::LateUpdate()
 	//this makes the light match the player's position
 
 	for (int i(0); i < LeaderBoard::playerCount; ++i) {
-		Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup;
+		Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup * 0.5f;
 	}
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 }
 
 void DemoScene::DrawOverlay()
@@ -273,11 +280,12 @@ Scene* DemoScene::Reattach()
 	Scene::Reattach();
 
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightsColour[0] = glm::vec3(200.f);
+	Rendering::LightsColour[0] = glm::vec3(20.f);
 	Rendering::LightCount = 2 + LeaderBoard::playerCount;
 	Rendering::LightsPos[0] = glm::vec3(20.5f, -1, 21.8f);
 	Rendering::LightsPos[1] = glm::vec3(20.5f, 3, 21.8f);
-	Rendering::AmbientStrength = 1.f;
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 
 	m_camCount = LeaderBoard::playerCount;
 	if (LeaderBoard::timedGoal) {

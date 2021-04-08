@@ -400,6 +400,7 @@ void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Cam
 
 	ObjLoader::m_texShader->SetUniform("addColour", colour);
 	ObjLoader::m_texShader->SetUniform("receiveShadows", 1);
+	ObjLoader::m_texShader->SetUniform("rimLighting", 0);
 
 	for (int i(0); i < m_models[m_index].vao.size(); ++i) {
 		ObjLoader::m_texShader->SetUniformMatrix("MVP", VP * model);

@@ -18,12 +18,10 @@ namespace Rendering
 	void RenderForShading(entt::registry* reg);
 
 	extern glm::vec3 BackColour;
+	extern glm::vec3 DefaultColour;
 	extern std::array<glm::vec3, MAX_LIGHTS> LightsPos;
 	extern std::array<glm::vec3, MAX_LIGHTS> LightsColour;
 	extern size_t LightCount;
-	extern glm::vec3 DefaultColour;
-	extern glm::vec3 AmbientColour;
-	extern glm::float32 AmbientStrength;
 
 	extern HitboxGen* hitboxes;
 	extern Effects* effects;

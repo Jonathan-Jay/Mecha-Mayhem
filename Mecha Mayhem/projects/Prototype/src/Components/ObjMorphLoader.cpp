@@ -884,11 +884,11 @@ void ObjMorphLoader::Draw(const glm::mat4& model, const glm::vec3& colour)
 	if (!m_enabled)	return;
 
 	if (m_anims[m_index].text)
-		m_texQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_anims[m_index].texture });
+		m_texQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_rimLighting, m_anims[m_index].texture });
 	else if (m_anims[m_index].mat)
-		m_matQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows });
+		m_matQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	else
-		m_defaultQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows });
+		m_defaultQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 }
 
 void ObjMorphLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
@@ -896,11 +896,11 @@ void ObjMorphLoader::DrawTemp(const glm::mat4& model, const glm::vec3& colour)
 	if (!m_enabled)	return;
 
 	if (m_anims[m_index].text)
-		m_texTempQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_anims[m_index].texture });
+		m_texTempQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_rimLighting, m_anims[m_index].texture });
 	else if (m_anims[m_index].mat)
-		m_matTempQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows });
+		m_matTempQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 	else
-		m_defaultTempQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows });
+		m_defaultTempQueue.push_back({ m_t, m_vao, model, colour + m_colour, m_receiveShadows, m_rimLighting });
 }
 
 /*void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour,
@@ -933,6 +933,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 			m_shader->SetUniform("t", m_defaultTempQueue[i].t);
 			m_shader->SetUniform("addColour", m_defaultTempQueue[i].colour);
 			m_shader->SetUniform("receiveShadows", m_defaultTempQueue[i].shaded);
+			m_shader->SetUniform("rimLighting", m_defaultTempQueue[i].rimLit);
 
 			m_defaultTempQueue[i].vao->Render();
 		}
@@ -943,6 +944,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 			m_shader->SetUniform("t", m_defaultQueue[i].t);
 			m_shader->SetUniform("addColour", m_defaultQueue[i].colour);
 			m_shader->SetUniform("receiveShadows", m_defaultQueue[i].shaded);
+			m_shader->SetUniform("rimLighting", m_defaultQueue[i].rimLit);
 
 			m_defaultQueue[i].vao->Render();
 		}
@@ -969,6 +971,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 			m_texShader->SetUniform("t", m_texTempQueue[i].t);
 			m_texShader->SetUniform("addColour", m_texTempQueue[i].colour);
 			m_texShader->SetUniform("receiveShadows", m_texTempQueue[i].shaded);
+			m_texShader->SetUniform("rimLighting", m_texTempQueue[i].rimLit);
 
 			Sprite::m_textures[m_texTempQueue[i].texture].texture->Bind(0);
 
@@ -981,6 +984,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 			m_texShader->SetUniform("t", m_texQueue[i].t);
 			m_texShader->SetUniform("addColour", m_texQueue[i].colour);
 			m_texShader->SetUniform("receiveShadows", m_texQueue[i].shaded);
+			m_texShader->SetUniform("rimLighting", m_texQueue[i].rimLit);
 
 			Sprite::m_textures[m_texQueue[i].texture].texture->Bind(0);
 
@@ -1009,6 +1013,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 			m_matShader->SetUniform("t", m_matTempQueue[i].t);
 			m_matShader->SetUniform("addColour", m_matTempQueue[i].colour);
 			m_matShader->SetUniform("receiveShadows", m_matTempQueue[i].shaded);
+			m_matShader->SetUniform("rimLighting", m_matTempQueue[i].rimLit);
 
 			m_matTempQueue[i].vao->Render();
 		}
@@ -1019,6 +1024,7 @@ void ObjMorphLoader::PerformDraw(const glm::mat4& view, const Camera& camera, co
 			m_matShader->SetUniform("t", m_matQueue[i].t);
 			m_matShader->SetUniform("addColour", m_matQueue[i].colour);
 			m_matShader->SetUniform("receiveShadows", m_matQueue[i].shaded);
+			m_matShader->SetUniform("rimLighting", m_matQueue[i].rimLit);
 
 			m_matQueue[i].vao->Render();
 		}

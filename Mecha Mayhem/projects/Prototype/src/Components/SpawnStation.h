@@ -1,6 +1,5 @@
 #pragma once
 #include "Player.h"
-#include "Utilities/Time.h"
 
 class Spawner {
 public:
@@ -91,12 +90,13 @@ public:
 		});
 
 		if (touched != nullptr) {
+			int temp = 0;
 			if (m_currWeapon == Player::WEAPON::FIST) {
 				if (touched->PickUpOffhand(Player::OFFHAND::HEALPACK2)) {
 					m_timer = m_delay;
 					m_spawnerModel.SetDirection(false);
 
-					AudioEngine::Instance().GetEvent("pickup").Restart();
+					SoundEventManager::Play(SoundEventManager::SOUND::PICKUP, pos);
 				}
 			}
 			else if (m_currWeapon == Player::WEAPON::SWORD) {
@@ -104,14 +104,15 @@ public:
 					m_timer = m_delay;
 					m_spawnerModel.SetDirection(false);
 
-					AudioEngine::Instance().GetEvent("pickup").Restart();
+					SoundEventManager::Play(SoundEventManager::SOUND::PICKUP, pos);
 				}
 			}
-			else if (touched->PickUpWeapon(m_currWeapon)) {
+			else if (temp = touched->PickUpWeapon(m_currWeapon)) {
 				m_timer = m_delay;
 				m_spawnerModel.SetDirection(false);
 
-				AudioEngine::Instance().GetEvent("pickup").Restart();
+				//temp is 1 aka pickup, or 2 aka reload
+				SoundEventManager::Play(SoundEventManager::SOUND(temp), pos);
 			}
 		}
 	}

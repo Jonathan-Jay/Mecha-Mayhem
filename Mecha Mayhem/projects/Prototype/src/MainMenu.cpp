@@ -1,6 +1,12 @@
 #include "MainMenu.h"
 #include "LeaderBoard.h"
 
+MainMenu::MainMenu(const std::string& name) :
+	Scene(name, BLM::GLMzero, false)
+{
+	m_frameEffects.SetShadowVP(-20, 20, 20, -10, glm::vec3(4.125f - 1.5f, 0, 4.45f + 1.5f));
+}
+
 void MainMenu::Init(int width, int height)
 {
 	ECS::AttachRegistry(&m_reg);
@@ -10,7 +16,7 @@ void MainMenu::Init(int width, int height)
 		.ResizeWindow(width, height).SetNear(0.3f);
 
 	title = ECS::CreateEntity();
-	ECS::AttachComponent<ObjMorphLoader>(title).LoadMeshs("title", true).SetReceiveShadows(false);
+	ECS::AttachComponent<ObjMorphLoader>(title).LoadMeshs("title", true).SetReceiveShadows(false).SetRimLighting(true);
 	ECS::GetComponent<Transform>(title).SetPosition(glm::vec3(0.f, 0.15f, -0.9f)).SetScale(0.25f).ChildTo(camera);
 
 	text = ECS::CreateEntity();
@@ -35,45 +41,70 @@ void MainMenu::Init(int width, int height)
 
 
 	charSelect = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(charSelect).Init("CharSelect.png", -12.326f, 1.5f).SetReceiveShadows(false);
+	ECS::AttachComponent<Sprite>(charSelect).Init("CharSelect.png", -12.326f, 1.5f).SetCastShadows(false).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(charSelect).SetPosition(glm::vec3(0, 103.f - 100.f, -8)).ChildTo(charSelectParent);
+
+	confirm = ECS::CreateEntity();
+	ECS::AttachComponent<Sprite>(confirm).Init("confirm.png", -6.5156f, 0.75f)
+		.SetCastShadows(false).SetReceiveShadows(false).SetEnabled(false);
+	ECS::GetComponent<Transform>(confirm).SetPosition(glm::vec3(0, 101.5f - 100.f, -8)).ChildTo(charSelectParent);
 
 
 	for (int x(0); x < 4; ++x) {
 		{
 			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Sprite>(entity).Init("ArrowL.png", -0.75f, 0.75f);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, 99.f - 100.f, -8)).ChildTo(charSelectParent);
+			ECS::AttachComponent<Sprite>(entity).Init("dpad.png", -0.75f, 0.531f).SetCastShadows(false);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, 0.f, -8)).ChildTo(charSelectParent);
 		}
 		{
 			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Sprite>(entity).Init("ArrowR.png", -0.75f, 0.75f);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 5, 99.f - 100.f, -8)).ChildTo(charSelectParent);
+			ECS::AttachComponent<Sprite>(entity).Init("ArrowL.png", -0.75f, 0.75f).SetCastShadows(false);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, -1.f, -8)).ChildTo(charSelectParent);
 		}
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity).Init("ArrowR.png", -0.75f, 0.75f).SetCastShadows(false);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 5, -1.f, -8)).ChildTo(charSelectParent);
+		}
+
+		glm::vec3 pos = glm::vec3(x * 4 - 6, -1.f, -8);
+		glm::quat rot = glm::quatLookAt(glm::normalize(pos - glm::vec3(0, -1, 0)), BLM::GLMup);
+
 		models[x] = ECS::CreateEntity();
 		ECS::AttachComponent<Player>(models[x]).Init(CONUSER::NONE, LeaderBoard::players[x].model);
 		ECS::AttachComponent<PhysBody>(models[x]);
-		ECS::GetComponent<Transform>(models[x]).SetPosition(glm::vec3(x * 4 - 6, 99.f - 100.f, -8))
-			.SetRotation(glm::angleAxis(BLM::pi, BLM::GLMup)).SetScale(1.5f).ChildTo(charSelectParent);
+		ECS::GetComponent<Transform>(models[x]).SetPosition(pos).SetRotation(rot * glm::angleAxis(BLM::pi, BLM::GLMup))
+			.SetScale(1.5f).ChildTo(charSelectParent);
+
+		popup[x] = ECS::CreateEntity();
+		ECS::AttachComponent<Sprite>(popup[x]).Init("a.png", -0.6859f, 0.5f).SetCastShadows(false).SetEnabled(true);
+		ECS::GetComponent<Transform>(popup[x]).SetPosition(pos + glm::vec3(0, 0, -0.5f) * rot + glm::vec3(0, 0, 1.f)).ChildTo(charSelectParent);
 	}
 
 	digit1 = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(digit1).SetReceiveShadows(false);
+	ECS::AttachComponent<Sprite>(digit1).SetCastShadows(false).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(digit1).SetPosition(glm::vec3(0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 	digit2 = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(digit2).SetReceiveShadows(false);
+	ECS::AttachComponent<Sprite>(digit2).SetCastShadows(false).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(digit2).SetPosition(glm::vec3(-0.4f, 96.75f - 100.f, -8)).ChildTo(charSelectParent);
 
 	FixDigits(LeaderBoard::scoreGoal);
 
 	timerText = ECS::CreateEntity();
-	//ECS::AttachComponent<Sprite>(timerText).SetReceiveShadows(false).Init(glm::vec4(0.f, 0.f, 0.f, 1.f), -1.7f, 1.2f).SetEnabled(LeaderBoard::timedGoal);
-	ECS::AttachComponent<Sprite>(timerText).SetReceiveShadows(false).Init(LeaderBoard::timedGoal ? "timed.png" : "kills.png", -4.5184f, 1.f);
+	ECS::AttachComponent<Sprite>(timerText).SetCastShadows(false).SetReceiveShadows(false)
+		.Init(LeaderBoard::timedGoal ? "timed.png" : "kills.png", -4.5184f, 1.f);
 	ECS::GetComponent<Transform>(timerText).SetPosition(glm::vec3(0.45f, 96.75f - 100.f, -8.01f)).ChildTo(charSelectParent);
+	
+	{
+		auto entity = ECS::CreateEntity();
+		ECS::AttachComponent<Sprite>(entity).SetCastShadows(false).SetReceiveShadows(false)
+			.Init("dpad.png", -0.75f, 0.531f);
+		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(-2.25f, 96.75f - 100.f, -8.f))
+			.SetRotation(glm::angleAxis(glm::radians(90.f), glm::vec3(0, 0, -1))).ChildTo(charSelectParent);
+	}
 
 	backGround = ECS::CreateEntity();
-	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10)
-		.SetCastShadows(false).SetReceiveShadows(false);
+	ECS::AttachComponent<Sprite>(backGround).Init("genericbg.png", -19, 10).SetReceiveShadows(false);
 	ECS::GetComponent<Transform>(backGround).SetPosition(glm::vec3(0, 100 - 100.f, -10)).ChildTo(charSelectParent);
 
 
@@ -93,7 +124,6 @@ void MainMenu::Init(int width, int height)
 	Rendering::LightsPos[5] = BLM::GLMzero;
 
 	m_frameEffects.Init();
-	m_frameEffects.SetShadowVP(-20, 20, 20, -10, glm::vec3(4.125f - 1.5f, 0, 4.45f + 1.5f));
 
 	if (m_frameEffects[0] == nullptr) {
 		m_frameEffects.AddEffect(new DepthOfFieldEffect());
@@ -166,9 +196,9 @@ void MainMenu::Update()
 			glm::angleAxis(glm::radians(lx * 6), BLM::GLMup) * glm::angleAxis(glm::radians(ly * 6), glm::vec3(-1, 0, 0))
 		).GetGlobalPosition() + glm::vec3(0, -1, 0);
 
-		Rendering::LightsPos[2] = ECS::GetComponent<Transform>(text).SetRotation(
+		ECS::GetComponent<Transform>(text).SetRotation(
 			glm::angleAxis(glm::radians(lx * 3), BLM::GLMup) * glm::angleAxis(glm::radians(ly * 3), glm::vec3(-1, 0, 0))
-		).GetGlobalPosition();
+		);
 
 
 		if (m_exit) {
@@ -177,24 +207,11 @@ void MainMenu::Update()
 			if (ECS::GetComponent<ObjMorphLoader>(title).IsDone()) {
 				ECS::GetComponent<ObjMorphLoader>(title).ToggleDirection();
 				ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(100.f);
-				//ECS::GetComponent<Transform>(camera).SetPosition(glm::vec3(0, 100, 0)).SetRotation(BLM::GLMQuat);
-				//ECS::GetComponent<Transform>(text).SetScale(1.f);
-
-
-
-
 
 				ECS::GetComponent<Transform>(charSelectParent).SetRotation(BLM::GLMQuat);
 
-
-
-
-
-
-				ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat)// .UnChild();
-					.SetScale(0.f);
-				ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat)// .UnChild();
-					.SetScale(0.f);
+				ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).SetScale(0.f);
+				ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).SetScale(0.f);
 
 				cameraPath.SetSpeed(1);
 				m_exit = false;
@@ -203,12 +220,12 @@ void MainMenu::Update()
 				m_exitHoldTimer = 1.f;
 				m_confirmTimer = 1.f;
 				Rendering::BackColour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
-				Rendering::LightsPos[0] = glm::vec3(0, 100, -5);
+				Rendering::LightsPos[0] = glm::vec3(0, 100, 0);
+				Rendering::LightsPos[1] = glm::vec3(0, 100, 0);
 				Rendering::LightsPos[2] = BLM::GLMzero;
 				Rendering::LightsPos[3] = BLM::GLMzero;
 				Rendering::LightsPos[4] = BLM::GLMzero;
 				Rendering::LightsPos[5] = BLM::GLMzero;
-				Rendering::AmbientStrength = 1.5f;
 				//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(1.1f);
 				((BloomEffect*)m_frameEffects[1])->SetThreshold(1.f);
 			}
@@ -264,12 +281,15 @@ void MainMenu::Update()
 			auto &p = ECS::GetComponent<Player>(models[x]);
 
 			if (p.IsPlayer()) {
+				ECS::GetComponent<Sprite>(popup[x]).SetEnabled(false);
 				if (Rendering::LightsPos[2 + x] == BLM::GLMzero)
 					Rendering::LightsPos[2 + x] = (ECS::GetComponent<Transform>(models[x]).GetGlobalPosition() + glm::vec3(0, 0, 1.75f));
 
 				if (ControllerInput::GetButtonDown(BUTTON::Y, CONUSER(x))) {
 					//ECS::GetComponent<Sprite>(timerText).SetEnabled(LeaderBoard::timedGoal = !LeaderBoard::timedGoal);
 					ECS::GetComponent<Sprite>(timerText).Init((LeaderBoard::timedGoal = !LeaderBoard::timedGoal) ? "timed.png" : "kills.png", -4.5184f, 1.f);
+					
+					SoundEventManager::Play(SoundEventManager::SOUND::SHOOT);
 				}
 
 				if (ControllerInput::GetButtonDown(BUTTON::DDOWN, CONUSER(x))) {
@@ -313,6 +333,7 @@ void MainMenu::Update()
 					p.Init(LeaderBoard::players[x].user = CONUSER::NONE, 0);
 					playerSwapped[x] = true;
 					Rendering::LightsPos[2 + x] = BLM::GLMzero;
+					SoundEventManager::Play(SoundEventManager::SOUND::SWAP);
 					continue;
 				}
 
@@ -332,6 +353,8 @@ void MainMenu::Update()
 
 						p.Init(CONUSER::FOUR, LeaderBoard::players[x].model, LeaderBoard::players[x].colour);
 
+						SoundEventManager::Play(SoundEventManager::SOUND::RELOAD);
+
 						playerSwapped[x] = true;
 					}
 				}
@@ -343,6 +366,8 @@ void MainMenu::Update()
 						FixColourUp(x);
 
 						p.Init(CONUSER::FOUR, LeaderBoard::players[x].model, LeaderBoard::players[x].colour);
+						
+						SoundEventManager::Play(SoundEventManager::SOUND::RELOAD);
 
 						playerSwapped[x] = true;
 					}
@@ -352,7 +377,11 @@ void MainMenu::Update()
 				}
 			}
 			else {
+				ECS::GetComponent<Sprite>(popup[x]).SetEnabled(true);
 				playerSwapped[x] = false;
+				if (Rendering::LightsPos[2 + x] != BLM::GLMzero)
+					Rendering::LightsPos[2 + x] = BLM::GLMzero;
+
 				if (ControllerInput::GetButtonDown(BUTTON::A, CONUSER(x))) {
 					if (LeaderBoard::players[x].model == 0)
 						LeaderBoard::players[x].model = 1;
@@ -363,6 +392,7 @@ void MainMenu::Update()
 					p.Init(CONUSER::FOUR, LeaderBoard::players[x].model, LeaderBoard::players[x].colour);
 					playerSwapped[x] = true;
 					m_confirmTimer = 1.f;
+					SoundEventManager::Play(SoundEventManager::SOUND::PICKUP);
 				}
 			}
 
@@ -382,30 +412,16 @@ void MainMenu::Update()
 						Rendering::LightsPos[3] = BLM::GLMzero;
 						Rendering::LightsPos[4] = BLM::GLMzero;
 						Rendering::LightsPos[5] = BLM::GLMzero;
-						Rendering::AmbientStrength = 1.f;
 						//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 						((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 						ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
 
-
-
 						ECS::GetComponent<Transform>(charSelectParent)
 							.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
 
-
-
-						ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).ChildTo(camera)
-
-
-
-						.SetScale(0.25f);
-						ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).ChildTo(camera)
-						
-
-
-
-						.SetScale(1.f);
+						ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).ChildTo(camera).SetScale(0.25f);
+						ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).ChildTo(camera).SetScale(1.f);
 					}
 					ECS::GetComponent<Sprite>(charSelect).SetWidth(-12.326f * m_exitHoldTimer);
 				}
@@ -417,6 +433,8 @@ void MainMenu::Update()
 				ECS::GetComponent<Sprite>(charSelect).SetWidth(-12.326f);
 			}
 		}
+
+		ECS::GetComponent<Sprite>(confirm).SetEnabled(playerCount > 0);
 
 		//if (allHolding && playerCount > 0) {
 		if (allHolding == playerCount && playerCount > 0) {
@@ -478,21 +496,25 @@ void MainMenu::Update()
 			((BloomEffect*)m_frameEffects[1])->SetThreshold(1.f);
 		}
 	}
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 }
 
 Scene* MainMenu::Reattach()
 {
-	AudioEngine::Instance().GetEvent("MainMenu").Restart();
+	//AudioEngine::Instance().GetEvent("MainMenu").Restart();
+	SoundEventManager::Play(SoundEventManager::SOUND::MAINMENU);
 
 	Rendering::BackColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 	Rendering::DefaultColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 	Rendering::LightCount = 6;
-	Rendering::LightsColour[0] = glm::vec3(3.f);
+	Rendering::LightsColour[0] = glm::vec3(0.1f);
 	Rendering::LightsPos[2] = BLM::GLMzero;
 	Rendering::LightsPos[3] = BLM::GLMzero;
 	Rendering::LightsPos[4] = BLM::GLMzero;
 	Rendering::LightsPos[5] = BLM::GLMzero;
-	Rendering::AmbientStrength = 1.f;
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 	//((DepthOfFieldEffect*)m_frameEffects[0])->SetDepthLimit(0.74f);
 	((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 

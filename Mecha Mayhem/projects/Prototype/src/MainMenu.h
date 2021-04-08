@@ -6,8 +6,7 @@
 class MainMenu : public Scene
 {
 public:
-	MainMenu(const std::string& name) :
-		Scene(name, BLM::GLMzero, false) {}
+	MainMenu(const std::string& name);
 
 	virtual void Init(int windowWidth, int windowHeight) override;
 	virtual void Update() override;
@@ -69,9 +68,16 @@ private:
 	entt::entity text = entt::null;
 	entt::entity charSelect = entt::null;
 	entt::entity backGround = entt::null;
+	entt::entity confirm = entt::null;
 	entt::entity digit1 = entt::null;
 	entt::entity digit2 = entt::null;
 	entt::entity models[4] = {
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null
+	};
+	entt::entity popup[4] = {
 		entt::null,
 		entt::null,
 		entt::null,

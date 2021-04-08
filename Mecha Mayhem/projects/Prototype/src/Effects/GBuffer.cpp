@@ -25,7 +25,7 @@ void GBuffer::Init(unsigned width, unsigned height)
 		//Add Colour targets to GBuffer
 		_gBuffer.AddColorTarget(GL_RGBA8);	//Albedo buffer, needs all channels
 		_gBuffer.AddColorTarget(GL_RGB8);	//Normals buffer, doesn't need alpha
-		_gBuffer.AddColorTarget(GL_RGB8);	//Specular buffer, really only needs one
+		_gBuffer.AddColorTarget(GL_RGBA8);	//Specular buffer, x stores emissivity, y stores specularness, z stores shadows, w stores rim lighting
 
 		//Important note: you can get position data from depth buffer, but we're gonna use a position buffer
 		_gBuffer.AddColorTarget(GL_RGB32F);	//Position buffer, big boy

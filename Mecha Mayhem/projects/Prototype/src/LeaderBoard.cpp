@@ -87,8 +87,11 @@ T fakeSmoothStep(T a, T b, float percent) {
 
 void LeaderBoard::Update()
 {
-	float /*lx = 0, ly = 0,*/ rx = 0, ry = 0;
+	float /*lx = 0, ly = 0,*/ rx = 0, ry = 0, mult = 1.f;
 	for (int i(0); i < 4; ++i) {
+		if (ControllerInput::GetButtonDown(BUTTON::SELECT, CONUSER(i))) {
+			mult += 5.f / playerCount;
+		}
 		if (ControllerInput::GetButtonDown(BUTTON::START, CONUSER(i))) {
 			if (ControllerInput::GetButton(BUTTON::RB, CONUSER(i))) {
 				if (BackEnd::GetFullscreen())	BackEnd::SetTabbed();
@@ -100,10 +103,16 @@ void LeaderBoard::Update()
 	auto& pTrans = ECS::GetComponent<Transform>(playerEnt);
 
 	if (m_timer > 0) {
-		m_timer -= Time::dt;
+		m_timer -= mult * Time::dt;
 		if (m_timer <= 0) {
 			m_timer = 0;
 			//anything else here
+			ECS::GetComponent<Sprite>(text).SetWidth(-5.51f);
+			pTrans.SetPosition(glm::vec3(1.75f, -0.1f, -3.5f));
+			for (int i(0); i < 4; ++i) {
+				ECS::GetComponent<Sprite>(playerScores[i].bar).SetWidth(-3.88f);
+				ECS::GetComponent<Transform>(playerScores[i].parent).SetPosition(playerScores[i].finalPos);
+			}
 		}
 		if (m_timer < 1) {
 			//press A to continue here
@@ -184,8 +193,11 @@ Scene* LeaderBoard::Reattach()
 	Scene::Reattach();
 
 	Rendering::LightCount = 1;
+	Rendering::LightsColour[0] = glm::vec3(0.5f);
 	Rendering::LightsPos[0] = glm::vec3(1.75f, -0.5f, 7.f);
 	Rendering::BackColour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 
 	m_timer = 4.25f;
 

@@ -1,4 +1,5 @@
 #version 420
+#define MAX_LIGHTS 10
 
 layout(location = 0) in vec2 inUV;
 
@@ -39,6 +40,11 @@ layout(binding = 4) uniform sampler2D s_emissiveTex;
 uniform mat4 u_LightSpaceMatrix;
 uniform vec3 u_camPos[4];
 uniform int camCount;
+
+uniform vec3  lightsPos[MAX_LIGHTS];
+uniform vec3  lightsColour[MAX_LIGHTS];
+uniform int lightCount;
+const float specStrength = 1.0;
 
 out vec4 frag_color;
 
@@ -134,6 +140,21 @@ void main() {
 		(1.0 - shadow) * //Shadow value
 		(diffuse + specular) // light factors from our single light
 		) * texSpec.x; // don't render when emissive
+
+
+	float lightDistSq = 0.0;
+    for(int i = 0; i < lightCount; ++i) {
+		lightDir = lightsPos[i] - fragPos;
+		lightDistSq = dot(lightDir, lightDir);
+		lightDir = normalize(lightDir);
+
+		//			diffuse
+		result += ((max(dot(inNormal, lightDir), 0.0)
+			//	SpecStrength															ShininessCoefficient
+			+ specStrength * pow(max(dot(inNormal, normalize(viewDir + lightDir)), 0.0), texSpec.y))
+			//	attenuation	emissive removal
+			/ lightDistSq * texSpec.x) * lightsColour[i];
+	}
 
 		result += texture(s_emissiveTex, inUV).rgb;
 

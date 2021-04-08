@@ -44,7 +44,7 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 		//the shadow texture is sent elsewhere
 		_shaders[Lights::DIRECTIONAL]->SetUniformMatrix("u_LightSpaceMatrix", _lightSpaceViewProj);
 
-		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos", *_camPos.data(), 4);
+		_shaders[Lights::DIRECTIONAL]->SetUniform("u_camPos", *_camPos.data(), _camCount);
 		_shaders[Lights::DIRECTIONAL]->SetUniform("camCount", _camCount);
 
 		_sunBuffer.Bind(0);
@@ -90,6 +90,9 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 
 
 	_shaders[Lights::AMBIENT]->Bind();
+	//for rim lighting
+	_shaders[Lights::AMBIENT]->SetUniform("u_camPos", *_camPos.data(), _camCount);
+	_shaders[Lights::AMBIENT]->SetUniform("camCount", _camCount);
 
 	_sunBuffer.Bind(0);
 
