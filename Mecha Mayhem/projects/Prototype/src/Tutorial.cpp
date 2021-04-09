@@ -359,8 +359,8 @@ void Tutorial::Update()
 
 void Tutorial::LateUpdate()
 {
-	auto& trans = ECS::GetComponent<Transform>(Head[0]);
-	SoundEventManager::UpdatePosition(trans.GetGlobalPosition(), -trans.GetForwards());
+	//auto& trans = ECS::GetComponent<Transform>(Head[0]);
+	//SoundEventManager::UpdatePosition(trans.GetGlobalPosition(), -trans.GetForwards());
 }
 
 void Tutorial::DrawOverlay()
