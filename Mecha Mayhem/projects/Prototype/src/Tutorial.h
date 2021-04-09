@@ -5,20 +5,17 @@
 class Tutorial : public Scene
 {
 public:
-	Tutorial(const std::string& name, const glm::vec3& gravity = glm::vec3(0.f)) :
-		Scene(name, gravity, true) {}
+	Tutorial(const std::string& name, const glm::vec3& gravity = glm::vec3(0.f));
 
 	virtual void Init(int windowWidth, int windowHeight) override;
 	virtual void Update() override;
+	virtual void LateUpdate() override;
 	virtual void DrawOverlay() override;
+	virtual void Exit() override {
+		//SoundEventManager::ThreeDSounds = false;
+		Scene::Exit();
+	}
 	virtual Scene* Reattach() override;
-	/*virtual void ImGuiFunc() override
-	{
-		if (ImGui::Button("Draw")) {
-			m_colliders.ToggleDraw();
-		}
-		m_colliders.Update();
-	};*/
 
 private:
 	void SetDigits(int index, int number);
@@ -52,12 +49,6 @@ private:
 		glm::vec3(-1, 7, -5),
 		glm::vec3(2, 9, -30),
 		glm::vec3(0, 9, -50) },8
-	};
-	CatmullFollower dronePath4 = { 3, {
-		glm::vec3(-1, 5, 1),
-		glm::vec3(1, 5, 1),
-		glm::vec3(1, 5, -1),
-		glm::vec3(-1, 5, -1) },8
 	};
 
 	float camDistance = 2.5f;

@@ -1,6 +1,14 @@
 #include "Tutorial.h"
 #include "LeaderBoard.h"
 
+Tutorial::Tutorial(const std::string& name, const glm::vec3& gravity)
+	: Scene(name, gravity, true)
+{
+	m_frameEffects.SetShadowVP(-35, 35, 40, -60, glm::vec3(0, 0, -30));
+	m_frameEffects.GetSun()._shadowBiasMax = 0.0015f;
+	m_frameEffects.GetSun()._lightDirection = glm::vec4(-4, -5, -4, 0);
+}
+
 void Tutorial::Init(int width, int height)
 {
 	ECS::AttachRegistry(&m_reg);
@@ -22,14 +30,14 @@ void Tutorial::Init(int width, int height)
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(0, 1, -12))
 			.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 			.SetSpawn(glm::vec3(4, 1, -59)).SetRotation(glm::radians(180.f), 0).TakeDamage(76);
 	}
 	{
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(0, 2.5f, -20))
 			.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 			.SetSpawn(glm::vec3(-4, 1, -59)).SetRotation(glm::radians(180.f), 0);
 	}
 
@@ -46,7 +54,7 @@ void Tutorial::Init(int width, int height)
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(-7.5f, 1, i * 7.5f - 55))
 				.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 				.SetSpawn(glm::vec3(-7.5f, 1, i * 7.5f - 55)).SetRotation(glm::radians(90.f), 0);
 			dummies[i].dummy = entity;
 		}
@@ -70,7 +78,7 @@ void Tutorial::Init(int width, int height)
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(7.5f, 1, i * 7.5f - 55))
 				.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 				.SetSpawn(glm::vec3(7.5f, 1, i * 7.5f - 55)).SetRotation(glm::radians(270.f), 0);
 			dummies[i + 3].dummy = entity;
 		}
@@ -132,9 +140,6 @@ void Tutorial::Init(int width, int height)
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init();
-	m_frameEffects.SetShadowVP(-35, 35, 40, -60, glm::vec3(0, 0, -30));
-	m_frameEffects.GetSun()._shadowBiasMax = 0.0015f;
-	m_frameEffects.GetSun()._lightDirection = glm::vec4(-4, -5, -4, 0);
 
 	Player::SetCamDistance(camDistance);
 
@@ -214,8 +219,15 @@ void Tutorial::Update()
 		}
 	}
 
-	if (m_paused)
+	if (m_paused) {
+		for (int i(0), temp(0); i < 4; ++i) {
+			if (LeaderBoard::players[i].user != CONUSER::NONE) {
+				LeaderBoard::players[i].sensitivity = ECS::GetComponent<Player>(bodyEnt[temp]).EditSensitivity();
+				++temp;
+			}
+		}
 		return;
+	}
 
 	/*auto &p1 = ECS::GetComponent<Player>(bodyEnt1);
 	auto &p2 = ECS::GetComponent<Player>(bodyEnt2);
@@ -319,7 +331,9 @@ void Tutorial::Update()
 		}
 	}
 	else if (winner) {
-		AudioEngine::Instance().GetEvent("reload").Restart();
+		//AudioEngine::Instance().GetEvent("reload").Restart();
+		SoundEventManager::Play(SoundEventManager::SOUND::RELOAD,
+			ECS::GetComponent<Transform>(bodyEnt[0]).GetGlobalPosition());
 
 		for (int i(0), temp(0); i < 4; ++i) {
 			if (LeaderBoard::players[i].user != CONUSER::NONE) {
@@ -343,6 +357,12 @@ void Tutorial::Update()
 	ECS::GetComponent<Transform>(speakerDrone).SetPosition(dronePath3.Update(Time::dt).GetPosition()).SetRotation(dronePath3.GetLookingForwards(0.5f));
 }
 
+void Tutorial::LateUpdate()
+{
+	auto& trans = ECS::GetComponent<Transform>(Head[0]);
+	SoundEventManager::UpdatePosition(trans.GetGlobalPosition(), -trans.GetForwards());
+}
+
 void Tutorial::DrawOverlay()
 {
 
@@ -364,11 +384,12 @@ Scene* Tutorial::Reattach()
 	Scene::Reattach();
 
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightsColour[0] = glm::vec3(200.f);
+	Rendering::LightsColour[0] = glm::vec3(20.f);
 	Rendering::LightCount = 2;
 	Rendering::LightsPos[0] = glm::vec3(0, 10, -42.5f);
-	Rendering::LightsPos[1] = glm::vec3(0, 2, 0);
-	Rendering::AmbientStrength = 1.f;
+	Rendering::LightsPos[1] = glm::vec3(0, 5, 0);
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 
 	m_camCount = LeaderBoard::playerCount;
 
@@ -379,15 +400,15 @@ Scene* Tutorial::Reattach()
 		--i;
 		cameraEnt[i] = ECS::CreateEntity();
 		if (m_camCount == 2)
-			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(100.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetHalfWidth(), BackEnd::GetHeight());
 		else
-			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(300.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
+			ECS::AttachComponent<Camera>(cameraEnt[i]).Setfar(100.f).SetFovDegrees(60.f).ResizeWindow(BackEnd::GetWidth(), BackEnd::GetHeight());
 
 		bodyEnt[i] = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(bodyEnt[i]).CreatePlayer(bodyEnt[i], BLM::GLMQuat, glm::vec3(0, 1.5f, 0));
 		ECS::AttachComponent<Player>(bodyEnt[i]).Init(
 			LeaderBoard::players[temp].user, LeaderBoard::players[temp].model, LeaderBoard::players[temp].colour, i
-		).SetRotation(glm::radians(180.f), 0).SetSpawn(glm::vec3(0, 1.5f, 0));
+		).SetRotation(glm::radians(180.f), 0).SetSpawn(glm::vec3(0, 1.5f, 0)).SetSensitivity(LeaderBoard::players[temp].sensitivity);
 
 		Head[i] = ECS::CreateEntity();
 		ECS::GetComponent<Transform>(Head[i]).SetPosition(glm::vec3(0, 0.75f, 0)).
@@ -403,6 +424,8 @@ Scene* Tutorial::Reattach()
 
 	Player::SetCamDistance(camDistance);
 	Player::SetSkyPos(glm::vec3(0, 25, -45));
+
+	//SoundEventManager::ThreeDSounds = true;
 
 	return this;
 }

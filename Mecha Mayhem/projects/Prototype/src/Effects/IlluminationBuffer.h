@@ -1,5 +1,4 @@
 #pragma once
-
 #include "GBuffer.h"
 #include "Utilities/Lighting/UniformBuffer.h"
 #include "Utilities/Lighting/PointLight.h"
@@ -8,7 +7,6 @@
 enum Lights
 {
 	DIRECTIONAL = 1,
-	//POINT,
 	AMBIENT
 };
 
@@ -31,6 +29,12 @@ public:
 	void SetLightSpaceViewProj(glm::mat4 lightSpaceViewProj);
 	void SetCamPos(glm::vec3 camPos, int camNum);
 	void SetCamCount(int camNum);
+	void SendLights(std::array<glm::vec3, MAX_LIGHTS>& lightsPos,
+					std::array<glm::vec3, MAX_LIGHTS>& lightsColour, int LightCount) {
+		_shaders[Lights::DIRECTIONAL]->SetUniform("lightsPos", *lightsPos.data(), LightCount);
+		_shaders[Lights::DIRECTIONAL]->SetUniform("lightsColour", *lightsColour.data(), LightCount);
+		_shaders[Lights::DIRECTIONAL]->SetUniform("lightCount", LightCount);
+	}
 
 	DirectionalLight& GetSunRef();
 	

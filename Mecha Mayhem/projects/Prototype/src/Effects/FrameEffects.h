@@ -70,6 +70,11 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
+	static void SetLights(std::array<glm::vec3, MAX_LIGHTS>& lightsPos,
+						  std::array<glm::vec3, MAX_LIGHTS>& lightsColour, size_t LightCount) {
+		illumBuffer.SendLights(lightsPos, lightsColour, LightCount);
+	}
+
 	void SetShadowVP(const glm::mat4& VP);
 	void SetShadowVP(float left, float right, float nearZ, float farZ, const glm::vec3& position);
 

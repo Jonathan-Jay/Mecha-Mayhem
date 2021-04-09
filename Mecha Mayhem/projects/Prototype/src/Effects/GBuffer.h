@@ -8,6 +8,7 @@ enum Target
 	NORMAL,
 	SPECULAR,
 	POSITION,
+	EMISSIVE
 };
 
 

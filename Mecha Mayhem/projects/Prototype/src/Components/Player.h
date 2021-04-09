@@ -3,7 +3,7 @@
 #include "PhysBody.h"
 #include "ObjMorphLoader.h"
 #include "Utilities/Time.h"
-#include <AudioEngine.h>
+#include "Utilities/SoundEventManager.h"
 
 class Player
 {
@@ -15,8 +15,7 @@ public:
 		RIFLE,
 		CANNON,
 		MACHINEGUN,
-		SHOTGUN,
-		MISSILE
+		SHOTGUN
 	};
 	enum class OFFHAND {
 		EMPTY = 0,	//continues from WEAPON to allow for rand() choice
@@ -137,7 +136,6 @@ public:
 			return true;
 		}
 		else {
-			//m_hitSound.play();
 			m_damageCounter = 0.75f;
 		}
 
@@ -151,8 +149,8 @@ public:
 	//returns true if <= than timer
 	bool RespawnDelayTest(float timer) { return m_respawnTimer <= timer; }
 
-	//returns true if successful
-	bool PickUpWeapon(WEAPON pickup);
+	//returns 1 if successful, 2 if picked up ammo, 0 if failed
+	int PickUpWeapon(WEAPON pickup);
 
 	//returns true if successful
 	bool PickUpOffhand(OFFHAND pickup);
@@ -172,6 +170,9 @@ public:
 	//return score
 	short GetScore() { return m_killCount; }
 
+	Player& SetSensitivity(glm::vec2 sensitivity) { m_sensitivity = sensitivity; return *this; }
+	glm::vec2 EditSensitivity();
+
 	static Sprite m_digits[10];
 private:
 	bool groundTest(float yVelo, PhysBody& bodyPos);
@@ -179,7 +180,7 @@ private:
 	//attacking
 	btVector3 Melee(const glm::vec3& pos);
 	void UseWeapon(PhysBody& body, Transform& head, float offset);
-	void LaserGun(float offset, Transform& head, short damage, float distance, WEAPON type);
+	void LaserGun(glm::quat offsetQuat, Transform& head, short damage, float distance, WEAPON type, glm::vec3 poffset = BLM::GLMzero);
 
 	//other things
 	void SwapWeapon();
@@ -200,8 +201,11 @@ private:
 
 	static const glm::mat4 m_gunOffsetMat;
 	static const glm::mat4 m_swordOffsetMat;
+	static const glm::mat4 m_rotation90;
 	static constexpr float pi = glm::half_pi<float>() - 0.01f;
 
+	static const float m_maxSensitivity;
+	static const float m_minSensitivity;
 	static const glm::vec4 m_gunOffset;
 	static const btVector3 m_gravity;
 	static glm::vec3 m_skyPos;
@@ -211,7 +215,6 @@ private:
 
 	static Sprite m_healthBarOutline;
 	static Sprite m_healthBar;
-	static Sprite m_healthBarDamaged;
 	static Sprite m_healthBarBack;
 	static Sprite m_dashBarOutline;
 	static Sprite m_dashBar;
@@ -292,17 +295,20 @@ private:
 	static const GunProperties pistol;
 	static const GunProperties cannon;
 	static const GunProperties rifle;
-	static const GunProperties missileLauncher;
 	static const GunProperties shotgun;
 	static const GunProperties machineGun;
-	//static const float shotgunDistance;
 
-	glm::vec3 m_colour = glm::vec3(0.f);
+	//	store this for sounds
+	glm::vec3 m_bodPos = BLM::GLMzero;
+
+	//additive colour
+	glm::vec3 m_colour = BLM::GLMzero;
 
 	//glm::quat m_startRot = glm::quat(1, 0, 0, 0);
-	glm::vec3 m_spawnPos = glm::vec3(0.f);
-	glm::vec3 m_deathPos = glm::vec3(0.f);
+	glm::vec3 m_spawnPos = BLM::GLMzero;
+	glm::vec3 m_deathPos = BLM::GLMzero;
 	glm::vec2 m_rot = glm::vec2(0.f);
 	glm::vec2 m_deathRot = glm::vec2(0.f);
+	glm::vec2 m_sensitivity = glm::vec2(2.f, 1.5f);
 };
 

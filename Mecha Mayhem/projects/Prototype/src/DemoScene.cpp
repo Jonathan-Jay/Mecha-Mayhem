@@ -1,6 +1,12 @@
 #include "DemoScene.h"
 #include "LeaderBoard.h"
 
+DemoScene::DemoScene(const std::string& name, const glm::vec3& gravity)
+	: Scene(name, gravity, true)
+{
+	m_frameEffects.SetShadowVP(-70, 70, 40, -60, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
+}
+
 void DemoScene::Init(int width, int height)
 {
 	ECS::AttachRegistry(&m_reg);
@@ -35,14 +41,14 @@ void DemoScene::Init(int width, int height)
 	Rendering::frameEffects = &m_frameEffects;
 
 	m_frameEffects.Init();
-	m_frameEffects.SetShadowVP(-70, 70, 40, -60, glm::vec3(20.5f - 0.f, 0, 21.8f + 5.f));
 
 	Player::SetUIAspect(width, height);
 	Player::SetCamDistance(camDistance);
 
 	Player::SetSkyPos(glm::vec3(20.5f, 10, 21.8f));
 
-	m_pauseSprite = Sprite("Pause.png", 8.952f, 3);
+	m_pauseSprite = { "Pause.png", 8.952f, 3 };
+	m_colonSprite = { "colon.png", 0.3736f, 1.6667f };
 }
 
 void DemoScene::Update()
@@ -84,8 +90,12 @@ void DemoScene::Update()
 	bool winner = false;
 	if (m_paused) {
 		int allHolding = 0;
-		for (int i(0); i < LeaderBoard::playerCount; ++i) {
-			allHolding += ControllerInput::GetButton(BUTTON::SELECT, CONUSER(i));
+		for (int i(0), temp(0); i < 4; ++i) {
+			if (LeaderBoard::players[i].user != CONUSER::NONE) {
+				LeaderBoard::players[i].sensitivity = ECS::GetComponent<Player>(bodyEnt[temp]).EditSensitivity();
+				allHolding += ControllerInput::GetButton(BUTTON::SELECT, LeaderBoard::players[i].user);
+				++temp;
+			}
 		}
 
 		if (allHolding == LeaderBoard::playerCount) {
@@ -165,6 +175,10 @@ void DemoScene::Update()
 			Init(BackEnd::GetWidth(), BackEnd::GetHeight());
 			QueueSceneChange(3);
 		}
+		//we update the colour correction
+		else if (m_frameEffects[0]) {
+			((ColourCorrection*)m_frameEffects[0])->SetIntensity(1.f - (m_timer / winWaitTime));
+		}
 	}
 	else if (winner) {
 		for (int i(0), temp(0); i < 4; ++i) {
@@ -188,9 +202,19 @@ void DemoScene::Update()
 				++temp;
 			}
 		}
-		m_timer = 5.f;
+		SoundEventManager::Create(SoundEventManager::SOUND::GAMEMUSIC).SetParameter("Music Volume", 0.f);
+		SoundEventManager::Play(SoundEventManager::SOUND::MATCHEND);
+		m_timer = winWaitTime;
 		if (LeaderBoard::timedGoal)
 			m_gameTimer = 0.f;
+
+		//at end of game, add colour correction;
+		if (m_frameEffects[0] == nullptr) {
+			m_frameEffects.InsertEffect(new ColourCorrection(), 0);
+			m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+			((ColourCorrection*)m_frameEffects[0])->SetIntensity(0.f);
+			((ColourCorrection*)m_frameEffects[0])->SetCube(gameEndCube);
+		}
 	}
 }
 
@@ -199,8 +223,10 @@ void DemoScene::LateUpdate()
 	//this makes the light match the player's position
 
 	for (int i(0); i < LeaderBoard::playerCount; ++i) {
-		Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup;
+		Rendering::LightsPos[2 + i] = ECS::GetComponent<Transform>(bodyEnt[i]).GetGlobalPosition() - BLM::GLMup * 0.5f;
 	}
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 }
 
 void DemoScene::DrawOverlay()
@@ -208,33 +234,47 @@ void DemoScene::DrawOverlay()
 	//drawTimer if timed match
 	if (m_gameTimer >= 0) {
 		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
+
+		//colon position
+		float xPos = 0.75f;
+		//10 minutes
+		if (m_gameTimer >= 600.f)
+			xPos = 0;
 		glm::mat4 timerMat = glm::mat4(
 			1, 0, 0, 0,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
-			1.75f, m_yPos, -99.9f, 1
+			xPos, m_yPos, -99.9f, 1
 		);
+		Sprite::BeginUIDraw(5, 1);
 
-		Sprite::BeginDraw(4);
+		m_colonSprite.DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 
-		//get digits
-		int min = m_gameTimer / 60;
+		//get minutes
+		int min1 = m_gameTimer / 60.f;
+
 		//get seconds
-		int sec1 = m_gameTimer - (60 * min);
-		//get tens
+		int sec1 = ceilf(m_gameTimer - floorf(m_gameTimer / 60.f) * 60.f);
+		min1 += sec1 == 60;
+		int min2 = min1 / 10;
+		sec1 *= sec1 != 60;
 		int sec2 = sec1 / 10;
-		sec1 = sec1 - (sec2 * 10);
+		min1 -= (min2 * 10);
+		sec1 -= (sec2 * 10);
 
 		//draw digits here
-		Player::m_digits[min].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
-		//timerMat[3] = glm::vec4(0, 8.5f, -100, 1);
-		//m_colon.Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
-		timerMat[3].x = -0.5f;
-		Player::m_digits[sec2].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
-		timerMat[3].x = -1.75f;
-		Player::m_digits[sec1].Draw(Rendering::orthoVP.GetViewProjection(), timerMat);
+		if (min2) {
+			timerMat[3].x = xPos + 2.25f;
+			Player::m_digits[min2].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
+		}
+		timerMat[3].x = xPos + 0.85f;
+		Player::m_digits[min1].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
+		timerMat[3].x = xPos - 0.85f;
+		Player::m_digits[sec2].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
+		timerMat[3].x = xPos - 2.25f;
+		Player::m_digits[sec1].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 
-		Sprite::PerformDraw();
+		Sprite::PerformUIDraw(1);
 	}
 
 	if (m_paused) {
@@ -256,11 +296,12 @@ Scene* DemoScene::Reattach()
 	Scene::Reattach();
 
 	Rendering::DefaultColour = glm::vec4(0.75f, 0.75f, 0.75f, 1.f);
-	Rendering::LightsColour[0] = glm::vec3(200.f);
+	Rendering::LightsColour[0] = glm::vec3(20.f);
 	Rendering::LightCount = 2 + LeaderBoard::playerCount;
 	Rendering::LightsPos[0] = glm::vec3(20.5f, -1, 21.8f);
 	Rendering::LightsPos[1] = glm::vec3(20.5f, 3, 21.8f);
-	Rendering::AmbientStrength = 1.f;
+	//fix lights
+	FrameEffects::SetLights(Rendering::LightsPos, Rendering::LightsColour, Rendering::LightCount);
 
 	m_camCount = LeaderBoard::playerCount;
 	if (LeaderBoard::timedGoal) {
@@ -321,7 +362,8 @@ Scene* DemoScene::Reattach()
 			m_colliders.SetSpawnNear(
 				ECS::AttachComponent<Player>(bodyEnt[i]).Init(
 					LeaderBoard::players[temp].user, LeaderBoard::players[temp].model, LeaderBoard::players[temp].colour, i
-				).SetRotation(glm::radians(180.f), 0), spawnPos[spawntests[i]], 25.f
+					).SetRotation(glm::radians(180.f), 0).SetSensitivity(LeaderBoard::players[temp].sensitivity),
+				spawnPos[spawntests[i]], 25.f
 			)
 		);
 
@@ -340,5 +382,21 @@ Scene* DemoScene::Reattach()
 	Player::SetCamDistance(camDistance);
 	Player::SetSkyPos(glm::vec3(20.5f, 10, 21.8f));
 
+	AudioEvent& music = SoundEventManager::Create(SoundEventManager::SOUND::GAMEMUSIC);
+	music.SetParameter("Music Volume", 1.f);
+	music.Restart();
+
+
 	return this;
+}
+
+void DemoScene::ImGuiFunc()
+{
+	Scene::ImGuiFunc();
+
+	for (int i(0); i < 4; ++i) {
+		if (bodyEnt[i] != entt::null)
+			if (ImGui::Button(("Give player " + std::to_string(i + 1) + " 1 kill").c_str()))
+				ECS::GetComponent<Player>(bodyEnt[i]).GivePoints(1);
+	}
 }

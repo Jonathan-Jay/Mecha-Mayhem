@@ -24,6 +24,7 @@ public:
 		int model = 0;
 		int score = 0;
 		glm::vec3 colour = BLM::GLMzero;
+		glm::vec2 sensitivity = glm::vec2(2.f, 1.5f);
 	};
 
 	static PlayerChoice players[4];
@@ -38,7 +39,7 @@ private:
 	//digit2 is leftmost, digit1 is rightmost, only support double digits
 	struct DigitData {
 		glm::vec3 startingPos = BLM::GLMzero;
-		glm::vec3 finalPos =BLM::GLMzero ;
+		glm::vec3 finalPos = BLM::GLMzero ;
 		entt::entity parent = entt::null;
 		entt::entity number = entt::null;
 		entt::entity digit1 = entt::null;

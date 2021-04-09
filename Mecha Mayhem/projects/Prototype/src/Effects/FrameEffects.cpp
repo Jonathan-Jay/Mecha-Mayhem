@@ -19,10 +19,9 @@ void FrameEffects::Init(unsigned width, unsigned height)
 	PostEffect::Init("shaders/Post/bloom_combine_pass.glsl");
 
 	//others
-	//PostEffect::Init("shaders/Post/color_correction_frag.glsl");
+	PostEffect::Init("shaders/Post/color_correction_frag.glsl");
 	PostEffect::Init("shaders/Post/greyscale_frag.glsl");
 	PostEffect::Init("shaders/Post/sepia_frag.glsl");
-	PostEffect::Init("shaders/Post/toon_frag.glsl");
 
 	PostEffect::Init("shaders/Post/dof_extract.glsl");
 	PostEffect::Init("shaders/Post/dof_deletion.glsl");
@@ -41,7 +40,7 @@ void FrameEffects::Init(unsigned width, unsigned height)
 	baseEffect = new GBuffer();
 
 	//shadowMap->Unload();
-	shadowMap->AddDepthTarget();
+	shadowMap->SetAsDepthBuffer(true);
 	shadowMap->SetWrapMode(WrapMode::ClampToBorder);
 	shadowMap->Init(shadowWidth, shadowHeight);
 

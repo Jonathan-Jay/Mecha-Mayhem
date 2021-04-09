@@ -9,12 +9,12 @@
 #include <json.hpp>
 #include <fstream>
 
-#include <GLM/glm.hpp>
 #include <GLM/gtc/type_ptr.hpp>
 
 #include "Engine/BackEnd.h"
 #include "Engine/Texture2D.h"
 #include "Camera.h"
+#include "Utilities/BLM.h"
 
 class Sprite
 {
@@ -38,15 +38,14 @@ public:
 	static void BeginDraw(unsigned amt = 0);
 	static void BeginUIDraw(unsigned UIamt = 0, unsigned camCount = 0);
 
-	void Draw(const glm::mat4& VP, const glm::mat4& model);
-	void DrawSingle(const glm::mat4& VP, const glm::mat4& model);
-	void DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum);
+	void Draw(const glm::mat4& VP, const glm::mat4& model, const glm::vec3& addColour = BLM::GLMzero);
+	void DrawSingle(const glm::mat4& VP, const glm::mat4& model, const glm::vec3& addColour = BLM::GLMzero);
+	void DrawToUI(const glm::mat4& VP, const glm::mat4& model, short camNum, const glm::vec3& addColour = BLM::GLMzero);
 
 	static void PerformDraw();
 	static void PerformUIDraw(int numOfCams);
 	
-	//lightVPMatrix sent in ObjLoader
-	static void PerformDrawShadow(/*const glm::mat4& lightVPMatrix*/);
+	static void PerformDrawShadow(const glm::mat4& lightVPMatrix);
 
 	void SetScale(float scl) { m_scale = scl; }
 	void SetWidth(float width) { m_width = width; }
@@ -78,7 +77,7 @@ public:
 	Sprite& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
 	bool GetCastShadows() { return m_castShadows; }
 
-	void SetEnabled(bool choice) { m_enabled = choice; }
+	Sprite& SetEnabled(bool choice) { m_enabled = choice;	return *this; }
 	bool GetEnabled() { return m_enabled; }
 
 private:
@@ -86,7 +85,8 @@ private:
 		size_t index;
 		glm::mat4 model;
 		glm::mat4 MVP;
-		int receiveShadows = 0;
+		glm::vec3 additiveColour;
+		int receiveShadows;
 	};
 	static std::vector<DrawData> m_Queue;
 	static std::vector<DrawData> m_UIQueue[4];

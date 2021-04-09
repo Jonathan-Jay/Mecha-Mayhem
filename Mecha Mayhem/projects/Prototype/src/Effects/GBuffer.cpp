@@ -25,10 +25,11 @@ void GBuffer::Init(unsigned width, unsigned height)
 		//Add Colour targets to GBuffer
 		_gBuffer.AddColorTarget(GL_RGBA8);	//Albedo buffer, needs all channels
 		_gBuffer.AddColorTarget(GL_RGB8);	//Normals buffer, doesn't need alpha
-		_gBuffer.AddColorTarget(GL_RGB8);	//Specular buffer, really only needs one
+		_gBuffer.AddColorTarget(GL_RGBA8);	//Specular buffer, x stores emissivity, y stores specularness, z stores shadows, w stores rim lighting
 
 		//Important note: you can get position data from depth buffer, but we're gonna use a position buffer
 		_gBuffer.AddColorTarget(GL_RGB32F);	//Position buffer, big boy
+		_gBuffer.AddColorTarget(GL_RGBA8);	//Emissive buffer, needs all channels
 
 		//Add a depth buffer
 		_gBuffer.AddDepthTarget();
@@ -52,6 +53,7 @@ void GBuffer::BindLighting()
 	_gBuffer.BindColorAsTexture(Target::NORMAL, 1);
 	_gBuffer.BindColorAsTexture(Target::SPECULAR, 2);
 	_gBuffer.BindColorAsTexture(Target::POSITION, 3);
+	_gBuffer.BindColorAsTexture(Target::EMISSIVE, 4);
 }
 
 void GBuffer::Clear()
@@ -70,12 +72,14 @@ void GBuffer::UnbindLighting()
 	_gBuffer.UnbindTexture(1);
 	_gBuffer.UnbindTexture(2);
 	_gBuffer.UnbindTexture(3);
+	_gBuffer.UnbindTexture(4);
 }
 
 void GBuffer::DrawBuffersToScreen(int test)
 {
 	_passThrough->Bind();
-	if (test >= 0 && test < 4) {
+	//draw individual
+	if (test >= 0 && test <= 4) {
 		_gBuffer.BindColorAsTexture(test, 0);
 		_gBuffer.DrawFullscreenQuad();
 		_gBuffer.UnbindTexture(0);

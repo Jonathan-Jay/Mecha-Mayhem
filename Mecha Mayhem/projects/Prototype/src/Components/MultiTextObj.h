@@ -17,7 +17,7 @@ public:
 		float ambientLightStrength = 0.05f, const glm::vec3& ambientColour = glm::vec3(0.f), float ambientStrength = 0.f
 	);*/
 	void Draw(const glm::mat4& model, const glm::mat4& view, const Camera& camera, const glm::vec3& colour);
-	void DrawShadow(const glm::mat4& model);
+	void DrawShadow(const glm::mat4& MVP);
 
 	void Enable() { m_enabled = true; }
 	void Disable() { m_enabled = false; }

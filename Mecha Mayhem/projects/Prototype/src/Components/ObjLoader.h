@@ -1,6 +1,5 @@
 #pragma once
 #include "Sprite.h"
-#include "Utilities/BLM.h"
 
 class ObjLoader
 {
@@ -28,7 +27,7 @@ public:
 		float specularStrength = 1.f, float shininess = 4,
 		float ambientLightStrength = 0.05f, const glm::vec3& ambientColour = glm::vec3(0.f), float ambientStrength = 0.f
 	);*/
-	static void PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float specularStrength, float shininess);
+	static void PerformDraw(const glm::mat4& view, const Camera& camera, const glm::vec3& colour, float emissiveness = 0, float shininess = 4);
 
 	static void PerformDrawShadow(const glm::mat4& lightVPMatrix);
 
@@ -43,6 +42,8 @@ public:
 	bool GetReceiveShadows() { return m_receiveShadows; }
 	ObjLoader& SetCastShadows(bool choice) { m_castShadows = choice; return *this; }
 	bool GetCastShadows() { return m_castShadows; }
+	ObjLoader& SetRimLighting(bool choice) { m_rimLighting = choice; return *this; }
+	bool GetRimLighting() { return m_rimLighting; }
 private:
 
 	struct Models
@@ -60,6 +61,7 @@ private:
 		glm::mat4 model;
 		glm::vec3 colour;
 		int shaded;
+		int rimLit;
 	};
 
 	static std::vector<DrawData> m_matQueue;
@@ -82,6 +84,7 @@ private:
 
 	bool m_castShadows = true;
 	bool m_receiveShadows = true;
+	bool m_rimLighting = false;
 	bool m_enabled = false;
 	int m_index = -1;
 	glm::vec3 m_colour = BLM::GLMzero;
