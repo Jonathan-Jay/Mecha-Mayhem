@@ -9,10 +9,13 @@ public:
 		MAINMENU,
 		PICKUP,
 		RELOAD,
-		SWAP = 2,
+		SWAP,
 		STEP,
 		SHOOT,
-		PUNCH
+		PUNCH,
+		HIT,
+		GAMEMUSIC,
+		MATCHEND
 	};
 
 	static void Init() {
@@ -23,19 +26,23 @@ public:
 		engine->LoadBus("SFX", "bus:/SFX");
 
 		//						number of sound effects
-		soundEventQueues.reserve(6);
+		soundEventQueues.reserve(9);
 		//deal with all the options		evnt id followed by how many instances
 		soundEventQueues.push_back({ "Main Menu", 1 });		//	SOUND::MAINMENU
 		soundEventQueues.push_back({ "pickup", 5 });		//	SOUND::PICKUP
 		soundEventQueues.push_back({ "reload", 5 });		//	SOUND::RELOAD
-		//soundEventQueues.push_back({ "swap", 5 });		//	SOUND::SWAP
+		soundEventQueues.push_back({ "swap", 5 });			//	SOUND::SWAP
 		soundEventQueues.push_back({ "steps", 20 });		//	SOUND::STEP
 		soundEventQueues.push_back({ "Pew", 30 });			//	SOUND::SHOOT
 		soundEventQueues.push_back({ "punch", 4 });			//	SOUND::PUNCH
+		soundEventQueues.push_back({ "hit", 20 });			//	SOUND::HIT
+		soundEventQueues.push_back({ "Game Music", 1 });	//	SOUND::GAMEMUSIC
+		soundEventQueues.push_back({ "Game Over", 1 });		//	SOUND::MATCHEND
 
-		engine->GetListener().SetPosition(BLM::GLMzero);
-		engine->GetListener().SetForward(glm::vec3(0, 0, -1));
+
 		engine->GetListener().SetUp(BLM::GLMup);
+		//sets the starting positions
+		ResetEvents();
 	}
 
 	static void Update() {
@@ -108,7 +115,8 @@ private:
 			}
 		}
 
-		//does the equivalent of a push(pop()) in this limited system, basically cycles through sounds
+		//does the equivalent of a push(pop()) in this limited system
+		//basically cycles through sounds (queue is always full)
 		AudioEvent& pushpop() {
 			_back = _front;
 			_front = (_front + 1) % _size;
@@ -116,11 +124,31 @@ private:
 			//return engine->GetEvent(_events[_back]);
 		}
 
+		/*	these aren't used because we dont need these functionalities
+		
+		//pops the front and returns what it poped (not deleted from array)
+		AudioEvent& pop() {
+			int index = _front;
+			_front = (_front + 1) % _size;
+			return *_events[index];
+		}
+
+		//pushes to the back and returns what was pushed
+		AudioEvent& push(AudioEvent& item) {
+			_back = (_back + 1) % _size;
+			if (_back == _front)
+				throw std::runtime_error("queue full\n");
+			return *(_events[_back] = &item);
+		}
+		*/
+
 		//last pushed events
 		AudioEvent& back() {	return *_events[_back];		}
+		//AudioEvent& back() {	return engine->GetEvent(_events[_back]);		}
 
 		//next pushed events
 		AudioEvent& front() {	return *_events[_front];	}
+		//AudioEvent& front() {	return engine->GetEvent(_events[_front]);	}
 
 		size_t size() { return _size; }
 

@@ -8,7 +8,7 @@
 int main() {
 	int width = 1280, height = 720;
 	bool showImGui = false;
-	const bool usingImGui = true;
+	const bool usingImGui = false;
 	Logger::outputLogger = false;
 	
 	GLFWwindow* window = Gameloop::Start("Mecha Mayhem", width, height, usingImGui);
@@ -16,7 +16,7 @@ int main() {
 
 	{
 		//set audio levels
-		AudioEngine::Instance().GetBus("Music").SetVolume(0.25f);
+		//AudioEngine::Instance().GetBus("Music").SetVolume(0.25f);
 
 		//this has to be done here
 		DemoScene::gameEndCube.loadFromFile("win.cube");
@@ -32,14 +32,14 @@ int main() {
 		Scene::m_scenes[2]->Init(width, height);
 		Scene::m_scenes[3]->Init(width, height);
 
+		Scene::m_activeScene = Scene::m_scenes[0]->Reattach();
+		/*
 		//controller	model	score	colour
 		LeaderBoard::players[0] = { CONUSER::NONE,	1,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[1] = { CONUSER::NONE,	2,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[2] = { CONUSER::NONE,	3,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[3] = { CONUSER::NONE,	4,		0,		glm::vec3(0,0,0) };
 
-		Scene::m_activeScene = Scene::m_scenes[0]->Reattach();
-		/*
 		Scene::m_scenes.push_back(new MapEditor("uh, not for playing"));
 		Scene::m_scenes[4]->Init(width, height);
 

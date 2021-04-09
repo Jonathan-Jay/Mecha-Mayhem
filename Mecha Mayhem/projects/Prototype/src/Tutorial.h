@@ -12,7 +12,7 @@ public:
 	virtual void LateUpdate() override;
 	virtual void DrawOverlay() override;
 	virtual void Exit() override {
-		SoundEventManager::ThreeDSounds = false;
+		//SoundEventManager::ThreeDSounds = false;
 		Scene::Exit();
 	}
 	virtual Scene* Reattach() override;

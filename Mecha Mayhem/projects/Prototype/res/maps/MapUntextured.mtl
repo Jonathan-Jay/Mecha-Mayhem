@@ -1,5 +1,5 @@
 # Blender MTL File: 'None'
-# Material Count: 23
+# Material Count: 30
 
 newmtl custom/blue_inner_courtyard
 Ns 9.000004
@@ -11,6 +11,28 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd demoMap/blue_outside_wall.png
+
+newmtl custom/blue_side_wall_crystal_storage
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/Blue_Side_Wall_Crystal_Storage.png
+
+newmtl custom/blue_side_wall_variant_pattern
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/Blue_Side_Wall_Variant_Pattern.png
 
 newmtl custom/blue_wall_tex
 Ns 9.000004
@@ -111,6 +133,17 @@ d 1.000000
 illum 2
 map_Kd demoMap/generic_pillar.png
 
+newmtl custom/greedn_side_gemlike
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/Greedn_Side_GemLike.png
+
 newmtl custom/green_double_line_tex
 Ns 9.000004
 Ka 1.000000 1.000000 1.000000
@@ -144,6 +177,39 @@ d 1.000000
 illum 2
 map_Kd demoMap/Green_Padded_Wall.png
 
+newmtl custom/green_side_boxlike
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/Green_Side_BoxLike.png
+
+newmtl custom/green_side_mainwall
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/Green_Side_MainWall.png
+
+newmtl custom/green_side_slight_linebump
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/Green_Side_Slight_LineBump.png
+
 newmtl custom/green_wall_tex
 Ns 9.000004
 Ka 1.000000 1.000000 1.000000
@@ -176,6 +242,18 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd demoMap/Inner_Padded_Wall.png
+
+newmtl custom/mechamayhemad
+emis 2
+Ns 9.000004
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd demoMap/MechaMayhemAd.png
 
 newmtl custom/outer_main
 Ns 9.000004

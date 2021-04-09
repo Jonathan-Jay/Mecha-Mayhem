@@ -11,17 +11,7 @@ public:
 	virtual void LateUpdate() override;
 	virtual void DrawOverlay() override;
 	virtual Scene* Reattach() override;
-	virtual void ImGuiFunc() override {
-		Scene::ImGuiFunc();
-
-		ImGui::SliderFloat("timerPos", &m_yPos, -10, 10);
-
-		for (int i(0); i < 4; ++i) {
-			if (bodyEnt[i] != entt::null)
-				if (ImGui::Button(("Give player " + std::to_string(i + 1) + " 1 kill").c_str()))
-					ECS::GetComponent<Player>(bodyEnt[i]).GivePoints(1);
-		}
-	}
+	virtual void ImGuiFunc() override;
 	virtual void Exit() override {
 		m_gameTimer = -1.f;
 		//impossible goal (if it does happen, then the game jsut ends)

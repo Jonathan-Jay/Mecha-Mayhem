@@ -12,29 +12,7 @@ public:
 	virtual void Update() override;
 
 	virtual Scene* Reattach() override;
-	virtual void ImGuiFunc() override {
-		Scene::ImGuiFunc();
-		if (m_scenePos != 1)	return;
-
-		for (int i(0); i < 4; ++i) {
-			if (!ECS::GetComponent<Player>(models[i]).IsPlayer()) {
-				if (ImGui::Button(("Add player " + std::to_string(i + 1)).c_str())) {
-					if (LeaderBoard::players[i].model == 0)
-						LeaderBoard::players[i].model = 1;
-					LeaderBoard::players[i].user = CONUSER(i);
-					ECS::GetComponent<Player>(models[i]).Init(CONUSER::FOUR, LeaderBoard::players[i].model);
-					playerSwapped[i] = true;
-					m_confirmTimer = 1.f;
-				}
-			}
-			else {
-				if (ImGui::Button(("Remove player " + std::to_string(i + 1)).c_str())) {
-					ECS::GetComponent<Player>(models[i]).Init(LeaderBoard::players[i].user = CONUSER::NONE, 0);
-					playerSwapped[i] = true;
-				}
-			}
-		}
-	}
+	virtual void ImGuiFunc() override;
 
 private:
 	void FixDigits(int number);
@@ -77,7 +55,19 @@ private:
 		entt::null,
 		entt::null
 	};
-	entt::entity popup[4] = {
+	entt::entity popup[16] = {
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
+		entt::null,
 		entt::null,
 		entt::null,
 		entt::null,

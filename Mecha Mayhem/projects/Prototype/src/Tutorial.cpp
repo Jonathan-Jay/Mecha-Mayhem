@@ -30,14 +30,14 @@ void Tutorial::Init(int width, int height)
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(0, 1, -12))
 			.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 			.SetSpawn(glm::vec3(4, 1, -59)).SetRotation(glm::radians(180.f), 0).TakeDamage(76);
 	}
 	{
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(0, 2.5f, -20))
 			.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+		ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 			.SetSpawn(glm::vec3(-4, 1, -59)).SetRotation(glm::radians(180.f), 0);
 	}
 
@@ -54,7 +54,7 @@ void Tutorial::Init(int width, int height)
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(-7.5f, 1, i * 7.5f - 55))
 				.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 				.SetSpawn(glm::vec3(-7.5f, 1, i * 7.5f - 55)).SetRotation(glm::radians(90.f), 0);
 			dummies[i].dummy = entity;
 		}
@@ -78,7 +78,7 @@ void Tutorial::Init(int width, int height)
 			auto entity = ECS::CreateEntity();
 			ECS::AttachComponent<PhysBody>(entity).CreatePlayer(entity, BLM::GLMQuat, glm::vec3(7.5f, 1, i * 7.5f - 55))
 				.GetBody()->setMassProps(0, btVector3(0, -1, 0));
-			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 69).SetMaxHealth(100)
+			ECS::AttachComponent<Player>(entity).Init(CONUSER::NONE, 0).SetMaxHealth(100)
 				.SetSpawn(glm::vec3(7.5f, 1, i * 7.5f - 55)).SetRotation(glm::radians(270.f), 0);
 			dummies[i + 3].dummy = entity;
 		}
@@ -425,7 +425,7 @@ Scene* Tutorial::Reattach()
 	Player::SetCamDistance(camDistance);
 	Player::SetSkyPos(glm::vec3(0, 25, -45));
 
-	SoundEventManager::ThreeDSounds = true;
+	//SoundEventManager::ThreeDSounds = true;
 
 	return this;
 }

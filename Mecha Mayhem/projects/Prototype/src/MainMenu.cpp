@@ -51,22 +51,6 @@ void MainMenu::Init(int width, int height)
 
 
 	for (int x(0); x < 4; ++x) {
-		{
-			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Sprite>(entity).Init("dpad.png", -0.75f, 0.531f).SetCastShadows(false);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, 0.f, -8)).ChildTo(charSelectParent);
-		}
-		{
-			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Sprite>(entity).Init("ArrowL.png", -0.75f, 0.75f).SetCastShadows(false);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, -1.f, -8)).ChildTo(charSelectParent);
-		}
-		{
-			auto entity = ECS::CreateEntity();
-			ECS::AttachComponent<Sprite>(entity).Init("ArrowR.png", -0.75f, 0.75f).SetCastShadows(false);
-			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 5, -1.f, -8)).ChildTo(charSelectParent);
-		}
-
 		glm::vec3 pos = glm::vec3(x * 4 - 6, -1.f, -8);
 		glm::quat rot = glm::quatLookAt(glm::normalize(pos - glm::vec3(0, -1, 0)), BLM::GLMup);
 
@@ -79,6 +63,25 @@ void MainMenu::Init(int width, int height)
 		popup[x] = ECS::CreateEntity();
 		ECS::AttachComponent<Sprite>(popup[x]).Init("a.png", -0.6859f, 0.5f).SetCastShadows(false).SetEnabled(true);
 		ECS::GetComponent<Transform>(popup[x]).SetPosition(pos + glm::vec3(0, 0, -0.5f) * rot + glm::vec3(0, 0, 1.f)).ChildTo(charSelectParent);
+		
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity).Init("dpad.png", -0.75f, 0.531f).SetCastShadows(false).SetEnabled(false);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, 0.f, -8)).ChildTo(charSelectParent);
+			popup[4 + x] = entity;
+		}
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity).Init("ArrowL.png", -0.75f, 0.75f).SetCastShadows(false).SetEnabled(false);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 7, -1.f, -8)).ChildTo(charSelectParent);
+			popup[8 + x] = entity;
+		}
+		{
+			auto entity = ECS::CreateEntity();
+			ECS::AttachComponent<Sprite>(entity).Init("ArrowR.png", -0.75f, 0.75f).SetCastShadows(false).SetEnabled(false);
+			ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(x * 4 - 5, -1.f, -8)).ChildTo(charSelectParent);
+			popup[12 + x] = entity;
+		}
 	}
 
 	digit1 = ECS::CreateEntity();
@@ -99,7 +102,7 @@ void MainMenu::Init(int width, int height)
 		auto entity = ECS::CreateEntity();
 		ECS::AttachComponent<Sprite>(entity).SetCastShadows(false).SetReceiveShadows(false)
 			.Init("dpad.png", -0.75f, 0.531f);
-		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(-2.25f, 96.75f - 100.f, -8.f))
+		ECS::GetComponent<Transform>(entity).SetPosition(glm::vec3(3.1f, 96.75f - 100.f, -8.f))
 			.SetRotation(glm::angleAxis(glm::radians(90.f), glm::vec3(0, 0, -1))).ChildTo(charSelectParent);
 	}
 
@@ -269,7 +272,8 @@ void MainMenu::Update()
 		//character select
 
 		//exit
-		int lx = 0, allHolding = 0, playerCount = 0;
+		bool holding = false;
+		int lx = 0, rx = 0, allHolding = 0, playerCount = 0;
 		for (int x(0); x < 4; ++x) {
 			if (ControllerInput::GetButtonDown(BUTTON::START, CONUSER(x))) {
 				if (ControllerInput::GetButton(BUTTON::RB, CONUSER(x))) {
@@ -279,16 +283,15 @@ void MainMenu::Update()
 			}
 
 			auto &p = ECS::GetComponent<Player>(models[x]);
+			auto& Asprite = ECS::GetComponent<Sprite>(popup[x]);
 
 			if (p.IsPlayer()) {
-				ECS::GetComponent<Sprite>(popup[x]).SetEnabled(false);
-				if (Rendering::LightsPos[2 + x] == BLM::GLMzero)
-					Rendering::LightsPos[2 + x] = (ECS::GetComponent<Transform>(models[x]).GetGlobalPosition() + glm::vec3(0, 0, 1.75f));
+				++playerCount;
 
 				if (ControllerInput::GetButtonDown(BUTTON::Y, CONUSER(x))) {
 					//ECS::GetComponent<Sprite>(timerText).SetEnabled(LeaderBoard::timedGoal = !LeaderBoard::timedGoal);
 					ECS::GetComponent<Sprite>(timerText).Init((LeaderBoard::timedGoal = !LeaderBoard::timedGoal) ? "timed.png" : "kills.png", -4.5184f, 1.f);
-					
+
 					SoundEventManager::Play(SoundEventManager::SOUND::SHOOT);
 				}
 
@@ -300,6 +303,45 @@ void MainMenu::Update()
 					if (LeaderBoard::scoreGoal < 20)
 						FixDigits(++LeaderBoard::scoreGoal);
 				}
+
+				rx = ControllerInput::GetRX(CONUSER(x));
+				if (rx != 0) {
+					glm::quat rot = ECS::GetComponent<Transform>(models[x]).GetLocalRotation();
+					ECS::GetComponent<Transform>(models[x]).SetRotation(glm::rotate(rot, rx * Time::dt, BLM::GLMup));
+				}
+
+				if (!Asprite.GetEnabled()) {
+					ECS::GetComponent<Sprite>(popup[4 + x]).SetEnabled(false);
+					ECS::GetComponent<Sprite>(popup[8 + x]).SetEnabled(false);
+					ECS::GetComponent<Sprite>(popup[12 + x]).SetEnabled(false);
+					++allHolding;
+					if (ControllerInput::GetButtonDown(BUTTON::B, CONUSER(x))) {
+						Asprite.SetEnabled(true);
+						SoundEventManager::Play(SoundEventManager::SOUND::SWAP);
+						--allHolding;
+						continue;
+					}
+					if (!ControllerInput::GetButton(BUTTON::RB, CONUSER(x))) {
+						if (ControllerInput::GetButton(BUTTON::START, CONUSER(x))) {
+							playerSwapped[x] = true;
+							m_exitHoldTimer = 1.f;
+							holding = true;
+						}
+					}
+					continue;
+				}
+				ECS::GetComponent<Sprite>(popup[4 + x]).SetEnabled(true);
+				ECS::GetComponent<Sprite>(popup[8 + x]).SetEnabled(true);
+				ECS::GetComponent<Sprite>(popup[12 + x]).SetEnabled(true);
+
+				if (ControllerInput::GetButtonDown(BUTTON::A, CONUSER(x))) {
+					Asprite.SetEnabled(false);
+					SoundEventManager::Play(SoundEventManager::SOUND::PICKUP);
+					continue;
+				}
+
+				if (Rendering::LightsPos[2 + x] == BLM::GLMzero)
+					Rendering::LightsPos[2 + x] = (ECS::GetComponent<Transform>(models[x]).GetGlobalPosition() + glm::vec3(0, 0, 1.75f));
 
 				if (ControllerInput::GetButtonDown(BUTTON::DRIGHT, CONUSER(x))) {
 					if (++(colourIndex[x]) >= mm_colourCount)
@@ -320,34 +362,21 @@ void MainMenu::Update()
 					p.SetColour(LeaderBoard::players[x].colour);
 				}
 
-				++playerCount;
-				if (!ControllerInput::GetButton(BUTTON::RB, CONUSER(x))) {
-					if (ControllerInput::GetButton(BUTTON::START, CONUSER(x))) {
-						++allHolding;
-						playerSwapped[x] = true;
-						continue;
-					}
-				}
 
 				if (ControllerInput::GetButtonDown(BUTTON::B, CONUSER(x))) {
 					p.Init(LeaderBoard::players[x].user = CONUSER::NONE, 0);
 					playerSwapped[x] = true;
+					m_exitHoldTimer = 1.f;
 					Rendering::LightsPos[2 + x] = BLM::GLMzero;
 					SoundEventManager::Play(SoundEventManager::SOUND::SWAP);
 					continue;
 				}
 
-				float rx = ControllerInput::GetRX(CONUSER(x));
-				if (rx != 0) {
-					glm::quat rot = ECS::GetComponent<Transform>(models[x]).GetLocalRotation();
-					ECS::GetComponent<Transform>(models[x]).SetRotation(glm::rotate(rot, rx * Time::dt, BLM::GLMup));
-				}
 				lx = ControllerInput::GetLXRaw(CONUSER(x));
-
 				if (lx < 0) {
 					if (!playerSwapped[x]) {
-						if (--(LeaderBoard::players[x].model) < 1)
-							LeaderBoard::players[x].model = maxSelect;
+						if (--(LeaderBoard::players[x].model) < 1)		//bool increases max by one, access to secret character
+							LeaderBoard::players[x].model = maxSelect + ControllerInput::GetButton(BUTTON::LB, CONUSER(x));
 
 						FixColourUp(x);
 
@@ -359,8 +388,8 @@ void MainMenu::Update()
 					}
 				}
 				else if (lx > 0) {
-					if (!playerSwapped[x]) {
-						if (++(LeaderBoard::players[x].model) > maxSelect)
+					if (!playerSwapped[x]) {							//same as above
+						if (++(LeaderBoard::players[x].model) > (maxSelect + ControllerInput::GetButton(BUTTON::LB, CONUSER(x))))
 							LeaderBoard::players[x].model = 1;
 
 						FixColourUp(x);
@@ -377,14 +406,17 @@ void MainMenu::Update()
 				}
 			}
 			else {
-				ECS::GetComponent<Sprite>(popup[x]).SetEnabled(true);
+				Asprite.SetEnabled(true);
+				ECS::GetComponent<Sprite>(popup[4 + x]).SetEnabled(false);
+				ECS::GetComponent<Sprite>(popup[8 + x]).SetEnabled(false);
+				ECS::GetComponent<Sprite>(popup[12 + x]).SetEnabled(false);
 				playerSwapped[x] = false;
 				if (Rendering::LightsPos[2 + x] != BLM::GLMzero)
 					Rendering::LightsPos[2 + x] = BLM::GLMzero;
 
 				if (ControllerInput::GetButtonDown(BUTTON::A, CONUSER(x))) {
 					if (LeaderBoard::players[x].model == 0)
-						LeaderBoard::players[x].model = 1;
+						LeaderBoard::players[x].model = x + 1;
 					LeaderBoard::players[x].user = CONUSER(x);
 
 					FixColourUp(x);
@@ -392,6 +424,7 @@ void MainMenu::Update()
 					p.Init(CONUSER::FOUR, LeaderBoard::players[x].model, LeaderBoard::players[x].colour);
 					playerSwapped[x] = true;
 					m_confirmTimer = 1.f;
+					m_exitHoldTimer = 1.f;
 					SoundEventManager::Play(SoundEventManager::SOUND::PICKUP);
 				}
 			}
@@ -406,6 +439,15 @@ void MainMenu::Update()
 						m_scenePos = 0;
 						m_exitHoldTimer = 1.f;
 						playerSwapped[x] = true;
+						//deconfirm everyone
+						for (int i(0); i < 4; ++i) {
+							ECS::GetComponent<Sprite>(popup[i]).SetEnabled(true);
+							bool play = ECS::GetComponent<Player>(models[i]).IsPlayer();
+							ECS::GetComponent<Sprite>(popup[4 + i]).SetEnabled(play);
+							ECS::GetComponent<Sprite>(popup[8 + i]).SetEnabled(play);
+							ECS::GetComponent<Sprite>(popup[12 + i]).SetEnabled(play);
+						}
+						ECS::GetComponent<Sprite>(confirm).SetEnabled(false);
 
 						Rendering::BackColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 						Rendering::LightsPos[2] = BLM::GLMzero;
@@ -434,13 +476,23 @@ void MainMenu::Update()
 			}
 		}
 
-		ECS::GetComponent<Sprite>(confirm).SetEnabled(playerCount > 0);
+		ECS::GetComponent<Sprite>(confirm).SetEnabled((allHolding == playerCount) && playerCount);
 
-		//if (allHolding && playerCount > 0) {
-		if (allHolding == playerCount && playerCount > 0) {
+		//if (holding) {
+		if ((allHolding == playerCount) && playerCount && holding) {
 			m_confirmTimer -= Time::dt;
 			((BloomEffect*)m_frameEffects[1])->SetThreshold(0.6f + 0.4f * m_confirmTimer);
 			if (m_confirmTimer <= 0) {
+				//deconfirm everyone
+				for (int i(0); i < 4; ++i) {
+					ECS::GetComponent<Sprite>(popup[i]).SetEnabled(true);
+					bool play = ECS::GetComponent<Player>(models[i]).IsPlayer();
+					ECS::GetComponent<Sprite>(popup[4 + i]).SetEnabled(play);
+					ECS::GetComponent<Sprite>(popup[8 + i]).SetEnabled(play);
+					ECS::GetComponent<Sprite>(popup[12 + i]).SetEnabled(play);
+				}
+				ECS::GetComponent<Sprite>(confirm).SetEnabled(false);
+
 				//1 is tutorial
 				if (playerCount == 1)	QueueSceneChange(1);
 				//2+ is DemoScene
@@ -452,25 +504,11 @@ void MainMenu::Update()
 
 				ECS::GetComponent<ObjMorphLoader>(title).SetSpeed(1.f);
 
-
-
-
 				ECS::GetComponent<Transform>(charSelectParent)
 					.SetRotation(glm::angleAxis(glm::radians(180.f), BLM::GLMup));
 
-
-
-
-
-				ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat)// .ChildTo(camera);
-
-
-
-					.SetScale(0.25f);
-				ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat)// .ChildTo(camera);
-						
-
-					.SetScale(1.f);
+				ECS::GetComponent<Transform>(title).SetRotation(BLM::GLMQuat).SetScale(0.25f);
+				ECS::GetComponent<Transform>(text).SetRotation(BLM::GLMQuat).SetScale(1.f);
 				ECS::GetComponent<Transform>(camera).SetPosition(cameraPath.GetPosition());
 				LeaderBoard::playerCount = playerCount;
 				Rendering::BackColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
@@ -519,6 +557,37 @@ Scene* MainMenu::Reattach()
 	((BloomEffect*)m_frameEffects[1])->SetThreshold(0.9f);
 
 	return Scene::Reattach();
+}
+
+void MainMenu::ImGuiFunc()
+{
+	Scene::ImGuiFunc();
+	if (m_scenePos != 1)	return;
+
+	for (int i(0); i < 4; ++i) {
+		if (!ECS::GetComponent<Player>(models[i]).IsPlayer()) {
+			if (ImGui::Button(("Add player " + std::to_string(i + 1)).c_str())) {
+				if (LeaderBoard::players[i].model == 0)
+					LeaderBoard::players[i].model = i + 1;
+				LeaderBoard::players[i].user = CONUSER(i);
+
+				FixColourUp(i);
+
+				ECS::GetComponent<Player>(models[i]).Init(CONUSER::FOUR, LeaderBoard::players[i].model, LeaderBoard::players[i].colour);
+				playerSwapped[i] = true;
+				m_confirmTimer = 1.f;
+				SoundEventManager::Play(SoundEventManager::SOUND::PICKUP);
+			}
+		}
+		else {
+			if (ImGui::Button(("Remove player " + std::to_string(i + 1)).c_str())) {
+				ECS::GetComponent<Player>(models[i]).Init(LeaderBoard::players[i].user = CONUSER::NONE, 0);
+				playerSwapped[i] = true;
+				Rendering::LightsPos[2 + i] = BLM::GLMzero;
+				SoundEventManager::Play(SoundEventManager::SOUND::SWAP);
+			}
+		}
+	}
 }
 
 void MainMenu::FixDigits(int number)

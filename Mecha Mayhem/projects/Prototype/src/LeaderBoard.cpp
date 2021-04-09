@@ -89,8 +89,9 @@ void LeaderBoard::Update()
 {
 	float /*lx = 0, ly = 0,*/ rx = 0, ry = 0, mult = 1.f;
 	for (int i(0); i < 4; ++i) {
-		if (ControllerInput::GetButtonDown(BUTTON::SELECT, CONUSER(i))) {
-			mult += 5.f / playerCount;
+		if (ControllerInput::GetButton(BUTTON::A, CONUSER(i))
+			|| ControllerInput::GetButton(BUTTON::SELECT, CONUSER(i))) {
+			mult += 2.f / playerCount;
 		}
 		if (ControllerInput::GetButtonDown(BUTTON::START, CONUSER(i))) {
 			if (ControllerInput::GetButton(BUTTON::RB, CONUSER(i))) {

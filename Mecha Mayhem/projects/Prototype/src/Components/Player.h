@@ -136,7 +136,6 @@ public:
 			return true;
 		}
 		else {
-			//m_hitSound.play();
 			m_damageCounter = 0.75f;
 		}
 

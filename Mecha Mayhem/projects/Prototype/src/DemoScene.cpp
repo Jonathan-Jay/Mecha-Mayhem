@@ -202,6 +202,8 @@ void DemoScene::Update()
 				++temp;
 			}
 		}
+		SoundEventManager::Create(SoundEventManager::SOUND::GAMEMUSIC).SetParameter("Music Volume", 0.f);
+		SoundEventManager::Play(SoundEventManager::SOUND::MATCHEND);
 		m_timer = winWaitTime;
 		if (LeaderBoard::timedGoal)
 			m_gameTimer = 0.f;
@@ -232,30 +234,44 @@ void DemoScene::DrawOverlay()
 	//drawTimer if timed match
 	if (m_gameTimer >= 0) {
 		glViewport(0, 0, BackEnd::GetWidth(), BackEnd::GetHeight());
+
+		//colon position
+		float xPos = 0.75f;
+		//10 minutes
+		if (m_gameTimer >= 600.f)
+			xPos = 0;
 		glm::mat4 timerMat = glm::mat4(
 			1, 0, 0, 0,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
-			1.75f, m_yPos, -99.9f, 1
+			xPos, m_yPos, -99.9f, 1
 		);
+		Sprite::BeginUIDraw(5, 1);
 
-		Sprite::BeginUIDraw(4, 1);
+		m_colonSprite.DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 
-		//get digits
-		int min = m_gameTimer / 60;
+		//get minutes
+		int min1 = m_gameTimer / 60.f;
+
 		//get seconds
-		int sec1 = m_gameTimer - (60 * min);
-		//get tens
+		int sec1 = ceilf(m_gameTimer - floorf(m_gameTimer / 60.f) * 60.f);
+		min1 += sec1 == 60;
+		int min2 = min1 / 10;
+		sec1 *= sec1 != 60;
 		int sec2 = sec1 / 10;
-		sec1 = sec1 - (sec2 * 10);
+		min1 -= (min2 * 10);
+		sec1 -= (sec2 * 10);
 
 		//draw digits here
-		Player::m_digits[min].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
-		timerMat[3].x = 0.625f;
-		m_colonSprite.DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
-		timerMat[3].x = -0.5f;
+		if (min2) {
+			timerMat[3].x = xPos + 2.25f;
+			Player::m_digits[min2].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
+		}
+		timerMat[3].x = xPos + 0.85f;
+		Player::m_digits[min1].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
+		timerMat[3].x = xPos - 0.85f;
 		Player::m_digits[sec2].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
-		timerMat[3].x = -1.75f;
+		timerMat[3].x = xPos - 2.25f;
 		Player::m_digits[sec1].DrawToUI(Rendering::orthoVP.GetViewProjection(), timerMat, 0);
 
 		Sprite::PerformUIDraw(1);
@@ -366,5 +382,21 @@ Scene* DemoScene::Reattach()
 	Player::SetCamDistance(camDistance);
 	Player::SetSkyPos(glm::vec3(20.5f, 10, 21.8f));
 
+	AudioEvent& music = SoundEventManager::Create(SoundEventManager::SOUND::GAMEMUSIC);
+	music.SetParameter("Music Volume", 1.f);
+	music.Restart();
+
+
 	return this;
+}
+
+void DemoScene::ImGuiFunc()
+{
+	Scene::ImGuiFunc();
+
+	for (int i(0); i < 4; ++i) {
+		if (bodyEnt[i] != entt::null)
+			if (ImGui::Button(("Give player " + std::to_string(i + 1) + " 1 kill").c_str()))
+				ECS::GetComponent<Player>(bodyEnt[i]).GivePoints(1);
+	}
 }

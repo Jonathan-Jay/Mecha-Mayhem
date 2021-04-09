@@ -113,7 +113,7 @@ void Player::Init(int width, int height)
 	
 
 	m_reticle = { "ui/reticle.png", 1.f, 1.f };
-	m_scoreBack = { "ui/ScoreBox.png", 3.f, 3.223f };
+	m_scoreBack = { "ui/ScoreBox.png", 3.760f, 3.5f };
 	for (int i(0); i < 10; ++i)	m_digits[i] = { "num/" + std::to_string(i) + ".png", 1.25f, 1.6667f };
 
 	m_heal2 = { "ui/heal2.png", 2.f, 1.70f };
@@ -126,21 +126,14 @@ void Player::Init(int width, int height)
 	m_shotgunIcon = { "ui/shotgun.png", 2.f, 1.48f };
 
 	ObjMorphLoader("dummy/idle", true).LoadMeshs("dummy/death", true);
-	ObjMorphLoader("char/idle", true).LoadMeshs("char/walk", true)
-		.LoadMeshs("char/air", true).LoadMeshs("char/death", true)
-		.LoadMeshs("char/punch", true);
-	ObjMorphLoader("char2/idle", true).LoadMeshs("char2/walk", true)
-		.LoadMeshs("char2/air", true).LoadMeshs("char2/death", true)
-		.LoadMeshs("char2/punch", true);
-	ObjMorphLoader("char3/idle", true).LoadMeshs("char3/walk", true)
-		.LoadMeshs("char3/air", true).LoadMeshs("char3/death", true)
-		.LoadMeshs("char3/punch", true);
-	ObjMorphLoader("char4/idle", true).LoadMeshs("char4/walk", true)
-		.LoadMeshs("char4/air", true).LoadMeshs("char4/death", true)
-		.LoadMeshs("char4/punch", true);
-	ObjMorphLoader("char5/idle", true).LoadMeshs("char5/walk", true)
-		.LoadMeshs("char5/air", true).LoadMeshs("char5/death", true)
-		.LoadMeshs("char5/punch", true);
+	
+	//init all player morphs
+	for (int i(1); i <= 6; ++i) {
+		std::string name = "char" + std::to_string(i);
+		ObjMorphLoader(name + "/idle", true).LoadMeshs(name + "/walk", true)
+			.LoadMeshs(name + "/air", true).LoadMeshs(name + "/death", true)
+			.LoadMeshs(name + "/punch", true);
+	}
 }
 
 void Player::Unload()
@@ -166,20 +159,30 @@ Player& Player::Init(CONUSER user, int characterModel, const glm::vec3& colour, 
 	m_camPos = camPos;
 	m_colour = colour;
 
+	/*
 	switch (characterModel) {
 		//dummy (case 0 is also here)
 	default:	m_charModelIndex = "dummy";	m_charModel.LoadMeshs("dummy/idle", true);	m_user = CONUSER::NONE;	break;
 		//JJ's
-	case 1:		m_charModelIndex = "char";	m_charModel.LoadMeshs("char/idle", true);	break;
+	case 1:		m_charModelIndex = "char1";	m_charModel.LoadMeshs("char1/idle", true);	break;
 		//JL's
 	case 2:		m_charModelIndex = "char2";	m_charModel.LoadMeshs("char2/idle", true);	break;
 		//Ryan's
 	case 3:		m_charModelIndex = "char3";	m_charModel.LoadMeshs("char3/idle", true);	break;
-		//Bag
+		//Ryan's 2
 	case 4:		m_charModelIndex = "char4";	m_charModel.LoadMeshs("char4/idle", true);	break;
-		//Ryan's
+		//bag
 	case 5:		m_charModelIndex = "char5";	m_charModel.LoadMeshs("char5/idle", true);	break;
 	}
+	*/
+	if (characterModel == 0) {
+		m_charModelIndex = "dummy";
+		m_user = CONUSER::NONE;
+	}
+	else {
+		m_charModelIndex = "char" + std::to_string(characterModel);
+	}
+	m_charModel.LoadMeshs(m_charModelIndex + "/idle", true);
 
 	m_charModel.SetRimLighting(true);
 	return *this;
@@ -190,18 +193,22 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 	glm::mat4 tempModel = model;
 
 	if (m_camPos == camNum) {
-		if (m_charModelIndex == "char4")
+		//bag man
+		if (m_charModelIndex == "char6")
 			tempModel = glm::scale(model, glm::vec3(0.75f, 1.f, 0.75f));
 
 		//draw ui
 		float healthPercent = float(m_health) / m_maxHealth;
 		float dashPercent = m_dashTimer / m_dashDelay,
-			x = 15.7777f,	//1.77 * 10 - 2
+			//scorebox
+			x = 15.2777f,	//1.77 * 10 - 2
 			y = 7.5f,
+			//gun icons
 			x2 = 15.7777f,	//1.77 * 10 - 2
 			//x2 = 15.9277f,	//1.77 * 10 - 1.85
-			y2 = 4.5f,		//places weapons below score
-			x3 = 12.7777f,	//x - 3
+			y2 = 4.25f,		//places weapons below score
+			//heal icon
+			x3 = 11.7777f,	//x - 3.5
 			y3 = 7.5f;		//places heal besides score
 
 			//x4 x2 - 1.5
@@ -215,7 +222,7 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 			//x3 = 9.f;
 			//x4 = 14.f;
 			y = 5.f;
-			y2 = 2.f; // -2.5f
+			y2 = 1.75f; // -2.5f
 			y3 = 5.f;
 		}
 		if (numOfCams == 2) {
@@ -234,8 +241,8 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 
 		if (numOfCams > 2) 
 		{
-			UIMat *= 1.25f;
 			scaleMod = 1.25f;
+			UIMat *= scaleMod;
 		}
 
 		UIMat[3] = glm::vec4(x, y, -9.9f, 1);
@@ -318,16 +325,18 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 			float yPercent = m_sensitivity.y / m_maxSensitivity;
 			float tempY = (numOfCams == 1) * -3.f;
 
+			UIMat *= scaleMod;
+
 			UIMat[3] = glm::vec4(0.f, tempY, -9.7f, 1);
 			m_ammoBarBack.DrawToUI(VP, UIMat, camNum);
-			UIMat[3] = glm::vec4(0.f, tempY + yPercent - 1.f, -9.9f, 1);
+			UIMat[3] = glm::vec4(0.f, tempY + (yPercent - 1.f) * scaleMod, -9.9f, 1);
 			m_ammoBar.SetHeight(2.f * yPercent);
 			m_ammoBar.DrawToUI(VP, UIMat, camNum);
 
-			UIMat = m_rotation90;
+			UIMat = m_rotation90 * scaleMod;
 			UIMat[3] = glm::vec4(0.f, tempY, -9.8f, 1);
 			m_ammoBarBack.DrawToUI(VP, UIMat, camNum);
-			UIMat[3] = glm::vec4(1.f - xPercent, tempY, -10.f, 1);
+			UIMat[3] = glm::vec4((1.f - xPercent) * scaleMod, tempY, -10.f, 1);
 			m_ammoBar.SetHeight(2.f * xPercent);
 			m_ammoBar.DrawToUI(VP, UIMat, camNum);
 		}
@@ -346,9 +355,6 @@ void Player::Draw(const glm::mat4& model, short camNum, short numOfCams, bool pa
 	if (!m_punched && m_currWeapon != WEAPON::FIST) {
 		GetWeaponModel(m_currWeapon).DrawTemp(model * m_gunOffsetMat);
 	}
-
-	if (m_charModelIndex == "char5")
-		tempModel = glm::rotate(model, glm::radians(180.f), BLM::GLMup);
 
 	//temporary Fix for misaligned players
 	tempModel = glm::translate(tempModel, glm::vec3(0, -1, 0));
@@ -788,15 +794,21 @@ void Player::UseWeapon(PhysBody& body, Transform& head, float offset)
 	if (selectedGun.type != WEAPON::CANNON) {
 		if (selectedGun.type == WEAPON::SHOTGUN)
 		{
-			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
+			//																						left
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 11 - 20.f, rand() % 21 - 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
+			//																						right
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 11 + 10.f, rand() % 21 - 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
+			//																						down
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 11 - 20.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
+			//																						up
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 11 + 10.f, 0)));
 			LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
-			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 21 - 10.f, rand() % 21 - 10.f, 0)));
+
+			//center is random on all axis
+			offsetQuat = glm::angleAxis(glm::radians(rand() % 15 - 7.f), glm::normalize(glm::vec3(rand() % 11 - 5.f, rand() % 11 - 5.f, 0)));
 		}
 		LaserGun(offsetQuat, head, selectedGun.damage, selectedGun.maxRange, m_currWeapon);
 	}
@@ -842,6 +854,7 @@ void Player::LaserGun(glm::quat offsetQuat, Transform& head, short damage, float
 			damage *= HalfCurve(p.m_closestHitFraction * 100.f);
 		}
 
+		glm::vec3 hitPos = BLM::BTtoGLM(p.m_hitPointWorld);
 		glm::vec3 colour = BLM::GLMzero;
 
 		entt::entity playerIdTest = p.m_collisionObject->getUserIndex();
@@ -850,10 +863,11 @@ void Player::LaserGun(glm::quat offsetQuat, Transform& head, short damage, float
 				if (ECS::GetComponent<Player>(playerIdTest).TakeDamage(damage))
 					++m_killCount;
 				colour = glm::vec3(-2, -1, 1);
+				SoundEventManager::Play(SoundEventManager::SOUND::HIT, hitPos);
 			}
 		}
 		Rendering::effects->ShootLaser(head.GetGlobalRotation() * offsetQuat, rayPos,
-			glm::length(BLM::BTtoGLM(p.m_hitPointWorld) - rayPos), colour);
+			glm::length(hitPos - rayPos), colour);
 	}
 	else {
 		Rendering::effects->ShootLaser(head.GetGlobalRotation() * offsetQuat, rayPos, distance);
