@@ -1,4 +1,9 @@
 #include "IlluminationBuffer.h"
+#include "Components/ObjLoader.h"
+
+VertexArrayObject::sptr __sphere = nullptr;
+VertexArrayObject::sptr __cone = nullptr;
+VertexArrayObject::sptr __cube = nullptr;
 
 void IlluminationBuffer::Init(unsigned width, unsigned height)
 {
@@ -31,7 +36,18 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 	if (index == 0) {
 		_shaders.push_back(GetShader("shaders/Post/passthrough_frag.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/gBuffer_directional_frag.glsl"));
+		Shader::sptr point = Shader::Create();
+		point->LoadShaderPartFromFile("shaders/Post/gBuffer_point_vert.glsl", GL_VERTEX_SHADER);
+		point->LoadShaderPartFromFile("shaders/Post/gBuffer_point_frag.glsl", GL_FRAGMENT_SHADER);
+		point->Link();
+		_shaders.push_back(point);
 		_shaders.push_back(GetShader("shaders/Post/gBuffer_ambient_frag.glsl"));
+	}
+
+	if (__sphere == nullptr) {
+		__sphere = ObjLoader("maps/sphere.obj").GetVAO();
+		__cone = ObjLoader("maps/cone.obj").GetVAO();
+		__cube = ObjLoader("maps/cube.obj").GetVAO();
 	}
 }
 
@@ -61,32 +77,61 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 	}
 
 	//insert all other lighting here
-	/*
+	//*
+	std::vector<PointLight> _lights = {};
 	if (_lights.size()) {
+		VertexArrayObject::sptr mesh = nullptr;
+		if (meshChoice == 0)
+			mesh = __sphere;
+		else if (meshChoice == 1)
+			mesh = __cone;
+		else 
+			mesh = __cube;
+
+
 		//bind point light shader
 		_shaders[Lights::POINT]->Bind();
-		_shaders[Lights::POINT]->SetUniform("u_camPos", *_camPos.data(), 4);
-		_shaders[Lights::POINT]->SetUniform("camCount", _camCount);
-		for (int i(0); i < _lights.size(); ++i) {
-			_lights[i].buffer.SendData(reinterpret_cast<void*>(&_lights[i].point), sizeof(PointLight));
+		_shaders[Lights::POINT]->SetUniform("u_camPos", _camPos[0]);
+		//bind the light buffer
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetGBuffer().GetHandle());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _buffers[1]->GetHandle());
+		glBlitFramebuffer(0, 0, _buffers[1]->GetWidth(), _buffers[1]->GetHeight(),
+			0, 0, _buffers[1]->GetWidth(), _buffers[1]->GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-			_lights[i].buffer.Bind(0);
+		//draw lines
+		//if (showVolumes) {
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//}
+
+		_buffers[1]->Bind();
+		for (int i(0); i < _lights.size(); ++i) {
+			_lightBuffer.SendData(reinterpret_cast<void*>(&_lights[i]), sizeof(PointLight));
+
+			_lightBuffer.Bind(0);
 
 			gBuffer->BindLighting();
 			//bind the light accum buffer to keep adding to it
-			_buffers[1]->BindColorAsTexture(0, 4);
-			_buffers[1]->RenderToFSQ();
-			_buffers[1]->UnbindTexture(4);
+			_buffers[1]->BindColorAsTexture(0, 5);
+			//draw light volume
+			glm::mat4 mvp = glm::mat4(_lights[i]._radius);
+			mvp[3] = glm::vec4(glm::vec3(_lights[i]._lightPos), 1.f);
+			_shaders[Lights::POINT]->SetUniformMatrix("MVP", heldVP * mvp);
+			mesh->Render();
+
+			_buffers[1]->UnbindTexture(5);
 
 			gBuffer->UnbindLighting();
 
-			_lights[i].buffer.Unbind(0);
+			_lightBuffer.Unbind(0);
 
 
 		}
+		_buffers[1]->Unbind();
 		_shaders[Lights::POINT]->UnBind();
 	}
-	*/
+	//*/
 
 
 	_shaders[Lights::AMBIENT]->Bind();
@@ -107,6 +152,11 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 	_sunBuffer.Unbind(0);
 
 	_shaders[Lights::AMBIENT]->UnBind();
+}
+void IlluminationBuffer::Unload()
+{
+	PostEffect::Unload();
+	__sphere = nullptr;
 }
 /*
 void IlluminationBuffer::DrawIllumBuffer()

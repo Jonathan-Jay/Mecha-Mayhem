@@ -87,5 +87,7 @@ private:
 		glm::vec3(0.25f, 0.25f, 0.f),
 		glm::vec3(0.5f, 0.1f, 0.15f)
 	};
+
+	bool sceneToggle = true;
 };
 

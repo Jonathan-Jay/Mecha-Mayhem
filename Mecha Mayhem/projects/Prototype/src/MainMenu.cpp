@@ -494,9 +494,13 @@ void MainMenu::Update()
 				ECS::GetComponent<Sprite>(confirm).SetEnabled(false);
 
 				//1 is tutorial
-				if (playerCount == 1)	QueueSceneChange(1);
+				//if (playerCount == 1)	QueueSceneChange(1);
 				//2+ is DemoScene
-				else					QueueSceneChange(2);
+				//else					QueueSceneChange(2);
+
+				QueueSceneChange(1 + sceneToggle);
+				//force it to be always 1 player
+				LeaderBoard::playerCount = 1;
 
 				m_scenePos = 0;
 				m_exitHoldTimer = 1.f;
@@ -587,6 +591,17 @@ void MainMenu::ImGuiFunc()
 				Rendering::LightsPos[2 + i] = BLM::GLMzero;
 				SoundEventManager::Play(SoundEventManager::SOUND::SWAP);
 			}
+		}
+	}
+
+	if (sceneToggle) {
+		if (ImGui::Button("Toggle scene: Demo")) {
+			sceneToggle = false;
+		}
+	}
+	else {
+		if (ImGui::Button("Toggle scene: Tutorial")) {
+			sceneToggle = true;
 		}
 	}
 }

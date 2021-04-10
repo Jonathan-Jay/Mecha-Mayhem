@@ -35,6 +35,8 @@ public:
 	void Disable() { m_enabled = false; }
 	bool GetEnabled() { return m_enabled; }
 
+	VertexArrayObject::sptr GetVAO() { return m_models[m_index].vao; }
+
 	glm::vec3 GetAdditiveColour() { return m_colour; }
 	void SetAdditiveColour(const glm::vec3& colour) { m_colour = colour; }
 

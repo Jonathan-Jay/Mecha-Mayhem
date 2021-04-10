@@ -31,6 +31,7 @@ void FrameEffects::Init(unsigned width, unsigned height)
 
 	//gbuffer
 	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
+	PostEffect::Init("shaders/Post/gBuffer_point_frag.glsl");
 	PostEffect::Init("shaders/Post/gBuffer_ambient_frag.glsl");
 
 	//transparency

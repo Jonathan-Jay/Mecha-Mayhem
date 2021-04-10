@@ -70,6 +70,14 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
+	static void SetVP(const glm::mat4 VP) {
+		illumBuffer.SetViewProj(VP);
+	}
+
+	static IlluminationBuffer& GetIllumBuffer() {
+		return illumBuffer;
+	}
+
 	static void SetLights(std::array<glm::vec3, MAX_LIGHTS>& lightsPos,
 						  std::array<glm::vec3, MAX_LIGHTS>& lightsColour, size_t LightCount) {
 		illumBuffer.SendLights(lightsPos, lightsColour, LightCount);

@@ -185,6 +185,18 @@ void Scene::ImGuiFunc()
 	/*ImGui::SetWindowSize(ImVec2(150, 50));
 	ImGui::Text("Empty");*/
 
+	if (ImGui::CollapsingHeader("Assignment 4 stuff")) {
+		int& mesh = m_frameEffects.GetIllumBuffer().meshChoice;
+		std::string name = "sphere";
+		if (mesh == 1)
+			name = "cone";
+		else if (mesh == 2)
+			name = "cube";
+		ImGui::SliderInt(name.c_str(), &mesh, 0, 2);
+
+
+	}
+
 	if (ImGui::CollapsingHeader("Post Processing Effects"))
 	{
 		ImGui::Text(("Number of effects: " + std::to_string(m_frameEffects.size())).c_str());
