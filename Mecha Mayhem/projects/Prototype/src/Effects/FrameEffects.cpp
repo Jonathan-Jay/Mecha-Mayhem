@@ -159,6 +159,15 @@ void FrameEffects::UnBindTransparency()
 
 void FrameEffects::Draw(/*bool paused*/)
 {
+	if (bufferchoice < 6) {
+		baseEffect->DrawBuffersToScreen(bufferchoice);
+		return;
+	}
+	if (bufferchoice == 7) {
+		illumBuffer.DrawIllumBuffer();
+		return;
+	}
+
 	if (m_usingShadows)		shadowMap->BindDepthAsTexture(30);
 	else		Sprite::m_textures[0].texture->Bind(30);
 

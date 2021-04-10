@@ -186,14 +186,84 @@ void Scene::ImGuiFunc()
 	ImGui::Text("Empty");*/
 
 	if (ImGui::CollapsingHeader("Assignment 4 stuff")) {
-		int& mesh = m_frameEffects.GetIllumBuffer().meshChoice;
-		std::string name = "sphere";
-		if (mesh == 1)
-			name = "cone";
-		else if (mesh == 2)
-			name = "cube";
-		ImGui::SliderInt(name.c_str(), &mesh, 0, 2);
+		auto& illum = m_frameEffects.GetIllumBuffer();
 
+		bool sun = illum.GetSunEnabled();
+		if (ImGui::Checkbox("sun", &sun)) {
+			illum.EnableSun(sun);
+			m_frameEffects.UsingShadows(sun);
+		}
+
+		std::string name = "";
+		if (ImGui::TreeNode("Lights")) {
+			ImGui::Checkbox("Light Volumes", &illum.drawVolumes);
+			ImGui::SameLine();
+			int& mesh = illum.meshChoice;
+			name = "sphere";
+			if (mesh == 1)
+				name = "cone";
+			else if (mesh == 2)
+				name = "cube";
+			ImGui::SliderInt(name.c_str(), &mesh, 0, 2);
+
+			if (illum._lights.size() < 25) {
+				if (ImGui::Button("Add Light")) {
+					illum._lights.push_back(PointLight());
+					illum._lights[illum._lights.size() - 1]._radius = IlluminationBuffer::GetPointLightRadius(illum._lights[illum._lights.size() - 1]);
+				}
+			}
+			ImGui::SliderFloat("light power (makes it weird tho)", &illum.power, 0.5f, 10.f);
+
+			if (illum._lights.size()) {
+				ImGui::SliderInt("currentLight (is green)", &illum.currentLight, 0, illum._lights.size() - 1);
+				bool changed = false;
+				PointLight& light = illum._lights[illum.currentLight];
+				ImGui::SliderFloat3("position", &light._lightPos[0], -25, 25);
+				changed += ImGui::SliderFloat3("colour", &light._lightCol[0], 0, 15);
+				changed += ImGui::SliderFloat("linear falloff", &light._lightLinearFalloff, 0.01f, 5.f, "%.4f");
+				changed += ImGui::SliderFloat("quadratic falloff", &light._lightQuadraticFalloff, 0.01f, 5.f, "%.4f");
+				if (changed)
+					light._radius = IlluminationBuffer::GetPointLightRadius(light);
+
+				if (ImGui::Button("randomize all")) {
+					for (int i(0); i < illum._lights.size(); ++i) {
+						illum._lights[i]._lightPos = glm::vec4(glm::vec3(
+							(float(rand()) / RAND_MAX) * 50.f - 25.f,
+							(float(rand()) / RAND_MAX) * 10.f,
+							(float(rand()) / RAND_MAX) * 50.f - 25.f
+						), 0.f);
+						illum._lights[i]._lightCol = glm::vec4(glm::vec3(
+							(float(rand()) / RAND_MAX) * 10.f + 5.f,
+							(float(rand()) / RAND_MAX) * 10.f + 5.f,
+							(float(rand()) / RAND_MAX) * 10.f + 5.f
+						), 0.f);
+						illum._lights[i]._lightLinearFalloff = (float(rand()) / RAND_MAX) * 5.f + 0.01f;
+						illum._lights[i]._lightQuadraticFalloff = (float(rand()) / RAND_MAX) * 5.f + 0.01f;
+						illum._lights[i]._radius = IlluminationBuffer::GetPointLightRadius(illum._lights[i]);
+					}
+				}
+			}
+
+			ImGui::TreePop();
+		}
+
+
+		name = "default view";
+		if (FrameEffects::bufferchoice == 0)
+			name = "albedo/colour buffer";
+		else if (FrameEffects::bufferchoice == 1)
+			name = "normal";
+		else if (FrameEffects::bufferchoice == 2)
+			name = "specular";
+		else if (FrameEffects::bufferchoice == 3)
+			name = "position";
+		else if (FrameEffects::bufferchoice == 4)
+			name = "emissive";
+		else if (FrameEffects::bufferchoice == 5)
+			name = "4 buffers";
+		else if (FrameEffects::bufferchoice == 7)
+			name = "light accum buffer";
+		ImGui::SliderInt(name.c_str(), &FrameEffects::bufferchoice, 0, 7);
 
 	}
 

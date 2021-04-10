@@ -70,7 +70,7 @@ public:
 		illumBuffer.SetCamCount(camNum);
 	}
 
-	static void SetVP(const glm::mat4 VP) {
+	static void SetVP(const glm::mat4& VP) {
 		illumBuffer.SetViewProj(VP);
 	}
 
@@ -99,6 +99,8 @@ public:
 
 	static const unsigned shadowWidth	= 4096;//8192;
 	static const unsigned shadowHeight	= 4096;//8192;
+
+	static int bufferchoice;
 private:
 	bool m_usingShadows = true;
 
@@ -117,3 +119,5 @@ private:
 		//View
 		glm::lookAt(glm::vec3(m_sun._lightDirection), BLM::GLMzero, BLM::GLMup);
 };
+
+inline int FrameEffects::bufferchoice = 6;

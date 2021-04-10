@@ -9,6 +9,7 @@ struct PointLight
 	vec4 _lightCol;
 
 	//FLOATS
+	float _lightConstantFalloff;
 	float _lightLinearFalloff;
 	float _lightQuadraticFalloff;
 	float _lightSpecularPow;
@@ -28,13 +29,15 @@ layout(binding = 4) uniform sampler2D s_emissiveTex;
 layout(binding = 5) uniform sampler2D s_lightAccumTex;
 
 uniform vec3 u_camPos;
+uniform vec2 windowSize;
+uniform float power;
 
 out vec4 frag_color;
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 // as well as https://learnopengl.com/Advanced-Lighting/Deferred-Shading
 void main() {
-	vec2 inUV = gl_FragCoord.xy;
+	vec2 inUV = gl_FragCoord.xy / windowSize;
 
 	//	inNormal = (normalize(inNormal) * 2.0) - 1.0;
 	vec3 inNormal = (normalize(texture(s_normalsTex, inUV).xyz) * 2.0) - 1.0;
@@ -45,20 +48,30 @@ void main() {
 	//Positions
 	vec3 fragPos = texture(s_positionTex, inUV).rgb;
 
-	// Diffuse
 	vec3 lightDir = point._lightPos.xyz - fragPos;
-	float lightDistSq = dot(lightDir, lightDir);
-	lightDir = normalize(lightDir);
+	float lightDist = length(lightDir);
+
+	// Diffuse
+	lightDir = lightDir / lightDist;
 	float diffuse = max(dot(inNormal, lightDir), 0.0);// add diffuse intensity
 
 	// Specular
 	vec3 viewDir  = normalize(u_camPos - fragPos);
 	// Get the specular from the specular map
-	float specular = point._lightSpecularPow * pow(max(dot(inNormal, normalize(viewDir + lightDir)), 0.0), texSpec.y);
+	float specular = point._lightSpecularPow * pow(max(dot(viewDir, reflect(-lightDir, inNormal)), 0.0), texSpec.y);
+	
+	// see https://learnopengl.com/Lighting/Light-casters for a good reference on how this all works, or
+	// https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff
+	float attenuation = power / (
+		point._lightConstantFalloff +
+		point._lightLinearFalloff * lightDist +
+		point._lightQuadraticFalloff * lightDist * lightDist
+	);
 
 	vec3 result = ((diffuse + specular)	// light factors from our single light
-		/ lightDistSq * texSpec.x)		// don't render when emissive
-		* point._lightCol.rgb;
+		* texSpec.x		// don't render when emissive
+		* attenuation
+		) * point._lightCol.rgb;
 
 	//emissive added in directional light
 	//result += texture(s_emissiveTex, inUV).rgb;

@@ -8,19 +8,12 @@ struct PointLight
 	//VEC4s 
 	//SHOULD ALWAYS USE VEC4s (Vec3s get upscaled to Vec4s anyways, using anything less is a waste of memory)
 	glm::vec4 _lightPos = glm::vec4(0.f, 0.f, 0.f, 0.f);
-	glm::vec4 _lightCol = glm::vec4(0.5f, 0.5f, 0.5f, 0.f);
+	glm::vec4 _lightCol = glm::vec4(2.5f, 2.5f, 2.5f, 0.f);
 
 	//FLOATS
-	float _lightLinearFalloff = 0.09f;
-	float _lightQuadraticFalloff = 0.032f;
+	float _lightConstantFalloff = 0.1f;
+	float _lightLinearFalloff = 0.9f;
+	float _lightQuadraticFalloff = 0.32f;
 	float _lightSpecularPow = 1.0f;
 	float _radius = 1.f;
 };
-
-float GetPointLightRadius(const PointLight& light)
-{
-	float lightMax = glm::max(glm::max(light._lightCol.r, light._lightCol.g), light._lightCol.b);
-	return (-light._lightLinearFalloff + std::sqrtf(
-				light._lightLinearFalloff * light._lightLinearFalloff - 4 * light._lightQuadraticFalloff * (1.f - (256.0 / 5.0) * lightMax)
-		)) / (2 * light._lightQuadraticFalloff);
-}

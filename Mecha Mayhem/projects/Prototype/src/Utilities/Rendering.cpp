@@ -123,7 +123,7 @@ namespace Rendering {
 			FrameEffects::UnBindTransparency();
 			
 			//frameEffects->Bind();
-
+			FrameEffects::SetVP(VP);
 			//exit even if some cams haven't been checked, because only the amount specified should render
 			if (++count >= numOfCams)
 				break;
