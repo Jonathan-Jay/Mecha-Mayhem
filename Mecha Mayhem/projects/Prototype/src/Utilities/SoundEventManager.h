@@ -40,6 +40,28 @@ public:
 		soundEventQueues.push_back({ "Game Over", 1 });		//	SOUND::MATCHEND
 
 
+		/*		pushpop tests
+		for (int i(0); i < 10; ++i) {
+			{
+				auto start = std::chrono::high_resolution_clock::now();
+				soundEventQueues[1].pushpop();
+				// Stop timer
+				auto elapsed = std::chrono::high_resolution_clock::now() - start;
+				// Print results
+				long long nano = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+				std::cout << "pushpop() took: " << nano << "nanoseconds\n";
+			}
+			{
+				auto start = std::chrono::high_resolution_clock::now();
+				soundEventQueues[1].push(soundEventQueues[1].pop());
+				// Stop timer
+				auto elapsed = std::chrono::high_resolution_clock::now() - start;
+				// Print results
+				long long nano = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+				std::cout << "push(pop()) took: " << nano << "nanoseconds\n\n";
+			}
+		}//*/
+
 		engine->GetListener().SetUp(BLM::GLMup);
 		//sets the starting positions
 		ResetEvents();
@@ -124,13 +146,14 @@ private:
 			//return engine->GetEvent(_events[_back]);
 		}
 
-		/*	these aren't used because we dont need these functionalities
+		//*	these aren't used because we dont need these functionalities
 		
 		//pops the front and returns what it poped (not deleted from array)
 		AudioEvent& pop() {
 			int index = _front;
 			_front = (_front + 1) % _size;
 			return *_events[index];
+			//return engine->GetEvent(_events[index]);
 		}
 
 		//pushes to the back and returns what was pushed
@@ -139,8 +162,9 @@ private:
 			if (_back == _front)
 				throw std::runtime_error("queue full\n");
 			return *(_events[_back] = &item);
+			//return engine->GetEvent(_events[_back]);
 		}
-		*/
+		//*/
 
 		//last pushed events
 		AudioEvent& back() {	return *_events[_back];		}

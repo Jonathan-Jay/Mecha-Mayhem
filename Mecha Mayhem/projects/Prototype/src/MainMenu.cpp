@@ -574,6 +574,7 @@ void MainMenu::ImGuiFunc()
 				FixColourUp(i);
 
 				ECS::GetComponent<Player>(models[i]).Init(CONUSER::FOUR, LeaderBoard::players[i].model, LeaderBoard::players[i].colour);
+				ECS::GetComponent<Sprite>(popup[i]).SetEnabled(false);
 				playerSwapped[i] = true;
 				m_confirmTimer = 1.f;
 				SoundEventManager::Play(SoundEventManager::SOUND::PICKUP);

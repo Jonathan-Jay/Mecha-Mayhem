@@ -251,6 +251,8 @@ void LeaderBoard::SortPlayers(std::vector<int>& playerIndices)
 {
 	int size = playerIndices.size() - 1;
 	//1 player would be 0, so 2 player minimum
+	
+	//auto start = std::chrono::high_resolution_clock::now();
 	if (size) {
 		//bubble sorting (improved by following slides):
 		for (int i(0); i < size; ++i) {
@@ -263,4 +265,10 @@ void LeaderBoard::SortPlayers(std::vector<int>& playerIndices)
 			}
 		}
 	}
+	/*		 Stop timer
+	auto elapsed = std::chrono::high_resolution_clock::now() - start;
+	// Print results
+	long long nano = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+	std::cout << playerIndices.size() << " tests took: " << nano << "nanoseconds\n\n";
+	//*/
 }

@@ -16,6 +16,6 @@ void main()
 {
 	vec4 source = texture(s_screenTex, inUV);
 
-	frag_color.rgb = mix(source.rgb, frag_color.rgb = texture(u_TexColorGrade, scale * source.rgb + offset).rgb, u_Intensity);
+	frag_color.rgb = mix(source.rgb, texture(u_TexColorGrade, scale * source.rgb + offset).rgb, u_Intensity);
 	frag_color.a = source.a;
 }
