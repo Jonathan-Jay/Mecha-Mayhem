@@ -196,6 +196,10 @@ void Scene::ImGuiFunc()
 		ImGui::SameLine();
 		ImGui::Checkbox("following path", &illum.moving);
 
+		ImGui::SliderFloat("exposure", &illum.exposure, 0.01f, 10);
+		ImGui::SliderFloat("gamma", &illum.gamma, 0.01f, 5);
+		ImGui::SliderFloat("HDR", &illum.HDRusage, 0.f, 1.f);
+
 		std::string name = "";
 		if (ImGui::TreeNode("Lights")) {
 			ImGui::Checkbox("Light Volumes", &illum.drawVolumes);

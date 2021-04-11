@@ -60,6 +60,7 @@ void IlluminationBuffer::Init(unsigned width, unsigned height)
 		point2->LoadShaderPartFromFile("shaders/Post/volume_point_frag.glsl", GL_FRAGMENT_SHADER);
 		point2->Link();
 		_shaders.push_back(point2);
+		_shaders.push_back(GetShader("shaders/Post/HDR_frag.glsl"));
 	}
 
 	if (__sphere == nullptr) {
@@ -150,11 +151,24 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 	}
 	//*/
 
+	//HDR on the accum buffer
+	_shaders[5]->Bind();
+
+	_shaders[5]->SetUniform("exposure", exposure);
+	_shaders[5]->SetUniform("gamma", gamma);
+	_shaders[5]->SetUniform("HDRusage", HDRusage);
+
+	_buffers[1]->BindColorAsTexture(0, 0);
+	_buffers[1]->RenderToFSQ();
+	_buffers[1]->UnbindTexture(0);
+
+	_shaders[5]->UnBind();
 
 	_shaders[Lights::AMBIENT]->Bind();
 	//for rim lighting
 	_shaders[Lights::AMBIENT]->SetUniform("u_camPos", *_camPos.data(), _camCount);
 	_shaders[Lights::AMBIENT]->SetUniform("camCount", _camCount);
+	_shaders[Lights::AMBIENT]->SetUniform("exposure", exposure);
 
 	_sunBuffer.Bind(0);
 

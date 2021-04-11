@@ -63,6 +63,9 @@ public:
 		)) / (2 * light._lightQuadraticFalloff);
 	}
 
+	float HDRusage = 1;
+	float exposure = 2.5f;
+	float gamma = 0.26f;
 	float power = 1;
 	int meshChoice = 0;
 	int currentLight = 0;

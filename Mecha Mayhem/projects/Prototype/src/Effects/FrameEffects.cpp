@@ -33,6 +33,7 @@ void FrameEffects::Init(unsigned width, unsigned height)
 	PostEffect::Init("shaders/Post/gBuffer_directional_frag.glsl");
 	PostEffect::Init("shaders/Post/gBuffer_point_frag.glsl");
 	PostEffect::Init("shaders/Post/gBuffer_ambient_frag.glsl");
+	PostEffect::Init("shaders/Post/HDR_frag.glsl");
 
 	//transparency
 	PostEffect::Init("shaders/Post/transparency_frag.glsl");
@@ -118,7 +119,7 @@ void FrameEffects::Clear(bool paused)
 	//pauseEffect.Clear();
 	
 	//clear the illum buffer with white instead of clear colour
-	glClearColor(1.f, 1.f, 1.f, 0.f);
+	glClearColor(0.f, 0.f, 0.f, 0.f);
 	illumBuffer.Clear();
 	transparencyLayer.Clear();
 }
@@ -164,6 +165,12 @@ void FrameEffects::Draw(/*bool paused*/)
 		return;
 	}
 	if (bufferchoice == 7) {
+		if (m_usingShadows)		shadowMap->BindDepthAsTexture(30);
+		else		Sprite::m_textures[0].texture->Bind(30);
+
+		illumBuffer.ApplyEffect(baseEffect);
+
+		Texture2D::Unbind(30);
 		illumBuffer.DrawIllumBuffer();
 		return;
 	}
