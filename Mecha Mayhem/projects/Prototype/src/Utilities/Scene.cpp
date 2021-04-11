@@ -193,6 +193,8 @@ void Scene::ImGuiFunc()
 			illum.EnableSun(sun);
 			m_frameEffects.UsingShadows(sun);
 		}
+		ImGui::SameLine();
+		ImGui::Checkbox("following path", &illum.moving);
 
 		std::string name = "";
 		if (ImGui::TreeNode("Lights")) {
@@ -211,11 +213,31 @@ void Scene::ImGuiFunc()
 					illum._lights.push_back(PointLight());
 					illum._lights[illum._lights.size() - 1]._radius = IlluminationBuffer::GetPointLightRadius(illum._lights[illum._lights.size() - 1]);
 				}
+				ImGui::SameLine();
+				if (ImGui::Button("Add Max Lights")) {
+					while (illum._lights.size() < 25) {
+						illum._lights.push_back(PointLight());
+						illum._lights[illum._lights.size() - 1]._radius = IlluminationBuffer::GetPointLightRadius(illum._lights[illum._lights.size() - 1]);
+					}
+				}
+				if (illum._lights.size())
+					ImGui::SameLine();
 			}
-			ImGui::SliderFloat("light power (makes it weird tho)", &illum.power, 0.5f, 10.f);
-
+			if (illum._lights.size()) {
+				if (ImGui::Button("Remove Light")) {
+					illum._lights.erase(illum._lights.begin() + illum.currentLight);
+					if (illum.currentLight >= illum._lights.size() && illum.currentLight != 0)
+						--illum.currentLight;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Remove All Lights")) {
+					illum._lights.clear();
+					illum.currentLight = 0;
+				}
+			}
 			if (illum._lights.size()) {
 				ImGui::SliderInt("currentLight (is green)", &illum.currentLight, 0, illum._lights.size() - 1);
+				ImGui::SliderFloat("light power (makes it weird tho)", &illum.power, 0.5f, 10.f);
 				bool changed = false;
 				PointLight& light = illum._lights[illum.currentLight];
 				ImGui::SliderFloat3("position", &light._lightPos[0], -25, 25);
@@ -229,7 +251,7 @@ void Scene::ImGuiFunc()
 					for (int i(0); i < illum._lights.size(); ++i) {
 						illum._lights[i]._lightPos = glm::vec4(glm::vec3(
 							(float(rand()) / RAND_MAX) * 50.f - 25.f,
-							(float(rand()) / RAND_MAX) * 10.f,
+							(float(rand()) / RAND_MAX) * 2.5f,
 							(float(rand()) / RAND_MAX) * 50.f - 25.f
 						), 0.f);
 						illum._lights[i]._lightCol = glm::vec4(glm::vec3(
@@ -237,8 +259,8 @@ void Scene::ImGuiFunc()
 							(float(rand()) / RAND_MAX) * 10.f + 5.f,
 							(float(rand()) / RAND_MAX) * 10.f + 5.f
 						), 0.f);
-						illum._lights[i]._lightLinearFalloff = (float(rand()) / RAND_MAX) * 5.f + 0.01f;
-						illum._lights[i]._lightQuadraticFalloff = (float(rand()) / RAND_MAX) * 5.f + 0.01f;
+						illum._lights[i]._lightLinearFalloff = (float(rand()) / RAND_MAX) * 2.5f + 2.5f;
+						illum._lights[i]._lightQuadraticFalloff = (float(rand()) / RAND_MAX) * 2.5f + 2.5f;
 						illum._lights[i]._radius = IlluminationBuffer::GetPointLightRadius(illum._lights[i]);
 					}
 				}

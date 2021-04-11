@@ -1,6 +1,18 @@
 #include "IlluminationBuffer.h"
 #include "Components/ObjLoader.h"
+#include "Utilities/Catmull.h"
+#include "Utilities/Time.h"
 
+CatmullFollower figureeight{ 1, {
+	glm::vec3 (0, 0, -20),
+	glm::vec3 (-10, 0, -10),
+	glm::vec3 (0, 0, 0),
+	glm::vec3 (10, 0, 10),
+	glm::vec3 (0, 0, 20),
+	glm::vec3 (-10, 0, 10),
+	glm::vec3 (0, 0, 0),
+	glm::vec3 (10, 0, -10)
+}, 2 };
 VertexArrayObject::sptr __sphere = nullptr;
 VertexArrayObject::sptr __cone = nullptr;
 VertexArrayObject::sptr __cube = nullptr;
@@ -93,21 +105,26 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 		mesh = __cube;
 
 	if (_lights.size()) {
+
 		//bind the light buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetGBuffer().GetHandle());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _buffers[1]->GetHandle());
 		glBlitFramebuffer(0, 0, _buffers[1]->GetWidth(), _buffers[1]->GetHeight(),
 			0, 0, _buffers[1]->GetWidth(), _buffers[1]->GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-		_buffers[1]->Bind();
-		glDisable(GL_CULL_FACE);
 
 		//bind point light shader
 		_shaders[Lights::POINT]->Bind();
 		_shaders[Lights::POINT]->SetUniform("u_camPos", _camPos[0]);
 		_shaders[Lights::POINT]->SetUniform("power", power);
-		_shaders[Lights::POINT]->SetUniform("windowSize", glm::vec2(_buffers[0]->GetWidth(), _buffers[0]->GetHeight()));
+		_buffers[1]->Bind();
+
+		glDepthMask(GL_FALSE);
+		if (moving)			figureeight.Update(Time::dt);
+
 		for (int i(0); i < _lights.size(); ++i) {
+			if (moving)		_lights[i]._lightPos = glm::vec4(figureeight.GetPoint(i * 4), 0.f);
+
 			_lightBuffer.SendData(reinterpret_cast<void*>(&_lights[i]), sizeof(PointLight));
 
 			_lightBuffer.Bind(0);
@@ -127,9 +144,9 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 
 			_lightBuffer.Unbind(0);
 		}
-		_shaders[Lights::POINT]->UnBind();
-		glEnable(GL_CULL_FACE);
+		glDepthMask(GL_TRUE);
 		_buffers[1]->Unbind();
+		_shaders[Lights::POINT]->UnBind();
 	}
 	//*/
 

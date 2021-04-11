@@ -3,7 +3,7 @@
 #include "Tutorial.h"
 #include "MainMenu.h"
 #include "LeaderBoard.h"
-//#include "MapEditorScene.h"
+#include "MapEditorScene.h"
 
 int main() {
 	int width = 1280, height = 720;
@@ -39,7 +39,8 @@ int main() {
 		LeaderBoard::players[1] = { CONUSER::NONE,	2,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[2] = { CONUSER::NONE,	3,		0,		glm::vec3(0,0,0) };
 		LeaderBoard::players[3] = { CONUSER::NONE,	4,		0,		glm::vec3(0,0,0) };
-
+		//*/
+		/*
 		Scene::m_scenes.push_back(new MapEditor("uh, not for playing"));
 		Scene::m_scenes[4]->Init(width, height);
 
@@ -100,7 +101,7 @@ int main() {
 			}
 			if (Input::GetKeyDown(KEY::F1))		showImGui = !showImGui;
 			//delete this?
-
+			
 			Scene::m_activeScene->Update();
 			Scene::doSceneChange(window);
 			

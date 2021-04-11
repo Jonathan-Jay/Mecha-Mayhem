@@ -16,9 +16,9 @@ public:
 
 	glm::quat GetLookingForwards(float ahead);
 
+	glm::vec3 GetPoint(float AddedDistance = 0);
 private:
 	glm::vec3 CalcCatmull(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float t);
-	glm::vec3 GetPoint(float AddedDistance = 0);
 
 	bool m_dirty = true;
 

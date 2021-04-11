@@ -24,6 +24,11 @@ public:
 	//Can only apply effect using GBuffer object
 	void ApplyEffect(GBuffer* gBuffer);
 
+	void Reshape(unsigned width, unsigned height) override {
+		PostEffect::Reshape(width, height);
+		_shaders[Lights::POINT]->SetUniform("windowSize", glm::vec2(width, height));
+	}
+
 	//get rid of sphere mesh
 	void Unload() override;
 
@@ -62,6 +67,7 @@ public:
 	int meshChoice = 0;
 	int currentLight = 0;
 	bool drawVolumes = true;
+	bool moving = true;
 	std::vector<PointLight> _lights = {};
 private:
 	glm::mat4 _lightSpaceViewProj;

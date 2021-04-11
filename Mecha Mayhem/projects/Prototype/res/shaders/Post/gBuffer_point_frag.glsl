@@ -79,5 +79,6 @@ void main() {
 	if (textureColor.a < 0.31)
 		result = vec3(0.0, 0.0, 0.0);
 
-	frag_color = vec4(result + texture(s_lightAccumTex, inUV).rgb, 1.0);
+	vec3 accum = texture(s_lightAccumTex, inUV).rgb;
+	frag_color = vec4(result + accum, 1.0);
 }
