@@ -60,6 +60,8 @@ public:
 	static std::vector<Scene*> m_scenes;
 	static Scene* m_activeScene;
 
+	static LUT3D gameEndCube;
+	static LUT3D otherCube;
 protected:
 	std::string m_name;
 	bool m_paused = false;
@@ -81,3 +83,6 @@ protected:
 	btCollisionDispatcher* _dispatcher = nullptr;
 	btSequentialImpulseConstraintSolver* _solver = nullptr;
 };
+
+inline LUT3D Scene::gameEndCube;
+inline LUT3D Scene::otherCube;

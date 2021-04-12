@@ -209,12 +209,10 @@ void DemoScene::Update()
 			m_gameTimer = 0.f;
 
 		//at end of game, add colour correction;
-		if (m_frameEffects[0] == nullptr) {
-			m_frameEffects.InsertEffect(new ColourCorrection(), 0);
-			m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
-			((ColourCorrection*)m_frameEffects[0])->SetIntensity(0.f);
-			((ColourCorrection*)m_frameEffects[0])->SetCube(gameEndCube);
-		}
+		m_frameEffects.InsertEffect(new ColourCorrection(), 0);
+		m_frameEffects[0]->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+		((ColourCorrection*)m_frameEffects[0])->SetIntensity(0.f);
+		((ColourCorrection*)m_frameEffects[0])->SetCube(gameEndCube);
 	}
 }
 

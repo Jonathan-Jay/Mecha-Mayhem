@@ -24,7 +24,7 @@ public:
 
 	void bind(int textureSlot);
 	void unbind(int textureSlot);
-
+	std::string name = "";
 private:
 	GLuint _handle = GL_NONE;
 	std::vector<glm::vec3> data;

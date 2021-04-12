@@ -65,6 +65,7 @@ void LUT3D::loadFromFile(std::string path)
 	unbind();
 
 	glDisable(GL_TEXTURE_3D);
+	name = path;
 }
 
 void LUT3D::bind()

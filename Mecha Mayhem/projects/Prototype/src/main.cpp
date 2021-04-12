@@ -19,7 +19,8 @@ int main() {
 		//AudioEngine::Instance().GetBus("Music").SetVolume(0.25f);
 
 		//this has to be done here
-		DemoScene::gameEndCube.loadFromFile("win.cube");
+		Scene::gameEndCube.loadFromFile("win.cube");
+		Scene::otherCube.loadFromFile("other.cube");
 
 		// Creating demo scenes
 		Scene::m_scenes.push_back(new MainMenu("Mecha Mayhem"));
@@ -116,7 +117,8 @@ int main() {
 		Scene::m_activeScene->Exit();
 
 		//this has to be done here
-		DemoScene::gameEndCube.Unload();
+		Scene::gameEndCube.Unload();
+		Scene::otherCube.Unload();
 	}
 
 	Gameloop::Stop(usingImGui);

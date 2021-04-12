@@ -221,6 +221,17 @@ void Scene::ImGuiFunc()
 						effect->SetIntensity(intensity);
 					}
 				}
+				else if (name == "ColourCorrection") {
+					ColourCorrection* effect = (ColourCorrection*)(m_frameEffects[i]);
+					float intensity = effect->GetIntensity();
+					if (ImGui::SliderFloat("Intensity", &intensity, 0.f, 1.f)) {
+						effect->SetIntensity(intensity);
+					}
+					std::string cube = (effect->GetCube().name == "win.cube") ? "game end" : "this";
+					if (ImGui::Button(("Toggle cube - current: " + cube).c_str())) {
+						effect->SetCube((cube == "game end") ? otherCube : gameEndCube);
+					}
+				}
 				else if (name == "Pixel") {
 					ImGui::Text("Pixels done by drawing to a smaller buffer, which means no new shader!");
 					PixelEffect* effect = (PixelEffect*)(m_frameEffects[i]);
@@ -268,6 +279,15 @@ void Scene::ImGuiFunc()
 				BloomEffect* effect = new BloomEffect();
 				effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
 				effect->SetInfo("Bloom");
+				m_frameEffects.AddEffect(effect);
+				effect = nullptr;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Colour Correction")) {
+				ColourCorrection* effect = new ColourCorrection();
+				effect->Init(BackEnd::GetWidth(), BackEnd::GetHeight());
+				effect->SetInfo("ColourCorrection");
+				effect->SetCube(otherCube);
 				m_frameEffects.AddEffect(effect);
 				effect = nullptr;
 			}

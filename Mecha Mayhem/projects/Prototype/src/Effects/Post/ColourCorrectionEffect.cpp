@@ -23,6 +23,8 @@ void ColourCorrection::ApplyEffect(PostEffect* buffer)
 {
 	BindShader(1);
 
+	_shaders[1]->SetUniform("u_Intensity", _intensity);
+
 	buffer->BindColorAsTexture(0, 0, 0);
 	_cube->bind(30);
 
@@ -43,8 +45,6 @@ void ColourCorrection::Unload()
 void ColourCorrection::SetIntensity(float intensity)
 {
 	_intensity = intensity;
-
-	_shaders[1]->SetUniform("u_Intensity", _intensity);
 }
 
 void ColourCorrection::SetCube(LUT3D &cube)

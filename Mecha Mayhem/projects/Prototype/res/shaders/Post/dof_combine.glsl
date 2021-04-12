@@ -11,5 +11,5 @@ void main()
 {
 	vec4 near = texture(s_nearTex, inUV);
 
-	frag_color = near.a < 1 ? texture(s_farTex, inUV) : near;
+	frag_color = mix(near, texture(s_farTex, inUV), float(near.a < 1));
 }
