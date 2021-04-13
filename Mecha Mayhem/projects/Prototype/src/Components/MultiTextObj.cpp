@@ -406,7 +406,9 @@ void MultiTextObj::Draw(const glm::mat4& model, const glm::mat4& view, const Cam
 		ObjLoader::m_texShader->SetUniformMatrix("MVP", VP * model);
 		ObjLoader::m_texShader->SetUniformMatrix("transform", model);
 
-		Sprite::m_textures[m_models[m_index].texture[i]].texture->Bind(0);
+		if (Sprite::usingTextures)
+			Sprite::m_textures[m_models[m_index].texture[i]].texture->Bind(0);
+		else Sprite::m_textures[0].texture->Bind(0);
 
 		m_models[m_index].vao[i]->Render();
 	}

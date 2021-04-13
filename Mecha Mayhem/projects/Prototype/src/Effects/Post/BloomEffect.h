@@ -23,10 +23,21 @@ public:
 	void SetBlurCount(int amt);
 	int GetBlurCount() const;
 
+	void SetBlurType(int type);
+	int GetBlurType() const;
+
+	static std::string GetName(int type) {
+		if (type == 0)		return "gaussian";
+		if (type == 1)		return "box";
+		if (type == 2)		return "radial";
+		return "";
+	}
+
 private:
 	float _threshold = 0.9f;
 	float _radius = 1.f;
 	int _blurCount = 5;
+	int _blurType = 0;
 
 	//reduces resolution of the blur buffers
 	const float _scalar = 4.f;

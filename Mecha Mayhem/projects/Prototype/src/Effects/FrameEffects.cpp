@@ -16,6 +16,8 @@ void FrameEffects::Init(unsigned width, unsigned height)
 	PostEffect::Init("shaders/Post/bloom_bright_pass.glsl");
 	PostEffect::Init("shaders/Post/bloom_horizontal_blur.glsl");
 	PostEffect::Init("shaders/Post/bloom_vertical_blur.glsl");
+	PostEffect::Init("shaders/Post/bloom_box_blur.glsl");
+	PostEffect::Init("shaders/Post/bloom_radial_blur.glsl");
 	PostEffect::Init("shaders/Post/bloom_combine_pass.glsl");
 
 	//others

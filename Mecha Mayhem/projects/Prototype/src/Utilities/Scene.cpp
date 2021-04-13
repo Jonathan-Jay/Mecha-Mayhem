@@ -185,6 +185,16 @@ void Scene::ImGuiFunc()
 	/*ImGui::SetWindowSize(ImVec2(150, 50));
 	ImGui::Text("Empty");*/
 
+	bool sunEnabled = FrameEffects::GetUsingSun();
+	if (ImGui::Checkbox("lights", &sunEnabled))
+		FrameEffects::UsingSun(sunEnabled);
+
+	sunEnabled = m_frameEffects.GetUsingShadows();
+	if (ImGui::Checkbox("shadows", &sunEnabled))
+		m_frameEffects.UsingShadows(sunEnabled);
+
+	ImGui::Checkbox("textures", &Sprite::usingTextures);
+
 	if (ImGui::CollapsingHeader("Post Processing Effects"))
 	{
 		ImGui::Text(("Number of effects: " + std::to_string(m_frameEffects.size())).c_str());
@@ -205,6 +215,12 @@ void Scene::ImGuiFunc()
 					int blur = effect->GetBlurCount();
 					if (ImGui::SliderInt("Blur Passes", &blur, 1, 15)) {
 						effect->SetBlurCount(blur);
+					}
+					blur = effect->GetBlurType();
+					ImGui::Text(BloomEffect::GetName(blur).c_str());
+					ImGui::SameLine();
+					if (ImGui::SliderInt("Blur Type", &blur, 0, 2)) {
+						effect->SetBlurType(blur);
 					}
 				}
 				else if (name == "Greyscale") {

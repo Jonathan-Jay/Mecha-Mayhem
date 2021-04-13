@@ -50,7 +50,7 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 		_sunBuffer.Bind(0);
 
 		gBuffer->BindLighting();
-		
+
 		_buffers[1]->RenderToFSQ();
 
 		gBuffer->UnbindLighting();
@@ -58,55 +58,40 @@ void IlluminationBuffer::ApplyEffect(GBuffer* gBuffer)
 		_sunBuffer.Unbind(0);
 
 		_shaders[Lights::DIRECTIONAL]->UnBind();
+
+		_shaders[Lights::AMBIENT]->Bind();
+		//for rim lighting
+		_shaders[Lights::AMBIENT]->SetUniform("u_camPos", *_camPos.data(), _camCount);
+		_shaders[Lights::AMBIENT]->SetUniform("camCount", _camCount);
+
+		_sunBuffer.Bind(0);
+
+		gBuffer->BindLighting();
+		_buffers[1]->BindColorAsTexture(0, 5);
+
+		_buffers[0]->RenderToFSQ();
+
+		_buffers[1]->UnbindTexture(5);
+		gBuffer->UnbindLighting();
+
+		_sunBuffer.Unbind(0);
+
+		_shaders[Lights::AMBIENT]->UnBind();
+
+		return;
 	}
 
-	//insert all other lighting here
-	/*
-	if (_lights.size()) {
-		//bind point light shader
-		_shaders[Lights::POINT]->Bind();
-		_shaders[Lights::POINT]->SetUniform("u_camPos", *_camPos.data(), 4);
-		_shaders[Lights::POINT]->SetUniform("camCount", _camCount);
-		for (int i(0); i < _lights.size(); ++i) {
-			_lights[i].buffer.SendData(reinterpret_cast<void*>(&_lights[i].point), sizeof(PointLight));
-
-			_lights[i].buffer.Bind(0);
-
-			gBuffer->BindLighting();
-			//bind the light accum buffer to keep adding to it
-			_buffers[1]->BindColorAsTexture(0, 4);
-			_buffers[1]->RenderToFSQ();
-			_buffers[1]->UnbindTexture(4);
-
-			gBuffer->UnbindLighting();
-
-			_lights[i].buffer.Unbind(0);
-
-
-		}
-		_shaders[Lights::POINT]->UnBind();
-	}
-	*/
-
-
-	_shaders[Lights::AMBIENT]->Bind();
-	//for rim lighting
-	_shaders[Lights::AMBIENT]->SetUniform("u_camPos", *_camPos.data(), _camCount);
-	_shaders[Lights::AMBIENT]->SetUniform("camCount", _camCount);
-
-	_sunBuffer.Bind(0);
+	//do passthrough
+	_shaders[0]->Bind();
 
 	gBuffer->BindLighting();
-	_buffers[1]->BindColorAsTexture(0, 5);
 
 	_buffers[0]->RenderToFSQ();
 
-	_buffers[1]->UnbindTexture(5);
 	gBuffer->UnbindLighting();
 
-	_sunBuffer.Unbind(0);
+	Shader::UnBind();
 
-	_shaders[Lights::AMBIENT]->UnBind();
 }
 /*
 void IlluminationBuffer::DrawIllumBuffer()

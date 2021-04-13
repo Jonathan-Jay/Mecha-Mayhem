@@ -80,6 +80,7 @@ public:
 	Sprite& SetEnabled(bool choice) { m_enabled = choice;	return *this; }
 	bool GetEnabled() { return m_enabled; }
 
+	static bool usingTextures;
 private:
 	struct DrawData {
 		size_t index;
@@ -103,3 +104,4 @@ private:
 	float m_scale = 1;
 };
 
+inline bool Sprite::usingTextures = true;

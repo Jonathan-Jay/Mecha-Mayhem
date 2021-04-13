@@ -89,6 +89,9 @@ public:
 	void UsingShadows(bool choice) { m_usingShadows = choice; }
 	bool GetUsingShadows() { return m_usingShadows; }
 
+	static void UsingSun(bool choice) { illumBuffer.EnableSun(choice); }
+	static bool GetUsingSun() { return illumBuffer.GetSunEnabled(); }
+
 	static const unsigned shadowWidth	= 4096;//8192;
 	static const unsigned shadowHeight	= 4096;//8192;
 private:

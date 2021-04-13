@@ -644,7 +644,9 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_texShader->SetUniform("receiveShadows", m_texTempQueue[i].shaded);
 			m_texShader->SetUniform("rimLighting", m_texTempQueue[i].rimLit);
 
-			Sprite::m_textures[m_models[m_texTempQueue[i].modelIndex].texture].texture->Bind(0);
+			if (Sprite::usingTextures)
+				Sprite::m_textures[m_models[m_texTempQueue[i].modelIndex].texture].texture->Bind(0);
+			else Sprite::m_textures[0].texture->Bind(0);
 
 			m_models[m_texTempQueue[i].modelIndex].vao->Render();
 		}
@@ -656,7 +658,9 @@ void ObjLoader::PerformDraw(const glm::mat4& view, const Camera& camera, const g
 			m_texShader->SetUniform("receiveShadows", m_texQueue[i].shaded);
 			m_texShader->SetUniform("rimLighting", m_texQueue[i].rimLit);
 
-			Sprite::m_textures[m_models[m_texQueue[i].modelIndex].texture].texture->Bind(0);
+			if (Sprite::usingTextures)
+				Sprite::m_textures[m_models[m_texQueue[i].modelIndex].texture].texture->Bind(0);
+			else Sprite::m_textures[0].texture->Bind(0);
 
 			m_models[m_texQueue[i].modelIndex].vao->Render();
 		}

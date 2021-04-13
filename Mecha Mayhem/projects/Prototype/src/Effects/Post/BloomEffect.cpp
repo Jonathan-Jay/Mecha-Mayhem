@@ -29,6 +29,8 @@ void BloomEffect::Init(unsigned width, unsigned height)
 		_shaders.push_back(GetShader("shaders/Post/bloom_bright_pass.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/bloom_horizontal_blur.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/bloom_vertical_blur.glsl"));
+		_shaders.push_back(GetShader("shaders/Post/bloom_box_blur.glsl"));
+		_shaders.push_back(GetShader("shaders/Post/bloom_radial_blur.glsl"));
 		_shaders.push_back(GetShader("shaders/Post/bloom_combine_pass.glsl"));
 	}
 
@@ -50,41 +52,84 @@ void BloomEffect::ApplyEffect(PostEffect* buffer)
 
 	UnbindShader();
 
-	_shaders[2]->SetUniform("u_Spread", _radius);
-	_shaders[3]->SetUniform("u_Spread", _radius);
+	bool bounce = false;
+	//gaussian
+	if (_blurType == 0) {
+		_shaders[2]->SetUniform("u_Spread", _radius);
+		_shaders[3]->SetUniform("u_Spread", _radius);
 
-	for (int i(0); i < _blurCount; ++i) {
-		//hori
-		BindShader(2);
+		for (int i(0); i < _blurCount; ++i) {
+			//hori
+			BindShader(2);
 
-		_buffers[1]->BindColorAsTexture(0, 0);
+			_buffers[1]->BindColorAsTexture(0, 0);
 
-		_buffers[2]->RenderToFSQ();
+			_buffers[2]->RenderToFSQ();
 
-		_buffers[1]->UnbindTexture(0);
+			_buffers[1]->UnbindTexture(0);
 
-		UnbindShader();
+			UnbindShader();
 
-		//verti
-		BindShader(3);
+			//verti
+			BindShader(3);
 
-		_buffers[2]->BindColorAsTexture(0, 0);
+			_buffers[2]->BindColorAsTexture(0, 0);
 
-		_buffers[1]->RenderToFSQ();
+			_buffers[1]->RenderToFSQ();
 
-		_buffers[2]->UnbindTexture(0);
+			_buffers[2]->UnbindTexture(0);
 
-		UnbindShader();
+			UnbindShader();
+		}
+	}
+	//box
+	else if (_blurType == 1) {
+		_shaders[4]->SetUniform("u_Spread", _radius);
+
+		for (int i(0); i < _blurCount; ++i) {
+			//box
+			BindShader(4);
+
+			_buffers[1 + bounce]->BindColorAsTexture(0, 0);
+
+			_buffers[2 - bounce]->RenderToFSQ();
+
+			_buffers[1 + bounce]->UnbindTexture(0);
+
+			UnbindShader();
+
+			bounce = !bounce;
+		}
+	}
+	//radial
+	else if (_blurType == 2) {
+		_shaders[5]->SetUniform("u_Spread", 0.5f + _radius * 0.1f);
+
+		for (int i(0); i < _blurCount; ++i) {
+			//radial
+			BindShader(5);
+
+			_buffers[1 + bounce]->BindColorAsTexture(0, 0);
+
+			_buffers[2 - bounce]->RenderToFSQ();
+
+			_buffers[1 + bounce]->UnbindTexture(0);
+
+			UnbindShader();
+
+			bounce = !bounce;
+
+		}
 	}
 
-	BindShader(4);
+	BindShader(6);
 
 	buffer->BindColorAsTexture(0, 0, 0);
-	_buffers[1]->BindColorAsTexture(0, 1);
+	_buffers[1 + bounce]->BindColorAsTexture(0, 1);
 
 	_buffers[0]->RenderToFSQ();
 
-	_buffers[1]->UnbindTexture(0);
+	_buffers[1 + bounce]->UnbindTexture(0);
 	buffer->UnbindTexture(0);
 
 	UnbindShader();
@@ -98,6 +143,7 @@ void BloomEffect::Reshape(unsigned width, unsigned height)
 
 	_shaders[2]->SetUniform("u_TexelSize", 1.f / width);
 	_shaders[3]->SetUniform("u_TexelSize", 1.f / height);
+	_shaders[4]->SetUniform("u_TexelSize", glm::vec2(1.f / width, 1.f / height));
 }
 
 void BloomEffect::SetThreshold(float threshold)
@@ -128,4 +174,14 @@ void BloomEffect::SetBlurCount(int amt)
 int BloomEffect::GetBlurCount() const
 {
 	return _blurCount;
+}
+
+void BloomEffect::SetBlurType(int type)
+{
+	_blurType = type;
+}
+
+int BloomEffect::GetBlurType() const
+{
+	return _blurType;
 }
